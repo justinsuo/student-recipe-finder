@@ -22,8 +22,13 @@ import { Badge } from "@/components/ui/Badge";
 import {
   generateRecipe,
   generateRecipeImage,
+  importRecipeUrl,
+  importRecipeText,
+  webSearchRecipes,
   isWorkerConfigured,
   type GeneratedRecipe,
+  type RecipeSourceMetadata,
+  type WebRecipeCandidate,
 } from "@/lib/workerClient";
 import {
   fallbackImageMeta,
@@ -58,9 +63,18 @@ const DIET_OPTS = ["vegetarian", "vegan", "high-protein", "gluten-free", "dairy-
 export default function AIChefPage() {
   const { addGroceryItems, toggleSaved, isSaved, pantry } = useAppStore();
 
-  const [mode, setMode] = useState<"have" | "imagine">("have");
+  const [mode, setMode] = useState<"have" | "imagine" | "web" | "url" | "paste">("have");
   const [ingredients, setIngredients] = useState("");
   const [cravings, setCravings] = useState("");
+  const [importUrl, setImportUrl] = useState("");
+  const [pasteText, setPasteText] = useState("");
+  const [pasteSourceUrl, setPasteSourceUrl] = useState("");
+  const [pasteCreator, setPasteCreator] = useState("");
+  const [pastePlatform, setPastePlatform] = useState<
+    "tiktok" | "instagram" | "youtube" | "pinterest" | "reddit" | "other"
+  >("tiktok");
+  const [webCandidates, setWebCandidates] = useState<WebRecipeCandidate[] | null>(null);
+  const [sourceMeta, setSourceMeta] = useState<RecipeSourceMetadata | null>(null);
   const [budget, setBudget] = useState<number>(3);
   const [servings, setServings] = useState<number>(2);
   const [equipment, setEquipment] = useState<string[]>(["microwave", "stovetop"]);
@@ -87,22 +101,68 @@ export default function AIChefPage() {
       setRecipe(null);
       setSavedId(null);
       setSavedImageDataUrl(null);
+      setSourceMeta(null);
     }
     try {
       const fromPantry =
         ingredients.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);
-      const r = await generateRecipe({
-        ingredients: fromPantry,
-        budgetPerServing: budget,
-        servings,
-        equipment,
-        timeLimit,
-        dietTags: diet,
-        cravings: mode === "imagine" ? cravings : undefined,
-        creativity,
-        refinement,
-      });
+      // Dispatch by mode — every branch ends with a GeneratedRecipe assigned to `r`
+      let r: GeneratedRecipe;
+      let importedSource: RecipeSourceMetadata | null = null;
+      if (mode === "web" && !refinement) {
+        setWebCandidates(null);
+        const wsr = await webSearchRecipes({
+          ingredients: fromPantry,
+          cravings,
+          equipment,
+          dietTags: diet,
+          budgetPerServing: budget,
+          maxResults: 5,
+        });
+        setWebCandidates(wsr.candidates);
+        setLoading(false);
+        return;
+      }
+      if (mode === "url" && !refinement) {
+        const out = await importRecipeUrl({
+          url: importUrl.trim(),
+          ingredients: fromPantry,
+          budgetPerServing: budget,
+          equipment,
+          dietTags: diet,
+          servings,
+        });
+        r = out.recipe;
+        importedSource = out.source;
+      } else if (mode === "paste" && !refinement) {
+        const out = await importRecipeText({
+          text: pasteText,
+          sourceUrl: pasteSourceUrl.trim() || undefined,
+          sourcePlatform: pastePlatform,
+          creatorName: pasteCreator.trim() || undefined,
+          ingredients: fromPantry,
+          budgetPerServing: budget,
+          equipment,
+          dietTags: diet,
+          servings,
+        });
+        r = out.recipe;
+        importedSource = out.source;
+      } else {
+        r = await generateRecipe({
+          ingredients: fromPantry,
+          budgetPerServing: budget,
+          servings,
+          equipment,
+          timeLimit,
+          dietTags: diet,
+          cravings: mode === "imagine" ? cravings : undefined,
+          creativity,
+          refinement,
+        });
+      }
       setRecipe(r);
+      setSourceMeta(importedSource);
       // Persist + (optionally) generate image
       const id = makeCustomRecipeId(r.name, "gen");
       const ai: AIGeneratedRecipe = {
@@ -294,17 +354,118 @@ export default function AIChefPage() {
       <section className="rounded-3xl border border-stone-200 bg-white p-5 sm:p-6">
         <div className="mb-5 flex flex-wrap gap-2">
           <ModeChip active={mode === "have"} onClick={() => setMode("have")}>
-            Generate from what I have
+            From what I have
           </ModeChip>
           <ModeChip
             active={mode === "imagine"}
             onClick={() => setMode("imagine")}
           >
-            Make something creative
+            Something creative
+          </ModeChip>
+          <ModeChip active={mode === "web"} onClick={() => setMode("web")}>
+            Search the web
+          </ModeChip>
+          <ModeChip active={mode === "url"} onClick={() => setMode("url")}>
+            Import a recipe URL
+          </ModeChip>
+          <ModeChip
+            active={mode === "paste"}
+            onClick={() => setMode("paste")}
+          >
+            Paste a recipe / caption
           </ModeChip>
         </div>
 
-        {mode === "have" ? (
+        {mode === "url" ? (
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-stone-800">
+              Recipe URL (food blog, recipe site, etc.)
+            </label>
+            <input
+              type="url"
+              value={importUrl}
+              onChange={(e) => setImportUrl(e.target.value)}
+              placeholder="https://cookieandkate.com/..."
+              className="w-full rounded-full border border-stone-200 bg-stone-50 px-3 py-2 text-sm focus:border-emerald-400 focus:bg-white focus:outline-none"
+            />
+            <p className="text-xs text-stone-500">
+              We&apos;ll extract structured recipe data (JSON-LD) when
+              available, adapt it to your pantry / budget / equipment, and
+              keep attribution to the original creator.
+            </p>
+          </div>
+        ) : mode === "paste" ? (
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-stone-800">
+              Paste a TikTok caption, blog excerpt, transcript, or recipe text
+            </label>
+            <textarea
+              value={pasteText}
+              onChange={(e) => setPasteText(e.target.value)}
+              rows={5}
+              placeholder="Paste the caption, recipe text, or transcript here. The AI will turn it into a clean recipe card."
+              className="w-full rounded-2xl border border-stone-200 bg-stone-50 p-3 text-sm focus:border-emerald-400 focus:bg-white focus:outline-none"
+            />
+            <div className="grid gap-2 sm:grid-cols-3">
+              <select
+                value={pastePlatform}
+                onChange={(e) =>
+                  setPastePlatform(
+                    e.target.value as typeof pastePlatform,
+                  )
+                }
+                className="rounded-full border border-stone-200 bg-stone-50 px-3 py-2 text-sm focus:border-emerald-400 focus:bg-white focus:outline-none"
+              >
+                <option value="tiktok">TikTok</option>
+                <option value="instagram">Instagram</option>
+                <option value="youtube">YouTube</option>
+                <option value="pinterest">Pinterest</option>
+                <option value="reddit">Reddit</option>
+                <option value="other">Other</option>
+              </select>
+              <input
+                value={pasteSourceUrl}
+                onChange={(e) => setPasteSourceUrl(e.target.value)}
+                placeholder="Source URL (optional)"
+                className="rounded-full border border-stone-200 bg-stone-50 px-3 py-2 text-sm focus:border-emerald-400 focus:bg-white focus:outline-none"
+              />
+              <input
+                value={pasteCreator}
+                onChange={(e) => setPasteCreator(e.target.value)}
+                placeholder="Creator name (optional)"
+                className="rounded-full border border-stone-200 bg-stone-50 px-3 py-2 text-sm focus:border-emerald-400 focus:bg-white focus:outline-none"
+              />
+            </div>
+            <p className="text-xs text-stone-500">
+              We don&apos;t scrape TikTok/Instagram directly — paste the
+              content you have access to and we&apos;ll build the recipe card
+              with credit to the creator.
+            </p>
+          </div>
+        ) : mode === "web" ? (
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-stone-800">
+              Tell me what you want — we&apos;ll search the web
+            </label>
+            <textarea
+              value={cravings}
+              onChange={(e) => setCravings(e.target.value)}
+              rows={2}
+              placeholder="viral TikTok ramen but cheap and microwave-friendly"
+              className="mt-1 w-full rounded-2xl border border-stone-200 bg-stone-50 p-3 text-sm focus:border-emerald-400 focus:bg-white focus:outline-none"
+            />
+            <label className="text-sm font-medium text-stone-800">
+              Ingredients I have (optional, helps ranking)
+            </label>
+            <textarea
+              value={ingredients}
+              onChange={(e) => setIngredients(e.target.value)}
+              rows={2}
+              placeholder="rice, eggs, frozen broccoli, chili crisp"
+              className="mt-1 w-full rounded-2xl border border-stone-200 bg-stone-50 p-3 text-sm focus:border-emerald-400 focus:bg-white focus:outline-none"
+            />
+          </div>
+        ) : mode === "have" ? (
           <div>
             <label className="text-sm font-medium text-stone-800">
               Ingredients you have
@@ -524,8 +685,81 @@ export default function AIChefPage() {
         </Card>
       )}
 
+      {webCandidates && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold text-stone-900">
+            Found on the web
+          </h2>
+          {webCandidates.length === 0 ? (
+            <p className="text-sm text-stone-600">
+              No good web matches. Try the &ldquo;Something creative&rdquo;
+              mode for an original recipe.
+            </p>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {webCandidates.map((c, i) => (
+                <Card key={`${c.sourceUrl}-${i}`} className="space-y-2">
+                  <div>
+                    <Badge tone="sky">
+                      {c.sourceName ?? new URL(c.sourceUrl).hostname}
+                    </Badge>
+                  </div>
+                  <h3 className="text-base font-semibold text-stone-900">
+                    {c.name}
+                  </h3>
+                  <p className="text-sm text-stone-600">{c.summary}</p>
+                  <p className="text-xs text-stone-500">
+                    {c.whyRecommended}
+                  </p>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <a
+                      href={c.sourceUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs font-semibold text-emerald-700 hover:underline"
+                    >
+                      Open original →
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMode("url");
+                        setImportUrl(c.sourceUrl);
+                      }}
+                      className="text-xs font-semibold text-stone-700 hover:underline"
+                    >
+                      Import &amp; adapt
+                    </button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
       {recipe && savedId && (
         <article className="space-y-6">
+          {sourceMeta && (
+            <Card className="border-sky-200 bg-sky-50">
+              <p className="text-xs font-semibold uppercase tracking-wide text-sky-800">
+                Recipe sources
+              </p>
+              <p className="mt-1 text-sm text-sky-900">
+                {sourceMeta.attributionText}
+              </p>
+              {sourceMeta.sourceUrl && (
+                <a
+                  href={sourceMeta.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1 inline-block text-xs font-semibold text-sky-700 hover:underline"
+                >
+                  Open original source →
+                </a>
+              )}
+            </Card>
+          )}
           <div className="overflow-hidden rounded-3xl shadow-sm">
             <div className="relative aspect-[16/9] bg-stone-100">
               {savedImageDataUrl ? (

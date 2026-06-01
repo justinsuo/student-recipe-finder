@@ -257,3 +257,100 @@ export async function generateRecipeImage(opts: {
 }): Promise<GenerateImageResult> {
   return postJson<GenerateImageResult>("/generate-recipe-image", opts);
 }
+
+// ============== Recipe Sources (URL import, web search, remix) ==============
+
+export interface RecipeSourceMetadata {
+  sourceType:
+    | "internal"
+    | "ai-generated"
+    | "food-blog"
+    | "recipe-site"
+    | "creator-blog"
+    | "youtube"
+    | "instagram"
+    | "tiktok"
+    | "reddit"
+    | "pinterest"
+    | "manual-user-link"
+    | "unknown-web";
+  sourceUrl?: string;
+  sourceName?: string;
+  creatorName?: string;
+  datePublished?: string;
+  dateAccessed: string;
+  citationRequired: boolean;
+  attributionText?: string;
+  imageUrl?: string;
+  transformedByAI?: boolean;
+  importedFromUserLink?: boolean;
+  structuredDataAvailable?: boolean;
+}
+
+export interface ImportRecipeResult {
+  recipe: GeneratedRecipe;
+  source: RecipeSourceMetadata;
+}
+
+export async function importRecipeUrl(opts: {
+  url: string;
+  ingredients?: string[];
+  budgetPerServing?: number;
+  equipment?: string[];
+  dietTags?: string[];
+  servings?: number;
+}): Promise<ImportRecipeResult> {
+  return postJson<ImportRecipeResult>("/recipes/import-url", opts);
+}
+
+export async function importRecipeText(opts: {
+  text: string;
+  sourceUrl?: string;
+  sourcePlatform?: "tiktok" | "instagram" | "youtube" | "pinterest" | "reddit" | "other";
+  creatorName?: string;
+  ingredients?: string[];
+  budgetPerServing?: number;
+  equipment?: string[];
+  dietTags?: string[];
+  servings?: number;
+}): Promise<ImportRecipeResult> {
+  return postJson<ImportRecipeResult>("/recipes/import-text", opts);
+}
+
+export interface WebRecipeCandidate {
+  name: string;
+  summary: string;
+  sourceUrl: string;
+  sourceName?: string;
+  creatorName?: string;
+  estimatedTotalTimeMinutes?: number | null;
+  estimatedServings?: number | null;
+  detectedIngredients: string[];
+  detectedEquipment: string[];
+  dietTags: string[];
+  whyRecommended: string;
+  imageUrl?: string | null;
+}
+
+export async function webSearchRecipes(opts: {
+  ingredients?: string[];
+  cravings?: string;
+  equipment?: string[];
+  dietTags?: string[];
+  budgetPerServing?: number;
+  maxResults?: number;
+}): Promise<{ candidates: WebRecipeCandidate[] }> {
+  return postJson<{ candidates: WebRecipeCandidate[] }>("/recipes/web-search", opts);
+}
+
+export async function remixRecipe(opts: {
+  baseRecipe: unknown;
+  userRequest: string;
+  pantryIngredients?: string[];
+  budgetPerServing?: number;
+  equipment?: string[];
+  dietTags?: string[];
+  preserveSourceAttribution?: boolean;
+}): Promise<GeneratedRecipe> {
+  return postJson<GeneratedRecipe>("/recipes/remix", opts);
+}

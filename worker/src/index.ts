@@ -466,6 +466,528 @@ async function handleGenerateImage(req: Request, env: Env): Promise<Response> {
   }
 }
 
+// ---------- Route: /recipes/import-url ----------
+//
+// Fetches a public recipe URL, prefers schema.org JSON-LD `Recipe` data, and
+// adapts the recipe to the user's pantry/equipment/budget if provided.
+
+interface JsonLdRecipe {
+  "@type"?: string | string[];
+  name?: string;
+  description?: string;
+  image?: string | { url?: string } | Array<string | { url?: string }>;
+  author?: string | { name?: string } | Array<string | { name?: string }>;
+  recipeIngredient?: string[];
+  recipeInstructions?:
+    | string
+    | Array<string | { text?: string; name?: string }>;
+  totalTime?: string;
+  prepTime?: string;
+  cookTime?: string;
+  recipeYield?: string | number;
+  recipeCuisine?: string;
+  datePublished?: string;
+}
+
+function isoDurationToMinutes(d?: string): number | undefined {
+  if (!d) return undefined;
+  // PT1H30M / PT45M / PT2H
+  const m = d.match(/^PT(?:(\d+)H)?(?:(\d+)M)?/);
+  if (!m) return undefined;
+  return (parseInt(m[1] || "0", 10) * 60) + parseInt(m[2] || "0", 10);
+}
+
+function extractJsonLd(html: string): JsonLdRecipe[] {
+  const found: JsonLdRecipe[] = [];
+  const re = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html)) !== null) {
+    try {
+      const txt = m[1].trim();
+      const parsed = JSON.parse(txt);
+      const items = Array.isArray(parsed) ? parsed : [parsed];
+      for (const it of items) {
+        if (!it) continue;
+        if (it["@graph"] && Array.isArray(it["@graph"])) {
+          for (const g of it["@graph"]) {
+            if (g && (g["@type"] === "Recipe" || (Array.isArray(g["@type"]) && g["@type"].includes("Recipe")))) {
+              found.push(g as JsonLdRecipe);
+            }
+          }
+        }
+        const t = it["@type"];
+        if (t === "Recipe" || (Array.isArray(t) && t.includes("Recipe"))) {
+          found.push(it as JsonLdRecipe);
+        }
+      }
+    } catch {
+      // ignore unparsable script blocks
+    }
+  }
+  return found;
+}
+
+function pickImage(img: JsonLdRecipe["image"]): string | undefined {
+  if (!img) return undefined;
+  if (typeof img === "string") return img;
+  if (Array.isArray(img)) {
+    const first = img[0];
+    return typeof first === "string" ? first : first?.url;
+  }
+  return img.url;
+}
+
+function pickAuthor(a: JsonLdRecipe["author"]): string | undefined {
+  if (!a) return undefined;
+  if (typeof a === "string") return a;
+  if (Array.isArray(a)) {
+    const first = a[0];
+    return typeof first === "string" ? first : first?.name;
+  }
+  return a.name;
+}
+
+function pickSteps(i: JsonLdRecipe["recipeInstructions"]): string[] {
+  if (!i) return [];
+  if (typeof i === "string") {
+    return i.split(/\n+|(?<=\.)\s+/).map((s) => s.trim()).filter(Boolean);
+  }
+  return i
+    .map((s) =>
+      typeof s === "string"
+        ? s
+        : (s as { text?: string; name?: string }).text ??
+          (s as { text?: string; name?: string }).name ??
+          "",
+    )
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+const IMPORT_ADAPT_SYSTEM = `You adapt a real recipe to a student's pantry, budget, and equipment without copying long passages verbatim. You receive a structured recipe (ingredients, steps, time, servings) plus the user's constraints.
+
+Rewrite the recipe in your own words. Keep the dish name and any well-known technique references; do not copy long instructional sentences verbatim. Adapt servings, ingredients, and equipment so they fit the user's constraints. Include source attribution metadata (provided separately) — do not invent a source.
+
+Always respond with ONLY valid JSON matching this schema (same as /generate-recipe). No markdown.
+
+Set imagePromptHint to a 1-sentence visual description.`;
+
+async function handleImportUrl(req: Request, env: Env): Promise<Response> {
+  const origin = req.headers.get("Origin");
+  let body: {
+    url?: string;
+    ingredients?: string[];
+    budgetPerServing?: number;
+    equipment?: string[];
+    dietTags?: string[];
+    servings?: number;
+  };
+  try {
+    body = await req.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400, env, origin);
+  }
+  const targetUrl = (body.url || "").toString().trim();
+  if (!targetUrl || !/^https?:\/\//.test(targetUrl)) {
+    return jsonResponse({ error: "Provide a valid http(s) URL" }, 400, env, origin);
+  }
+  try {
+    const fetchRes = await fetch(targetUrl, {
+      headers: {
+        "User-Agent":
+          "StudentRecipeFinder/1.0 (+https://github.com/justinsuo/student-recipe-finder) recipe-importer",
+        Accept: "text/html,application/xhtml+xml",
+      },
+      cf: { cacheTtl: 0 } as RequestInitCfProperties,
+      redirect: "follow",
+    });
+    if (!fetchRes.ok) {
+      return jsonResponse(
+        {
+          error: `Source returned ${fetchRes.status}. The page may block automated access — try pasting the recipe text into the "Paste a recipe" mode instead.`,
+        },
+        502,
+        env,
+        origin,
+      );
+    }
+    const html = await fetchRes.text();
+    const recipes = extractJsonLd(html);
+    if (recipes.length === 0) {
+      // Fall back to giving the model the page title + a short cleaned snippet
+      const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+      const title = titleMatch ? titleMatch[1].trim() : targetUrl;
+      const cleanText = html
+        .replace(/<script[\s\S]*?<\/script>/gi, " ")
+        .replace(/<style[\s\S]*?<\/style>/gi, " ")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ")
+        .slice(0, 4000);
+      const prompt = `Source URL: ${targetUrl}\nPage title: ${title}\nPage excerpt (may contain ads / non-recipe text):\n${cleanText}\n\nThe page has no structured recipe data. Extract whatever recipe you can find from the excerpt, then adapt it to the user's pantry (${(body.ingredients || []).join(", ") || "any"}), budget $${body.budgetPerServing ?? 3}/serving, equipment ${(body.equipment || []).join(", ") || "any"}, diet ${(body.dietTags || []).join(", ") || "none"}, servings ${body.servings ?? 2}. Return ONLY valid JSON in the recipe schema.`;
+      const result = await openaiChatJson({
+        env,
+        system: RECIPE_SYSTEM,
+        user: prompt,
+        maxTokens: 3000,
+        temperature: 0.4,
+      });
+      return jsonResponse(
+        {
+          recipe: result,
+          source: {
+            sourceType: "unknown-web",
+            sourceUrl: targetUrl,
+            citationRequired: true,
+            attributionText: `Adapted from a recipe on ${new URL(targetUrl).hostname}`,
+            transformedByAI: true,
+            dateAccessed: new Date().toISOString(),
+            structuredDataAvailable: false,
+          },
+        },
+        200,
+        env,
+        origin,
+      );
+    }
+    const ld = recipes[0];
+    const summary = {
+      name: ld.name ?? "Untitled recipe",
+      description: ld.description ?? "",
+      author: pickAuthor(ld.author) ?? "",
+      image: pickImage(ld.image),
+      ingredients: ld.recipeIngredient ?? [],
+      steps: pickSteps(ld.recipeInstructions),
+      totalTimeMinutes: isoDurationToMinutes(ld.totalTime),
+      prepTimeMinutes: isoDurationToMinutes(ld.prepTime),
+      cookTimeMinutes: isoDurationToMinutes(ld.cookTime),
+      yield: ld.recipeYield,
+      cuisine: ld.recipeCuisine,
+      datePublished: ld.datePublished,
+    };
+    const adaptPrompt = `Source structured recipe (paraphrase, do not copy verbatim):\n${JSON.stringify(summary, null, 2)}\n\nUser constraints:\n- Ingredients on hand: ${(body.ingredients || []).join(", ") || "any"}\n- Budget per serving: $${body.budgetPerServing ?? 3}\n- Equipment: ${(body.equipment || []).join(", ") || "any"}\n- Diet: ${(body.dietTags || []).join(", ") || "none"}\n- Target servings: ${body.servings ?? summary.yield ?? 2}\n\nRewrite as JSON per the schema. Keep the dish name; adapt steps to user equipment.`;
+    const result = await openaiChatJson({
+      env,
+      system: IMPORT_ADAPT_SYSTEM + "\n\n" + RECIPE_SYSTEM,
+      user: adaptPrompt,
+      maxTokens: 3000,
+      temperature: 0.5,
+    });
+    return jsonResponse(
+      {
+        recipe: result,
+        source: {
+          sourceType: "recipe-site",
+          sourceUrl: targetUrl,
+          sourceName: new URL(targetUrl).hostname,
+          creatorName: pickAuthor(ld.author),
+          imageUrl: pickImage(ld.image),
+          datePublished: ld.datePublished,
+          dateAccessed: new Date().toISOString(),
+          citationRequired: true,
+          attributionText: pickAuthor(ld.author)
+            ? `Adapted from a recipe by ${pickAuthor(ld.author)} on ${new URL(targetUrl).hostname}`
+            : `Adapted from a recipe on ${new URL(targetUrl).hostname}`,
+          transformedByAI: true,
+          structuredDataAvailable: true,
+        },
+      },
+      200,
+      env,
+      origin,
+    );
+  } catch (e) {
+    return jsonResponse(
+      { error: e instanceof Error ? e.message : "URL import failed" },
+      500,
+      env,
+      origin,
+    );
+  }
+}
+
+// ---------- Route: /recipes/import-text ----------
+//
+// Accepts a pasted social caption / transcript / handwritten recipe and turns
+// it into a structured recipe. Used when the source platform blocks
+// programmatic access (TikTok, Instagram, etc.) — the user can paste the
+// caption manually and the recipe gets built from that.
+
+async function handleImportText(req: Request, env: Env): Promise<Response> {
+  const origin = req.headers.get("Origin");
+  let body: {
+    text?: string;
+    sourceUrl?: string;
+    sourcePlatform?: string;
+    creatorName?: string;
+    ingredients?: string[];
+    budgetPerServing?: number;
+    equipment?: string[];
+    dietTags?: string[];
+    servings?: number;
+  };
+  try {
+    body = await req.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400, env, origin);
+  }
+  const text = (body.text || "").toString().trim();
+  if (!text) return jsonResponse({ error: "Missing text" }, 400, env, origin);
+  if (text.length > 10000) {
+    return jsonResponse({ error: "Text too long (max 10000 chars)" }, 400, env, origin);
+  }
+  const userPrompt = `Pasted source text (may be a TikTok caption, blog excerpt, Instagram description, or any messy recipe content). Extract a clean recipe and adapt to the user's constraints.
+
+Source text:
+"""
+${text}
+"""
+
+User constraints:
+- Ingredients on hand: ${(body.ingredients || []).join(", ") || "any"}
+- Budget per serving: $${body.budgetPerServing ?? 3}
+- Equipment: ${(body.equipment || []).join(", ") || "any"}
+- Diet: ${(body.dietTags || []).join(", ") || "none"}
+- Servings: ${body.servings ?? 2}
+${body.sourceUrl ? `- Source URL: ${body.sourceUrl}` : ""}
+${body.creatorName ? `- Creator: ${body.creatorName}` : ""}
+
+Return ONLY valid JSON per the recipe schema. Paraphrase steps; do not copy long passages from the source.`;
+  try {
+    const result = await openaiChatJson({
+      env,
+      system: IMPORT_ADAPT_SYSTEM + "\n\n" + RECIPE_SYSTEM,
+      user: userPrompt,
+      maxTokens: 3000,
+      temperature: 0.5,
+    });
+    return jsonResponse(
+      {
+        recipe: result,
+        source: {
+          sourceType:
+            body.sourcePlatform === "tiktok"
+              ? "tiktok"
+              : body.sourcePlatform === "instagram"
+                ? "instagram"
+                : body.sourcePlatform === "youtube"
+                  ? "youtube"
+                  : "manual-user-link",
+          sourceUrl: body.sourceUrl,
+          creatorName: body.creatorName,
+          dateAccessed: new Date().toISOString(),
+          citationRequired: !!body.sourceUrl,
+          attributionText: body.sourceUrl
+            ? `Adapted from a recipe by ${body.creatorName || "the original creator"}${body.sourcePlatform ? ` on ${body.sourcePlatform}` : ""}`
+            : "Adapted from user-pasted source",
+          transformedByAI: true,
+          importedFromUserLink: !!body.sourceUrl,
+          structuredDataAvailable: false,
+        },
+      },
+      200,
+      env,
+      origin,
+    );
+  } catch (e) {
+    return jsonResponse(
+      { error: e instanceof Error ? e.message : "text import failed" },
+      500,
+      env,
+      origin,
+    );
+  }
+}
+
+// ---------- Route: /recipes/web-search ----------
+//
+// Uses the OpenAI Responses API with the built-in web_search tool to find a
+// handful of real recipes online and return them in our structured schema.
+
+const DISCOVER_SYSTEM = `You are a budget recipe research assistant. The user describes a meal idea, ingredients, or constraints. You search the web for real recipes (food blogs, recipe sites, public posts) that match.
+
+Return ONLY valid JSON of the shape:
+{
+  "candidates": [
+    {
+      "name": "string",
+      "summary": "1-2 sentences in your own words, not copied",
+      "sourceUrl": "https://...",
+      "sourceName": "blog or site name",
+      "creatorName": "string or null",
+      "estimatedTotalTimeMinutes": <number or null>,
+      "estimatedServings": <number or null>,
+      "detectedIngredients": ["string"],
+      "detectedEquipment": ["microwave","stovetop","oven","rice-cooker","air-fryer","no-kitchen"],
+      "dietTags": ["vegan","vegetarian","high-protein","gluten-free","dairy-free"],
+      "whyRecommended": "1 sentence",
+      "imageUrl": "https://... or null"
+    }
+  ]
+}
+
+Rules:
+- Never copy more than a sentence of the original blog text. Summarize in your own words.
+- Always include sourceUrl.
+- Prefer simple, student-friendly, budget recipes.
+- If the user gives ingredients, prioritize recipes that use most of them.
+- Return at most 5 candidates. Quality over quantity.`;
+
+async function handleWebSearch(req: Request, env: Env): Promise<Response> {
+  const origin = req.headers.get("Origin");
+  let body: {
+    ingredients?: string[];
+    cravings?: string;
+    equipment?: string[];
+    dietTags?: string[];
+    budgetPerServing?: number;
+    maxResults?: number;
+  };
+  try {
+    body = await req.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400, env, origin);
+  }
+  const max = Math.min(Math.max(body.maxResults || 5, 1), 5);
+  const query = buildSearchQuery(body);
+  const userPrompt = `User wants: ${query}\nTarget: at most ${max} candidates.\nReturn JSON per the schema.`;
+  try {
+    const result = await openaiResponsesWithWebSearch({
+      env,
+      system: DISCOVER_SYSTEM,
+      user: userPrompt,
+      maxTokens: 2000,
+    });
+    return jsonResponse(result, 200, env, origin);
+  } catch (e) {
+    return jsonResponse(
+      { error: e instanceof Error ? e.message : "web search failed" },
+      500,
+      env,
+      origin,
+    );
+  }
+}
+
+function buildSearchQuery(b: {
+  ingredients?: string[];
+  cravings?: string;
+  equipment?: string[];
+  dietTags?: string[];
+  budgetPerServing?: number;
+}): string {
+  const parts: string[] = [];
+  if (b.cravings) parts.push(b.cravings);
+  if (b.ingredients?.length) parts.push(`using ${b.ingredients.join(", ")}`);
+  if (b.equipment?.length) parts.push(`for ${b.equipment.join(", ")}`);
+  if (b.dietTags?.length) parts.push(b.dietTags.join(", "));
+  if (b.budgetPerServing) parts.push(`under $${b.budgetPerServing}/serving`);
+  parts.push("student-friendly cheap recipe");
+  return parts.join(", ");
+}
+
+async function openaiResponsesWithWebSearch(opts: {
+  env: Env;
+  system: string;
+  user: string;
+  maxTokens?: number;
+}): Promise<unknown> {
+  const model = opts.env.DEFAULT_TEXT_MODEL || TEXT_MODEL_DEFAULT;
+  const res = await fetch("https://api.openai.com/v1/responses", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${opts.env.OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model,
+      input: [
+        { role: "system", content: opts.system },
+        { role: "user", content: opts.user },
+      ],
+      tools: [{ type: "web_search" }],
+      max_output_tokens: opts.maxTokens ?? 2000,
+    }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`OpenAI Responses ${res.status}: ${text.slice(0, 300)}`);
+  }
+  type ResponsesPayload = {
+    output_text?: string;
+    output?: Array<{
+      content?: Array<{ type?: string; text?: string }>;
+    }>;
+  };
+  const json = (await res.json()) as ResponsesPayload;
+  // Responses API output shape varies — try a few accessors
+  let raw = json.output_text;
+  if (!raw && Array.isArray(json.output)) {
+    for (const block of json.output) {
+      if (Array.isArray(block.content)) {
+        for (const c of block.content) {
+          if (c.type === "output_text" && typeof c.text === "string") {
+            raw = c.text;
+          }
+        }
+      }
+    }
+  }
+  if (!raw) throw new Error("Responses API returned no text");
+  // Find JSON in the response (model may add surrounding prose)
+  const start = raw.indexOf("{");
+  const end = raw.lastIndexOf("}");
+  const slice = start !== -1 && end !== -1 ? raw.slice(start, end + 1) : raw;
+  try {
+    return JSON.parse(slice);
+  } catch {
+    throw new Error("Responses API returned non-JSON output");
+  }
+}
+
+// ---------- Route: /recipes/remix ----------
+//
+// Refine an existing recipe (database, AI, imported, or user-created) per a
+// user request like "make it cheaper" / "microwave only" / "higher protein".
+
+async function handleRemix(req: Request, env: Env): Promise<Response> {
+  const origin = req.headers.get("Origin");
+  let body: {
+    baseRecipe?: Record<string, unknown>;
+    userRequest?: string;
+    pantryIngredients?: string[];
+    budgetPerServing?: number;
+    equipment?: string[];
+    dietTags?: string[];
+    preserveSourceAttribution?: boolean;
+  };
+  try {
+    body = await req.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400, env, origin);
+  }
+  if (!body.baseRecipe) {
+    return jsonResponse({ error: "Missing baseRecipe" }, 400, env, origin);
+  }
+  const prompt = `Existing recipe (use only structured facts, do not copy long passages):\n${JSON.stringify(body.baseRecipe).slice(0, 6000)}\n\nUser remix request: ${body.userRequest || "make it better"}\n\nUser constraints:\n- Pantry: ${(body.pantryIngredients || []).join(", ") || "any"}\n- Budget per serving: $${body.budgetPerServing ?? 3}\n- Equipment: ${(body.equipment || []).join(", ") || "any"}\n- Diet: ${(body.dietTags || []).join(", ") || "none"}\n\nReturn ONLY valid JSON per the schema. ${body.preserveSourceAttribution ? "Preserve the original source attribution in your output's whyThisFits." : ""}`;
+  try {
+    const result = await openaiChatJson({
+      env,
+      system: RECIPE_SYSTEM,
+      user: prompt,
+      maxTokens: 3000,
+      temperature: 0.5,
+    });
+    return jsonResponse(result, 200, env, origin);
+  } catch (e) {
+    return jsonResponse(
+      { error: e instanceof Error ? e.message : "remix failed" },
+      500,
+      env,
+      origin,
+    );
+  }
+}
+
 function buildImagePrompt(
   name: string,
   ingredients: string[],
@@ -512,6 +1034,14 @@ export default {
         return handleGenerateRecipe(req, env);
       case "/generate-recipe-image":
         return handleGenerateImage(req, env);
+      case "/recipes/import-url":
+        return handleImportUrl(req, env);
+      case "/recipes/import-text":
+        return handleImportText(req, env);
+      case "/recipes/web-search":
+        return handleWebSearch(req, env);
+      case "/recipes/remix":
+        return handleRemix(req, env);
       default:
         return jsonResponse({ error: "Not found" }, 404, env, origin);
     }
