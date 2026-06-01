@@ -29,6 +29,7 @@ import { DetailedSteps } from "@/components/recipe/DetailedSteps";
 import { IngredientPriceRow } from "@/components/pricing/IngredientPriceRow";
 import { RecipeAIRepriceButton } from "@/components/pricing/RecipeAIRepriceButton";
 import { quoteRecipe } from "@/lib/pricing/pricingEngine";
+import { bestEffortNutrition, isHighProtein } from "@/lib/nutritionEngine";
 import { useAppStore } from "@/lib/AppStore";
 import {
   calculateCostPerServing,
@@ -346,29 +347,47 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
         </Card>
       )}
 
-      <Card>
-        <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-stone-700">
-          🥗 Nutrition (estimate)
-        </h2>
-        <div className="mt-3 grid grid-cols-4 gap-3">
-          <NutritionPill
-            label="Calories"
-            value={recipe.estimatedNutrition.calories}
-            unit=""
-          />
-          <NutritionPill
-            label="Protein"
-            value={recipe.estimatedNutrition.protein}
-            unit="g"
-            highlight
-          />
-          <NutritionPill label="Carbs" value={recipe.estimatedNutrition.carbs} unit="g" />
-          <NutritionPill label="Fat" value={recipe.estimatedNutrition.fat} unit="g" />
-        </div>
-        <p className="mt-3 text-xs text-stone-500">
-          Per serving. Estimates only — not for medical use.
-        </p>
-      </Card>
+      {(() => {
+        const n = bestEffortNutrition(recipe);
+        const hp = isHighProtein(n.estimate);
+        const confLabel =
+          n.confidence === "high"
+            ? "High confidence"
+            : n.confidence === "medium"
+              ? "Medium confidence"
+              : "Low confidence";
+        return (
+          <Card>
+            <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-stone-700">
+              🥗 Nutrition per serving
+              {hp && (
+                <span className="ml-1 rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
+                  high protein
+                </span>
+              )}
+            </h2>
+            <p className="mt-1 text-xs text-stone-500">
+              {n.source === "calculated"
+                ? `Calculated from ingredients · ${confLabel.toLowerCase()}`
+                : "From recipe author · medium confidence"}
+            </p>
+            <div className="mt-3 grid grid-cols-4 gap-3">
+              <NutritionPill label="Calories" value={n.estimate.calories} unit="" />
+              <NutritionPill label="Protein" value={n.estimate.protein} unit="g" highlight />
+              <NutritionPill label="Carbs" value={n.estimate.carbs} unit="g" />
+              <NutritionPill label="Fat" value={n.estimate.fat} unit="g" />
+            </div>
+            {n.estimate.fiber !== undefined && (
+              <div className="mt-3 grid grid-cols-4 gap-3">
+                <NutritionPill label="Fiber" value={n.estimate.fiber} unit="g" />
+              </div>
+            )}
+            <p className="mt-3 text-xs text-stone-500">
+              Estimated from ingredients and serving size. Actual values vary by brand and preparation.
+            </p>
+          </Card>
+        );
+      })()}
     </div>
   );
 }

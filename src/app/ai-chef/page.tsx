@@ -48,6 +48,26 @@ import { INGREDIENTS } from "@/data/ingredients";
 import { resolvedToCustom, saveCustomIngredient, findExistingByName, getCustomIngredients } from "@/lib/customIngredientStorage";
 import { AIChefPantrySelector } from "@/components/ai/AIChefPantrySelector";
 import { Refrigerator } from "lucide-react";
+import { calculateNutritionForFreeForm } from "@/lib/nutritionEngine";
+
+// If the AI's ingredient list maps cleanly to our catalog, replace its
+// guessed macros with the deterministic engine result. Falls back to the
+// AI's numbers when matching is weak.
+function reconcileNutrition(r: GeneratedRecipe): GeneratedRecipe {
+  if (!r.ingredients?.length) return r;
+  const calc = calculateNutritionForFreeForm(r.ingredients, r.servings || 1);
+  if (calc.confidence === "low") return r;
+  return {
+    ...r,
+    estimatedNutrition: {
+      calories: calc.perServing.calories,
+      protein: calc.perServing.protein,
+      carbs: calc.perServing.carbs,
+      fat: calc.perServing.fat,
+      fiber: calc.perServing.fiber ?? 0,
+    },
+  };
+}
 
 // Safe money formatter — AI sometimes returns missing or non-numeric cost
 // fields, which would crash the page with "undefined.toFixed is not a function".
@@ -241,6 +261,7 @@ function AIChefPage() {
           refinement,
         });
       }
+      r = reconcileNutrition(r);
       setRecipe(r);
       setSourceMeta(importedSource);
       // Persist + (optionally) generate image
@@ -408,7 +429,7 @@ function AIChefPage() {
 
   function persistOption(o: GeneratedRecipeOption): string {
     const id = optionSavedIds[o.id] ?? makeCustomRecipeId(o.recipe.name, "gen");
-    const r = o.recipe;
+    const r = reconcileNutrition(o.recipe);
     const ai: AIGeneratedRecipe = {
       id,
       isAIGenerated: true,

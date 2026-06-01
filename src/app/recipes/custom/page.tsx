@@ -285,6 +285,33 @@ function CustomRecipePage() {
         </Card>
       </div>
 
+      {recipe.estimatedNutrition && (
+        <Card>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-stone-700">
+            🥗 Nutrition per serving
+          </h2>
+          <p className="mt-1 text-xs text-stone-500">
+            {recipe.isAIGenerated
+              ? "Calculated from ingredient matches · estimated"
+              : "From recipe author · estimated"}
+          </p>
+          <div className="mt-3 grid grid-cols-4 gap-3">
+            <NutritionCell label="Calories" value={recipe.estimatedNutrition.calories} unit="" />
+            <NutritionCell label="Protein" value={recipe.estimatedNutrition.protein} unit="g" highlight />
+            <NutritionCell label="Carbs" value={recipe.estimatedNutrition.carbs} unit="g" />
+            <NutritionCell label="Fat" value={recipe.estimatedNutrition.fat} unit="g" />
+          </div>
+          {typeof recipe.estimatedNutrition.fiber === "number" && (
+            <div className="mt-3 grid grid-cols-4 gap-3">
+              <NutritionCell label="Fiber" value={recipe.estimatedNutrition.fiber} unit="g" />
+            </div>
+          )}
+          <p className="mt-3 text-xs text-stone-500">
+            Estimated from ingredients and serving size. Actual values vary by brand and preparation.
+          </p>
+        </Card>
+      )}
+
       {(recipe.cheapTips?.length ?? 0) > 0 && (
         <Card>
           <h2 className="text-sm font-semibold uppercase tracking-wide text-amber-700">
@@ -313,6 +340,47 @@ function CustomRecipePage() {
           )}
         </Card>
       )}
+    </div>
+  );
+}
+
+function NutritionCell({
+  label,
+  value,
+  unit,
+  highlight,
+}: {
+  label: string;
+  value: number;
+  unit: string;
+  highlight?: boolean;
+}) {
+  const safe = Number.isFinite(Number(value)) ? Number(value) : 0;
+  return (
+    <div
+      className={
+        highlight
+          ? "rounded-2xl bg-emerald-100 px-3 py-3 text-center"
+          : "rounded-2xl bg-stone-100 px-3 py-3 text-center"
+      }
+    >
+      <p
+        className={
+          highlight ? "text-xs font-medium text-emerald-800" : "text-xs font-medium text-stone-600"
+        }
+      >
+        {label}
+      </p>
+      <p
+        className={
+          highlight
+            ? "text-lg font-bold text-emerald-900"
+            : "text-lg font-bold text-stone-900"
+        }
+      >
+        {safe}
+        {unit}
+      </p>
     </div>
   );
 }
