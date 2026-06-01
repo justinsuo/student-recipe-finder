@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Coins, Filter, RefreshCcw, Search } from "lucide-react";
+import { Coins, Filter, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { RecipeGrid } from "@/components/recipe/RecipeGrid";
 import { rankCheapRecipes } from "@/lib/recipeScoring";
-import { INGREDIENT_MAP } from "@/data/ingredients";
 import {
   isAirFryerRecipe,
   isMicrowaveRecipe,
@@ -13,6 +12,14 @@ import {
 } from "@/lib/equipmentFilters";
 import { Microwave, Wind, Home } from "lucide-react";
 import { LocationSetup } from "@/components/pricing/LocationSetup";
+import { SmartRecipeSearch } from "@/components/search/SmartRecipeSearch";
+import { SearchZeroState } from "@/components/search/SearchZeroState";
+import {
+  buildRecipeIndex,
+  searchRecipes,
+  type SearchScope,
+} from "@/lib/search/recipeSearch";
+import { RECIPES } from "@/data/recipes";
 import type {
   CheapFilters,
   DietTag,
@@ -72,12 +79,31 @@ export default function CheapRecipesPage() {
   const [filters, setFilters] = useState<CheapFilters>(DEFAULTS);
   const [sort, setSort] = useState<Sort>("best");
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [scope, setScope] = useState<SearchScope>("all");
   const [dormOnly, setDormOnly] = useState(false);
   const [mealPrepOnly, setMealPrepOnly] = useState(false);
   const [methodOnly, setMethodOnly] = useState<
     "any" | "air-fryer" | "microwave" | "no-stove" | "under-2"
   >("any");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  // Debounce typing → query that drives filtering
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQuery(query), 180);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  // Build the recipe index once per session
+  const searchIndex = useMemo(() => buildRecipeIndex(RECIPES), []);
+
+  // Build a set of recipe IDs that match the query (using the smart engine)
+  const queryHitIds = useMemo(() => {
+    const q = debouncedQuery.trim();
+    if (!q) return null;
+    const hits = searchRecipes(q, searchIndex, { scope });
+    return new Set(hits.map((h) => h.item.recipeId));
+  }, [debouncedQuery, scope, searchIndex]);
 
   const results = useMemo(() => {
     let r = rankCheapRecipes(filters);
@@ -104,16 +130,8 @@ export default function CheapRecipesPage() {
           (x.recipe.tags ?? []).includes("meal-prep"),
       );
     }
-    if (query.trim()) {
-      const q = query.trim().toLowerCase();
-      r = r.filter((x) => {
-        if (x.recipe.name.toLowerCase().includes(q)) return true;
-        if (x.recipe.description.toLowerCase().includes(q)) return true;
-        return x.recipe.ingredients.some((ri) => {
-          const ing = INGREDIENT_MAP.get(ri.ingredientId);
-          return ing?.name.toLowerCase().includes(q);
-        });
-      });
+    if (queryHitIds) {
+      r = r.filter((x) => queryHitIds.has(x.recipe.id));
     }
     const sorted = [...r];
     if (sort === "cheapest") sorted.sort((a, b) => a.costPerServing - b.costPerServing);
@@ -124,13 +142,13 @@ export default function CheapRecipesPage() {
         (a, b) => b.recipe.estimatedNutrition.protein - a.recipe.estimatedNutrition.protein,
       );
     return sorted;
-  }, [filters, sort, query, dormOnly, mealPrepOnly, methodOnly]);
+  }, [filters, sort, queryHitIds, dormOnly, mealPrepOnly, methodOnly]);
 
   // Reset page size when filters change
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setVisibleCount(PAGE_SIZE);
-  }, [filters, sort, query, dormOnly, mealPrepOnly, methodOnly]);
+  }, [filters, sort, debouncedQuery, scope, dormOnly, mealPrepOnly, methodOnly]);
 
   function clearAllFilters() {
     setFilters(DEFAULTS);
@@ -142,7 +160,7 @@ export default function CheapRecipesPage() {
   }
 
   const activeChips: { label: string; clear: () => void }[] = [];
-  if (query.trim()) activeChips.push({ label: `"${query.trim()}"`, clear: () => setQuery("") });
+  if (debouncedQuery.trim()) activeChips.push({ label: `"${debouncedQuery.trim()}"`, clear: () => setQuery("") });
   if (methodOnly !== "any") {
     const lbl: Record<string, string> = {
       "air-fryer": "Air fryer",
@@ -238,17 +256,14 @@ export default function CheapRecipesPage() {
           <h2 className="text-sm font-semibold uppercase tracking-wide">Filters</h2>
         </div>
 
-        <div className="relative mb-5">
-          <Search
-            size={16}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
-          />
-          <input
+        <div className="mb-5">
+          <SmartRecipeSearch
+            recipes={RECIPES}
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by recipe name or ingredient (rice, tofu, pasta…)"
-            className="w-full rounded-full border border-stone-200 bg-stone-50 py-2.5 pl-10 pr-4 text-sm focus:border-emerald-400 focus:bg-white focus:outline-none"
-            aria-label="Search recipes"
+            onChange={setQuery}
+            scope={scope}
+            onScopeChange={setScope}
+            placeholder="Try 'chickpeas', 'air fryer', or 'high protein'…"
           />
         </div>
 
@@ -477,16 +492,33 @@ export default function CheapRecipesPage() {
             {results.length === 1 ? "recipe" : "recipes"}
           </p>
         </div>
-        <RecipeGrid
-          results={visible}
-          emptyTitle="No recipes match these filters"
-          emptyDescription="Try raising your budget, allowing more equipment, or removing a diet restriction."
-          emptyAction={
-            <Button variant="outline" size="sm" onClick={clearAllFilters}>
-              Clear all filters
-            </Button>
-          }
-        />
+        {results.length === 0 && debouncedQuery.trim() ? (
+          <SearchZeroState
+            query={debouncedQuery}
+            filtersHidingMatches={
+              !!queryHitIds && queryHitIds.size > 0 && results.length === 0
+            }
+            hidingFilters={
+              !!queryHitIds && queryHitIds.size > 0
+                ? activeChips.slice(0, 5)
+                : []
+            }
+            index={searchIndex}
+            onClearAll={clearAllFilters}
+            onApplySuggestion={(s) => setQuery(s)}
+          />
+        ) : (
+          <RecipeGrid
+            results={visible}
+            emptyTitle="No recipes match these filters"
+            emptyDescription="Try raising your budget, allowing more equipment, or removing a diet restriction."
+            emptyAction={
+              <Button variant="outline" size="sm" onClick={clearAllFilters}>
+                Clear all filters
+              </Button>
+            }
+          />
+        )}
         {visible.length < results.length && (
           <div className="mt-6 flex justify-center">
             <Button
