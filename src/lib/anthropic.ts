@@ -218,6 +218,249 @@ export interface PantryChatTurn {
   content: string;
 }
 
+// ----------------- AI Chef via Haiku (fast path) -----------------
+//
+// The Cloudflare worker + gpt-4o-mini path takes 14–25s because of the
+// huge schema. This direct-browser Haiku path returns a slim, schema-valid
+// recipe in 2–4s — same flow Pesto uses for chat.
+//
+// We only emit the *essential* fields the UI needs; the rest are filled
+// with safe defaults so the GeneratedRecipe type still type-checks.
+
+export interface HaikuRecipeInput {
+  pantryIngredients?: string[];
+  cravings?: string;
+  budgetPerServing?: number;
+  servings?: number;
+  equipment?: string[];
+  dietTags?: string[];
+  timeLimit?: string;
+  refinement?: string;
+}
+
+interface SlimHaikuRecipe {
+  name: string;
+  description: string;
+  whyThisFits: string;
+  mealType: "breakfast" | "lunch" | "dinner" | "snack" | "meal-prep";
+  cuisineStyle: string;
+  servings: number;
+  prepTimeMinutes: number;
+  cookTimeMinutes: number;
+  totalTimeMinutes: number;
+  difficulty: "very easy" | "easy" | "medium";
+  equipment: string[];
+  primaryCookingMethod: string;
+  estimatedTotalCost: number;
+  estimatedCostPerServing: number;
+  ingredients: Array<{
+    name: string;
+    quantity: number;
+    unit: string;
+    estimatedCost: number;
+    userAlreadyHas: boolean;
+    optional?: boolean;
+    category?: string;
+  }>;
+  steps: string[];
+  cheapTips?: string[];
+  tags?: string[];
+  imagePromptHint?: string;
+}
+
+const QUICK_RECIPE_SYSTEM = `You are an expert budget-cooking helper for college students. Your job: answer "What can I cook tonight with what I have?" with ONE concrete, realistic recipe — fast.
+
+Rules:
+- Use the user's pantry as much as possible. Only add cheap missing ingredients when they meaningfully improve the dish.
+- Respect equipment strictly. Microwave-only means NO stovetop/oven steps.
+- Keep it tight: 4–7 ingredients, 4–6 steps. Practical for a dorm/apartment.
+- Numbers must be realistic: estimatedCost in USD; quantity is a number with a separate unit string ("2", "cups" — never "2 cups" as one field).
+
+Respond with ONLY valid JSON in this exact shape (no markdown):
+{
+  "name": "string",
+  "description": "1 sentence",
+  "whyThisFits": "1 sentence",
+  "mealType": "breakfast|lunch|dinner|snack|meal-prep",
+  "cuisineStyle": "string",
+  "servings": <1-6>,
+  "prepTimeMinutes": <number>,
+  "cookTimeMinutes": <number>,
+  "totalTimeMinutes": <number>,
+  "difficulty": "very easy|easy|medium",
+  "equipment": ["microwave|air-fryer|stovetop|oven|rice-cooker"],
+  "primaryCookingMethod": "microwave|air-fryer|stovetop|oven|rice-cooker|no-cook|mixed",
+  "estimatedTotalCost": <USD number>,
+  "estimatedCostPerServing": <USD number>,
+  "ingredients": [
+    {"name":"string","quantity":<number>,"unit":"string","estimatedCost":<USD>,"userAlreadyHas":<boolean>,"optional":<boolean>,"category":"string"}
+  ],
+  "steps": ["string"],
+  "cheapTips": ["string"],
+  "tags": ["string"],
+  "imagePromptHint": "1 sentence — no people, no text, no logos"
+}`;
+
+function buildQuickRecipeUserPrompt(opts: HaikuRecipeInput): string {
+  const lines: string[] = ["What can I cook tonight with what I have?"];
+  if (opts.pantryIngredients?.length) {
+    lines.push(`Pantry: ${opts.pantryIngredients.join(", ")}`);
+  }
+  if (opts.cravings?.trim()) {
+    lines.push(`Cravings / notes: ${opts.cravings.trim()}`);
+  }
+  if (opts.budgetPerServing) {
+    lines.push(`Budget per serving: $${opts.budgetPerServing}`);
+  }
+  if (opts.servings) {
+    lines.push(`Servings: ${opts.servings}`);
+  }
+  if (opts.equipment?.length) {
+    lines.push(`Equipment available: ${opts.equipment.join(", ")}`);
+  }
+  if (opts.dietTags?.length) {
+    lines.push(`Diet: ${opts.dietTags.join(", ")}`);
+  }
+  if (opts.timeLimit && opts.timeLimit !== "any") {
+    lines.push(`Time limit: ${opts.timeLimit}`);
+  }
+  if (opts.refinement) {
+    lines.push(`Refinement: ${opts.refinement}`);
+  }
+  lines.push("\nReturn ONLY valid JSON matching the schema. No markdown.");
+  return lines.join("\n");
+}
+
+function parseHaikuJson(raw: string): SlimHaikuRecipe {
+  let body = raw.trim();
+  if (body.startsWith("```")) {
+    body = body.replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
+  }
+  const start = body.indexOf("{");
+  const end = body.lastIndexOf("}");
+  if (start !== -1 && end !== -1) body = body.slice(start, end + 1);
+  return JSON.parse(body) as SlimHaikuRecipe;
+}
+
+import type { GeneratedRecipe } from "@/lib/workerClient";
+
+function expandToFullRecipe(slim: SlimHaikuRecipe): GeneratedRecipe {
+  // Fill in defaults so the existing AI Chef render code keeps working
+  // without needing to be aware that this recipe came from Haiku.
+  return {
+    name: slim.name,
+    description: slim.description,
+    userRequestSummary: "",
+    whyThisFits: slim.whyThisFits ?? "",
+    mealType: slim.mealType,
+    cuisineStyle: slim.cuisineStyle ?? "",
+    servings: slim.servings,
+    prepTimeMinutes: slim.prepTimeMinutes,
+    cookTimeMinutes: slim.cookTimeMinutes,
+    totalTimeMinutes: slim.totalTimeMinutes,
+    difficulty: slim.difficulty,
+    equipment: slim.equipment ?? [],
+    primaryCookingMethod: slim.primaryCookingMethod ?? "stovetop",
+    noStovetopRequired: !slim.equipment?.includes("stovetop"),
+    estimatedTotalCost: Number(slim.estimatedTotalCost) || 0,
+    estimatedCostPerServing: Number(slim.estimatedCostPerServing) || 0,
+    estimatedMissingIngredientCost: 0,
+    ingredients: (slim.ingredients ?? []).map((i) => ({
+      name: i.name,
+      quantity: Number(i.quantity) || 0,
+      unit: i.unit ?? "",
+      estimatedCost: Number(i.estimatedCost) || 0,
+      userAlreadyHas: Boolean(i.userAlreadyHas),
+      optional: Boolean(i.optional),
+      category: i.category ?? "other",
+    })),
+    missingIngredients: [],
+    steps: slim.steps ?? [],
+    guidedCookingSteps: [],
+    cheapTips: slim.cheapTips ?? [],
+    substitutions: [],
+    makeItCheaper: [],
+    makeItHealthier: [],
+    makeItHigherProtein: [],
+    pantryStaplesUsed: [],
+    optionalAddIns: [],
+    studentTips: [],
+    storageInstructions: "",
+    reheatingInstructions: "",
+    safetyNotes: [],
+    estimatedNutrition: { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+    tags: slim.tags ?? [],
+    imagePromptHint: slim.imagePromptHint,
+  };
+}
+
+/**
+ * Fast AI Chef path — Claude Haiku 4.5, direct from browser. Returns the
+ * same GeneratedRecipe shape the OpenAI worker path returns so the AI Chef
+ * UI works unchanged.
+ */
+export async function generateRecipeQuick(
+  opts: HaikuRecipeInput,
+): Promise<GeneratedRecipe> {
+  const text = await callAnthropic({
+    system: QUICK_RECIPE_SYSTEM,
+    maxTokens: 1500,
+    temperature: 0.6,
+    messages: [
+      { role: "user", content: buildQuickRecipeUserPrompt(opts) },
+    ],
+  });
+  const slim = parseHaikuJson(text);
+  return expandToFullRecipe(slim);
+}
+
+/**
+ * Multi-options fast path. Fires 4 parallel Haiku calls with different
+ * role hints (best-match / cheapest / fastest / wildcard) so total wall
+ * time = slowest single call (~3–5s) instead of 22s for one mega-call.
+ */
+import type { GeneratedRecipeOption, GeneratedRecipeOptionSet, OptionLabel } from "@/lib/workerClient";
+
+export async function generateRecipeQuickOptions(
+  opts: HaikuRecipeInput,
+): Promise<GeneratedRecipeOptionSet> {
+  const ROLES: Array<{ id: string; label: OptionLabel; hint: string }> = [
+    { id: "opt-1", label: "best-match", hint: "Best overall match: balanced, satisfying, fits the user's pantry, budget, and equipment closely." },
+    { id: "opt-2", label: "cheapest", hint: "Cheapest variant: bare-essentials ingredients, minimize anything missing, lowest cost per serving." },
+    { id: "opt-3", label: "fastest", hint: "Fastest variant: minimal steps, single-pan or single-bowl, under 15 minutes total." },
+    { id: "opt-4", label: "wildcard", hint: "Creative wildcard: meaningfully DIFFERENT format from the main (bowl vs wrap vs soup vs no-cook). Surprising but realistic." },
+  ];
+  const results = await Promise.all(
+    ROLES.map(async (role): Promise<GeneratedRecipeOption | null> => {
+      try {
+        const r = await generateRecipeQuick({
+          ...opts,
+          refinement: role.hint,
+        });
+        return {
+          id: role.id,
+          optionLabel: role.label,
+          shortReason: r.whyThisFits || "",
+          pantryMatchScore: role.id === "opt-1" ? 1 : 0.85,
+          selectedByDefault: role.id === "opt-1",
+          notesInfluenceSummary: "",
+          recipe: r,
+        };
+      } catch {
+        return null;
+      }
+    }),
+  );
+  const options = results.filter((o): o is GeneratedRecipeOption => o !== null);
+  if (!options.length) {
+    throw new Error("All option generations failed");
+  }
+  if (!options.some((o) => o.selectedByDefault)) {
+    options[0].selectedByDefault = true;
+  }
+  return { mainOptionId: options[0].id, options };
+}
+
 export async function pantryChat(
   pantryDescription: string,
   history: PantryChatTurn[],
