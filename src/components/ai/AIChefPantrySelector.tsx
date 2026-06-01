@@ -8,7 +8,6 @@ import {
   Plus,
   Refrigerator,
   Sparkles,
-  X,
 } from "lucide-react";
 import { useAppStore } from "@/lib/AppStore";
 import { INGREDIENT_MAP } from "@/data/ingredients";
@@ -29,11 +28,11 @@ interface Props {
  *
  * Each chip is a checkbox: clicking toggles "include this ingredient in the
  * current request" without ever modifying the underlying pantry. To remove
- * an item from the pantry entirely, use the X button (with confirmation
- * baked into removePantryItem at the store level).
+ * an item from the pantry entirely, use the Pantry page directly — tapping
+ * a chip here only toggles inclusion in this recipe.
  */
 export function AIChefPantrySelector({ selectedIds, onChange }: Props) {
-  const { pantry, hydrated, removePantryItem } = useAppStore();
+  const { pantry, hydrated } = useAppStore();
   const [customIngredientsTick, setCustomIngredientsTick] = useState(0);
 
   // Re-read custom ingredient names whenever the pantry mutates, since
@@ -142,59 +141,35 @@ export function AIChefPantrySelector({ selectedIds, onChange }: Props) {
           const active = selectedIds.has(it.id);
           return (
             <li key={it.id}>
-              <div
+              <button
+                type="button"
+                onClick={() => toggle(it.id)}
+                aria-pressed={active}
+                title={
+                  active
+                    ? "Tap to exclude from this recipe"
+                    : "Tap to include in this recipe"
+                }
                 className={
                   active
-                    ? "group inline-flex items-center gap-1 rounded-full border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition-colors"
-                    : "group inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-700 transition-colors hover:border-emerald-300 hover:bg-emerald-50"
+                    ? "inline-flex items-center gap-1 rounded-full border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                    : "inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-700 transition-colors hover:border-emerald-300 hover:bg-emerald-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
                 }
               >
-                <button
-                  type="button"
-                  onClick={() => toggle(it.id)}
-                  aria-pressed={active}
-                  className="inline-flex items-center gap-1 focus:outline-none"
-                  title={
-                    active
-                      ? "Tap to exclude from this recipe"
-                      : "Tap to include in this recipe"
-                  }
-                >
-                  {active ? <Check size={11} /> : <Plus size={11} />}
-                  {it.name}
-                  {it.useSoon && (
-                    <span
-                      className={
-                        active
-                          ? "ml-0.5 inline-flex items-center gap-0.5 rounded-full bg-amber-200 px-1 text-[9px] font-semibold text-amber-900"
-                          : "ml-0.5 inline-flex items-center gap-0.5 rounded-full bg-amber-100 px-1 text-[9px] font-semibold text-amber-800"
-                      }
-                    >
-                      <Clock4 size={9} /> use soon
-                    </span>
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (confirm(`Remove ${it.name} from your pantry?`)) {
-                      removePantryItem(it.id);
-                      const next = new Set(selectedIds);
-                      next.delete(it.id);
-                      onChange(next);
+                {active ? <Check size={11} /> : <Plus size={11} />}
+                {it.name}
+                {it.useSoon && (
+                  <span
+                    className={
+                      active
+                        ? "ml-0.5 inline-flex items-center gap-0.5 rounded-full bg-amber-200 px-1 text-[9px] font-semibold text-amber-900"
+                        : "ml-0.5 inline-flex items-center gap-0.5 rounded-full bg-amber-100 px-1 text-[9px] font-semibold text-amber-800"
                     }
-                  }}
-                  className={
-                    active
-                      ? "ml-1 rounded-full p-0.5 text-white/80 hover:bg-white/20 hover:text-white"
-                      : "ml-1 rounded-full p-0.5 text-stone-400 hover:bg-stone-100 hover:text-red-600"
-                  }
-                  aria-label={`Remove ${it.name} from pantry`}
-                  title={`Remove ${it.name} from pantry`}
-                >
-                  <X size={11} />
-                </button>
-              </div>
+                  >
+                    <Clock4 size={9} /> use soon
+                  </span>
+                )}
+              </button>
             </li>
           );
         })}

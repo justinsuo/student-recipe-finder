@@ -2,7 +2,6 @@
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import {
   Sparkles,
   ChefHat,
@@ -49,6 +48,7 @@ import { resolvedToCustom, saveCustomIngredient, findExistingByName, getCustomIn
 import { AIChefPantrySelector } from "@/components/ai/AIChefPantrySelector";
 import { Refrigerator } from "lucide-react";
 import { calculateNutritionForFreeForm } from "@/lib/nutritionEngine";
+import { generateRecipeQuick, generateRecipeQuickOptions, isAiEnabled } from "@/lib/anthropic";
 
 // If the AI's ingredient list maps cleanly to our catalog, replace its
 // guessed macros with the deterministic engine result. Falls back to the
@@ -102,12 +102,9 @@ export default function AIChefPageWrapper() {
 }
 
 function AIChefPage() {
-  const searchParams = useSearchParams();
   const { addGroceryItems, toggleSaved, isSaved, pantry } = useAppStore();
 
-  const [mode, setMode] = useState<"pantry" | "have" | "imagine" | "web" | "url" | "paste">(
-    () => (searchParams.get("usePantry") === "true" ? "pantry" : "have"),
-  );
+  const [mode, setMode] = useState<"pantry" | "have" | "imagine" | "web" | "url" | "paste">("pantry");
   const [selectedPantryIds, setSelectedPantryIds] = useState<Set<string>>(
     () => new Set(pantry.map((p) => p.ingredientId)),
   );
@@ -246,20 +243,39 @@ function AIChefPage() {
         r = out.recipe;
         importedSource = out.source;
       } else {
-        r = await generateRecipe({
-          ingredients: fromPantry,
-          budgetPerServing: budget,
-          servings,
-          equipment,
-          timeLimit,
-          dietTags: diet,
-          cravings:
-            mode === "imagine" || (mode === "pantry" && cravings.trim())
-              ? cravings
-              : undefined,
-          creativity,
-          refinement,
-        });
+        // Fast path: direct Haiku call from browser (≈ 2–4s) when the
+        // Anthropic key is available. Falls back to the worker + OpenAI
+        // path (10–14s) when it isn't.
+        if (isAiEnabled()) {
+          r = await generateRecipeQuick({
+            pantryIngredients: fromPantry,
+            budgetPerServing: budget,
+            servings,
+            equipment,
+            timeLimit,
+            dietTags: diet,
+            cravings:
+              mode === "imagine" || (mode === "pantry" && cravings.trim())
+                ? cravings
+                : undefined,
+            refinement,
+          });
+        } else {
+          r = await generateRecipe({
+            ingredients: fromPantry,
+            budgetPerServing: budget,
+            servings,
+            equipment,
+            timeLimit,
+            dietTags: diet,
+            cravings:
+              mode === "imagine" || (mode === "pantry" && cravings.trim())
+                ? cravings
+                : undefined,
+            creativity,
+            refinement,
+          });
+        }
       }
       r = reconcileNutrition(r);
       setRecipe(r);
@@ -497,21 +513,36 @@ function AIChefPage() {
               .split(/[\n,]+/)
               .map((s) => s.trim())
               .filter(Boolean);
-      const res = await generateRecipeOptions({
-        pantryIngredients: pantryNames,
-        selectedPantryIngredientIds: Array.from(selectedPantryIds),
-        aiNotes: aiNotes.trim() || undefined,
-        cravingText: cravings.trim() || undefined,
-        budgetPerServing: budget,
-        servings,
-        equipment,
-        dietTags: diet,
-        creativityLevel: creativity,
-        appendToExisting: append,
-        previousOptions: append
-          ? options.map((o) => ({ recipe: { name: o.recipe.name } }))
-          : undefined,
-      });
+      // Fast path: parallel Haiku calls direct from browser (~3–5s total)
+      // instead of the worker-based mega-call (22s+). Falls back to the
+      // worker path when the Anthropic key isn't configured.
+      const res = isAiEnabled()
+        ? await generateRecipeQuickOptions({
+            pantryIngredients: pantryNames,
+            cravings:
+              [cravings.trim(), aiNotes.trim()]
+                .filter(Boolean)
+                .join(" — ") || undefined,
+            budgetPerServing: budget,
+            servings,
+            equipment,
+            dietTags: diet,
+          })
+        : await generateRecipeOptions({
+            pantryIngredients: pantryNames,
+            selectedPantryIngredientIds: Array.from(selectedPantryIds),
+            aiNotes: aiNotes.trim() || undefined,
+            cravingText: cravings.trim() || undefined,
+            budgetPerServing: budget,
+            servings,
+            equipment,
+            dietTags: diet,
+            creativityLevel: creativity,
+            appendToExisting: append,
+            previousOptions: append
+              ? options.map((o) => ({ recipe: { name: o.recipe.name } }))
+              : undefined,
+          });
       const merged = append ? [...options, ...res.options] : res.options;
       setOptions(merged);
       const mainId = append
