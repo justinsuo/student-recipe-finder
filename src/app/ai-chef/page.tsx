@@ -858,12 +858,16 @@ function AIChefPage() {
             <input
               type="range"
               min={0.5}
-              max={6}
-              step={0.25}
+              max={30}
+              step={0.5}
               value={budget}
               onChange={(e) => setBudget(parseFloat(e.target.value))}
               className="mt-2 w-full accent-emerald-600"
             />
+            <div className="flex justify-between text-[11px] text-stone-500">
+              <span>$0.50</span>
+              <span>$30.00</span>
+            </div>
             <label className="mt-3 block text-sm font-medium text-stone-800">
               Servings ({servings})
             </label>

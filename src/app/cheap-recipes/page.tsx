@@ -326,8 +326,8 @@ export default function CheapRecipesPage() {
               <input
                 type="range"
                 min={0.5}
-                max={6}
-                step={0.25}
+                max={30}
+                step={0.5}
                 value={filters.budgetPerServing}
                 onChange={(e) =>
                   setFilters((f) => ({
@@ -340,7 +340,7 @@ export default function CheapRecipesPage() {
               />
               <div className="mt-1 flex justify-between text-[11px] text-stone-500">
                 <span>$0.50</span>
-                <span>$6.00</span>
+                <span>$30.00</span>
               </div>
             </div>
 
