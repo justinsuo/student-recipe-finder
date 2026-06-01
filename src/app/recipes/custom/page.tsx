@@ -14,6 +14,7 @@ import {
   ChefHat,
   Loader2,
   ImagePlus,
+  RefreshCw,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -156,12 +157,36 @@ function CustomRecipePage() {
       <div className="overflow-hidden rounded-3xl shadow-sm">
         <div className="relative aspect-[16/9] bg-stone-100">
           {imageSrc ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              src={imageSrc}
-              alt={recipe.name}
-              className="absolute inset-0 h-full w-full object-cover"
-            />
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={imageSrc}
+                alt={recipe.name}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              <button
+                type="button"
+                onClick={handleGenerateImage}
+                disabled={imageLoading || !isWorkerConfigured()}
+                className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-stone-800 shadow-sm backdrop-blur transition-colors hover:bg-white disabled:opacity-60"
+                title="Generate a new image — replaces the current one"
+              >
+                {imageLoading ? (
+                  <>
+                    <Loader2 size={12} className="animate-spin" /> Regenerating…
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw size={12} /> Regenerate image
+                  </>
+                )}
+              </button>
+              {imageError && (
+                <div className="absolute bottom-14 left-3 right-3 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-700 shadow-sm">
+                  {imageError}
+                </div>
+              )}
+            </>
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-emerald-100 to-amber-50 px-6 text-stone-500">
               {imageLoading ? (
