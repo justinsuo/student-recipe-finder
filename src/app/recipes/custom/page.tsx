@@ -24,6 +24,12 @@ import {
 import { useAppStore } from "@/lib/AppStore";
 import type { CustomRecipe } from "@/lib/customRecipeTypes";
 
+// Safe formatter — AI-saved recipes occasionally have missing/non-numeric costs.
+function money(n: unknown): string {
+  const v = typeof n === "number" ? n : Number(n);
+  return Number.isFinite(v) ? v.toFixed(2) : "—";
+}
+
 export default function CustomRecipePageWrapper() {
   return (
     <Suspense fallback={<div className="text-stone-500">Loading…</div>}>
@@ -121,7 +127,7 @@ function CustomRecipePage() {
       <header className="space-y-3">
         <div className="flex flex-wrap gap-2">
           <Badge tone="green" icon={<Coins size={12} />}>
-            ${recipe.estimatedCostPerServing.toFixed(2)}/serving
+            ${money(recipe.estimatedCostPerServing)}/serving
           </Badge>
           <Badge tone="amber" icon={<Clock size={12} />}>
             {recipe.totalTimeMinutes} min
@@ -174,7 +180,7 @@ function CustomRecipePage() {
                   </p>
                 </div>
                 <p className="font-medium text-stone-900">
-                  ${ing.estimatedCost.toFixed(2)}
+                  ${money(ing.estimatedCost)}
                 </p>
               </li>
             ))}

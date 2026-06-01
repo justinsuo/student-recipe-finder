@@ -168,7 +168,7 @@ function RecipeMiniCard({
           {recipe.name}
         </Link>
         <p className="text-xs text-stone-500">
-          ${recipe.estimatedCostPerServing.toFixed(2)}/serving ·{" "}
+          ${Number.isFinite(Number(recipe.estimatedCostPerServing)) ? Number(recipe.estimatedCostPerServing).toFixed(2) : "—"}/serving ·{" "}
           {recipe.totalTimeMinutes} min
         </p>
         <div className="flex justify-end pt-1">

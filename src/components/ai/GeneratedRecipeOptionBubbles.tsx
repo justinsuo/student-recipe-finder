@@ -107,7 +107,7 @@ export function GeneratedRecipeOptionBubbles({
                   <div className="flex items-center gap-2 pt-1 text-[11px] text-stone-700">
                     <span className="inline-flex items-center gap-0.5">
                       <Coins size={10} />$
-                      {o.recipe.estimatedCostPerServing?.toFixed(2) ?? "—"}
+                      {Number.isFinite(Number(o.recipe.estimatedCostPerServing)) ? Number(o.recipe.estimatedCostPerServing).toFixed(2) : "—"}
                     </span>
                     <span className="text-stone-300">·</span>
                     <span className="inline-flex items-center gap-0.5">

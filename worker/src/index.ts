@@ -256,10 +256,17 @@ async function openaiImage(
   } catch (e) {
     const err = e as Error & { status?: number };
     const msg = err.message || "";
+    // Fall back on:
+    //   - 401/403 (account doesn't have access to this model)
+    //   - "model does not exist" / "invalid_value" 400 (model deprecated or unknown)
+    //   - any verification/access wording
     const isPermissionish =
       err.status === 403 ||
       err.status === 401 ||
-      /verified|verification|access|permission|must be/i.test(msg);
+      err.status === 404 ||
+      /verified|verification|access|permission|must be|does not exist|invalid_value|unknown model|not found/i.test(
+        msg,
+      );
     if (primary !== fallback && isPermissionish) {
       // One automatic retry on a model that doesn't require verification
       return await attempt(fallback);
@@ -471,66 +478,39 @@ Use the user's existing ingredients as much as possible. Only add missing ingred
 
 Respect equipment constraints strictly. If the user only has a microwave, do not include stovetop, oven, or air fryer steps. If the user has an air fryer, include temperature, time, flip/shake reminders, and doneness checks. Include safety notes naturally (microwave-safe bowls, no metal in microwave, pierce potatoes before microwaving, steam caution, chicken cooked through, air fryer basket spacing).
 
-Always respond with ONLY valid JSON matching this schema (no markdown):
+Always respond with ONLY valid JSON matching this schema (no markdown). Use EXACT field names. Each ingredient MUST have numeric quantity + separate unit + numeric estimatedCost + boolean userAlreadyHas. Do NOT combine quantity+unit into one string.
+
 {
   "name": "string",
-  "description": "1–2 sentence original description",
-  "userRequestSummary": "1 sentence echoing what the user asked for",
-  "whyThisFits": "1–2 sentences explaining why this recipe matches the user's request",
+  "description": "1–2 sentences",
+  "userRequestSummary": "1 sentence",
+  "whyThisFits": "1–2 sentences",
   "mealType": "breakfast|lunch|dinner|snack|meal-prep",
   "cuisineStyle": "string",
-  "servings": <number 1-6>,
-  "prepTimeMinutes": <number>,
-  "cookTimeMinutes": <number>,
-  "totalTimeMinutes": <number>,
+  "servings": <1-6>,
+  "prepTimeMinutes": <n>, "cookTimeMinutes": <n>, "totalTimeMinutes": <n>,
   "difficulty": "very easy|easy|medium",
-  "equipment": ["microwave|air-fryer|stovetop|oven|rice-cooker|no-kitchen"],
+  "equipment": ["microwave|air-fryer|stovetop|oven|rice-cooker"],
   "primaryCookingMethod": "microwave|air-fryer|stovetop|oven|rice-cooker|no-cook|mixed",
-  "noStovetopRequired": <boolean>,
-  "estimatedTotalCost": <number USD>,
-  "estimatedCostPerServing": <number USD>,
-  "estimatedMissingIngredientCost": <number USD>,
-  "ingredients": [
-    {"name": "string", "quantity": <number>, "unit": "string", "estimatedCost": <number>, "userAlreadyHas": <boolean>, "optional": <boolean>, "category": "string"}
-  ],
-  "missingIngredients": [
-    {"name": "string", "estimatedCost": <number>, "importance": "required|recommended|optional", "cheapSubstitute": "string or null"}
-  ],
-  "steps": ["string", ...],
-  "detailedSteps": [
-    {
-      "shortStep": "string (same as the matching entry in steps[])",
-      "detailedExplanation": "string — WHY, HOW HOT, WHAT IT LOOKS LIKE, HOW IT SHOULD TASTE. Aimed at a beginner.",
-      "timerMinutes": <number or null>,
-      "heatLevel": "low|medium-low|medium|medium-high|high|none",
-      "textureCue": "string or null (e.g. 'rice should crackle and look dry, not wet')",
-      "tasteCue": "string or null (e.g. 'taste — add a pinch of salt if it feels flat')",
-      "beginnerTip": "string or null",
-      "safetyNote": "string or null"
-    }
-  ],
-  "flavorExplanation": "1–2 sentences on why this combination tastes good (role of each seasoning/sauce/aromatic)",
-  "seasoningUpgrades": ["string — small flavor boosts: 'splash of rice vinegar to brighten', 'sesame oil at the end for aroma'"],
-  "tasteTroubleshooting": ["string — 'if flat: add lemon juice or salt', 'if dry: oil/yogurt/sauce'"],
-  "flavorBadges": ["spicy|tangy|umami|garlicky|smoky|savory|creamy|crispy"],
-  "guidedCookingSteps": [
-    {"title": "string", "instruction": "string", "timerMinutes": <number or null>, "safetyNote": "string or null"}
-  ],
+  "noStovetopRequired": <bool>,
+  "estimatedTotalCost": <USD>, "estimatedCostPerServing": <USD>, "estimatedMissingIngredientCost": <USD>,
+  "ingredients": [{"name":"string","quantity":<n>,"unit":"string","estimatedCost":<USD>,"userAlreadyHas":<bool>,"optional":<bool>,"category":"string"}],
+  "missingIngredients": [{"name":"string","estimatedCost":<USD>,"importance":"required|recommended|optional","cheapSubstitute":"string or null"}],
+  "steps": ["string"],
   "cheapTips": ["string"],
-  "substitutions": [{"original": "string", "swap": "string", "why": "string", "estimatedSavings": <number or null>}],
+  "substitutions": [{"original":"string","swap":"string","why":"string","estimatedSavings":<n or null>}],
   "makeItCheaper": ["string"],
-  "makeItHealthier": ["string"],
-  "makeItHigherProtein": ["string"],
-  "pantryStaplesUsed": ["string"],
-  "optionalAddIns": ["string"],
   "studentTips": ["string"],
   "storageInstructions": "string",
   "reheatingInstructions": "string",
   "safetyNotes": ["string"],
-  "estimatedNutrition": {"calories": <number>, "protein": <number>, "carbs": <number>, "fat": <number>, "fiber": <number>},
+  "estimatedNutrition": {"calories":<n>,"protein":<n>,"carbs":<n>,"fat":<n>,"fiber":<n>},
   "tags": ["string"],
-  "imagePromptHint": "1-sentence visual description, no people, no text, no branding"
-}`;
+  "flavorBadges": ["spicy|tangy|umami|garlicky|smoky|savory|creamy|crispy"],
+  "imagePromptHint": "1 sentence — no people, no text, no logos"
+}
+
+Keep it tight: 4–8 ingredients, 4–8 steps, ≤4 tips. No detailed-step expansions in this response.`;
 
 async function handleGenerateRecipe(req: Request, env: Env): Promise<Response> {
   const origin = req.headers.get("Origin");
@@ -604,22 +584,43 @@ Hard rules:
 - Each recipe must be realistic, cheap, safe, and student-friendly.
 - Include cost-aware ingredient quantities, missing ingredients, steps, safety notes naturally (microwave-safe bowl, no metal, pierce potatoes, steam caution, chicken cooked through, air fryer basket spacing).
 
-Always respond with ONLY valid JSON in this exact schema (no markdown):
+Always respond with ONLY valid JSON in this exact schema (no markdown). Use EXACT field names. Each ingredient MUST have numeric quantity + separate unit string + numeric estimatedCost + boolean userAlreadyHas. Do NOT combine quantity+unit into one string. Do NOT rename "quantity" to "amount".
+
+INGREDIENT shape (used by every recipe.ingredients[] entry):
+{"name":"string","quantity":<number>,"unit":"string","estimatedCost":<USD number>,"userAlreadyHas":<boolean>,"optional":<boolean>,"category":"string"}
+
+MISSING INGREDIENT shape:
+{"name":"string","estimatedCost":<USD number>,"importance":"required|recommended|optional","cheapSubstitute":"string or null"}
+
+Top-level response:
 {
   "mainOptionId": "opt-1",
   "options": [
+    /* All 4 options use the SAME minimal shape. 4–6 ingredients, 4–6 steps. */
     {
-      "id": "opt-1",
-      "optionLabel": "best-match|cheapest|fastest|most-creative|uses-most-pantry|high-protein|comfort-food|wildcard",
-      "shortReason": "1 sentence why this option exists",
-      "pantryMatchScore": <0..1>,
-      "selectedByDefault": true,
-      "notesInfluenceSummary": "1 sentence — how the user's aiNotes shaped this recipe (empty string if no notes)",
-      "recipe": <full GeneratedRecipe object matching the single-recipe schema, including: name, description, userRequestSummary, whyThisFits, mealType, cuisineStyle, servings, prepTimeMinutes, cookTimeMinutes, totalTimeMinutes, difficulty, equipment, primaryCookingMethod, noStovetopRequired, estimatedTotalCost, estimatedCostPerServing, estimatedMissingIngredientCost, ingredients[], missingIngredients[], steps[], detailedSteps[ {shortStep, detailedExplanation, timerMinutes?, heatLevel?: "low|medium-low|medium|medium-high|high|none", textureCue?, tasteCue?, beginnerTip?, safetyNote?} for EVERY step in steps[] — beginners need to know WHY ("use leftover rice because it fries better and doesn't go mushy"), HOW HOT ("medium-high heat so the rice gets crisp"), WHAT IT LOOKS LIKE ("oil should shimmer; rice should crackle"), and HOW IT SHOULD TASTE ("taste and add salt if it tastes flat")], flavorExplanation: "1–2 sentences on WHY this combination tastes good — the role of each seasoning/sauce/aromatic", seasoningUpgrades[ "use what you have OR optional upgrade" suggestions ], tasteTroubleshooting[ "if flat: add lemon juice or salt", "if dry: add a drizzle of oil or yogurt", etc.], guidedCookingSteps[], cheapTips[], substitutions[], makeItCheaper[], makeItHealthier[], makeItHigherProtein[], pantryStaplesUsed[], optionalAddIns[], studentTips[], storageInstructions, reheatingInstructions, safetyNotes[], estimatedNutrition {calories,protein,carbs,fat,fiber}, tags[], flavorBadges[ "spicy|tangy|umami|garlicky|smoky|savory|creamy|crispy" subset that applies ], imagePromptHint: "1 sentence including key visible ingredients, cooking method, plating style — no people, no text, no logos">
+      "id":"opt-1",
+      "optionLabel":"best-match|cheapest|fastest|most-creative|uses-most-pantry|high-protein|comfort-food|wildcard",
+      "shortReason":"1 sentence",
+      "pantryMatchScore":<0..1>,
+      "selectedByDefault":true,
+      "notesInfluenceSummary":"1 sentence (or empty string)",
+      "recipe": {
+        "name":"string","description":"1 sentence","whyThisFits":"1 sentence",
+        "mealType":"breakfast|lunch|dinner|snack|meal-prep","cuisineStyle":"string",
+        "servings":<1-6>,"prepTimeMinutes":<n>,"cookTimeMinutes":<n>,"totalTimeMinutes":<n>,
+        "difficulty":"very easy|easy|medium",
+        "equipment":["microwave|air-fryer|stovetop|oven|rice-cooker"],
+        "primaryCookingMethod":"microwave|air-fryer|stovetop|oven|rice-cooker|no-cook|mixed",
+        "estimatedTotalCost":<USD>,"estimatedCostPerServing":<USD>,
+        "ingredients":[<INGREDIENT>],
+        "steps":["string"],
+        "tags":["string"],
+        "imagePromptHint":"1 sentence — no people, no text, no logos"
+      }
     },
-    {"id": "opt-2", ...},
-    {"id": "opt-3", ...},
-    {"id": "opt-4", ...}
+    {"id":"opt-2","optionLabel":"...","shortReason":"...","pantryMatchScore":<0..1>,"selectedByDefault":false,"notesInfluenceSummary":"","recipe":{...same shape as opt-1.recipe...}},
+    {"id":"opt-3", ...same shape...},
+    {"id":"opt-4", ...same shape...}
   ]
 }
 
@@ -637,17 +638,83 @@ async function handleGenerateRecipeOptions(
   } catch {
     return jsonResponse({ error: "Invalid JSON" }, 400, env, origin);
   }
-  const userPrompt = buildOptionsUserPrompt(body);
+  const baseUserPrompt = buildOptionsUserPrompt(body);
+  // Generate 4 distinct recipes in parallel — one per role. Each call uses
+  // the slim single-recipe schema (~600 tokens output). Total wall time =
+  // slowest single call (~8-12s on gpt-4o-mini) instead of ~35s for one
+  // mega-call that has to emit all 4 sequentially.
+  const ROLES: Array<{ id: string; label: string; roleHint: string }> = [
+    {
+      id: "opt-1",
+      label: "best-match",
+      roleHint:
+        "Best overall match: balanced, satisfying, fits the user's pantry + budget + equipment closely.",
+    },
+    {
+      id: "opt-2",
+      label: "cheapest",
+      roleHint:
+        "Cheapest possible variant: bare-essentials ingredients, minimize anything missing, prioritize price under budget.",
+    },
+    {
+      id: "opt-3",
+      label: "fastest",
+      roleHint:
+        "Fastest variant: minimal steps, single-pan/single-bowl, under 15 minutes total time if at all possible.",
+    },
+    {
+      id: "opt-4",
+      label: "wildcard",
+      roleHint:
+        "Creative wildcard: meaningfully DIFFERENT format from the main (bowl vs wrap vs soup vs fried vs no-cook). Surprising but realistic.",
+    },
+  ];
   try {
-    const result = await openaiChatJson({
+    const results = await Promise.all(
+      ROLES.map(async (role) => {
+        const userPrompt = `${baseUserPrompt}\n\nVariant role: ${role.roleHint}`;
+        try {
+          const r = (await openaiChatJson({
+            env,
+            task: "recipe" as const,
+            system: RECIPE_SYSTEM,
+            user: userPrompt,
+            maxTokens: 1500,
+            temperature: 0.6,
+          })) as Record<string, unknown>;
+          return {
+            id: role.id,
+            optionLabel: role.label,
+            shortReason: typeof r.whyThisFits === "string" ? r.whyThisFits : "",
+            pantryMatchScore: role.id === "opt-1" ? 1 : 0.85,
+            selectedByDefault: role.id === "opt-1",
+            notesInfluenceSummary: "",
+            recipe: r,
+          };
+        } catch {
+          return null;
+        }
+      }),
+    );
+    const options = results.filter((o): o is NonNullable<typeof o> => o !== null);
+    if (!options.length) {
+      return jsonResponse(
+        { error: "all option generations failed" },
+        500,
+        env,
+        origin,
+      );
+    }
+    // Ensure exactly one selectedByDefault.
+    if (!options.some((o) => o.selectedByDefault)) {
+      options[0].selectedByDefault = true;
+    }
+    return jsonResponse(
+      { mainOptionId: options[0].id, options },
+      200,
       env,
-      task: "recipeHighQuality" as const,
-      system: OPTIONS_SYSTEM,
-      user: userPrompt,
-      maxTokens: 6000,
-      temperature: 0.7,
-    });
-    return jsonResponse(result, 200, env, origin);
+      origin,
+    );
   } catch (e) {
     return jsonResponse(
       { error: e instanceof Error ? e.message : "options generation failed" },

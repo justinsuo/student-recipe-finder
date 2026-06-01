@@ -16,18 +16,22 @@ compatibility_flags = ["nodejs_compat"]
 # latest version. Override per-task to use bigger / cheaper models without
 # changing code.
 #
-# Defaults are pinned to gpt-5-nano — the cheapest member of the GPT-5
-# family (released 2025-08, ~$0.05/1M input tokens). Use gpt-5-mini for
-# more headroom or gpt-5 for the flagship.
-DEFAULT_TEXT_MODEL = "gpt-5-nano"
-RECIPE_MODEL = "gpt-5-nano"
-RECIPE_HIGH_QUALITY_MODEL = "gpt-5-nano"
-LIGHTWEIGHT_MODEL = "gpt-5-nano"
-PRICING_MODEL = "gpt-5-nano"
-INGREDIENT_MODEL = "gpt-5-nano"
-WEB_RECIPE_MODEL = "gpt-5-nano"
+# Defaults pinned to gpt-4o-mini. Tried gpt-5-nano (cheapest GPT-5) but its
+# hidden reasoning tokens add ~25s per call and it doesn't reliably follow
+# the recipe JSON schema (returns "quantity":"2 cups" instead of separate
+# {quantity:<number>, unit, estimatedCost} fields), which crashes the UI.
+# gpt-4o-mini: ~5s, strict JSON, ~$0.15/1M in / $0.60/1M out — still cheap.
+DEFAULT_TEXT_MODEL = "gpt-4o-mini"
+RECIPE_MODEL = "gpt-4o-mini"
+RECIPE_HIGH_QUALITY_MODEL = "gpt-4o-mini"
+LIGHTWEIGHT_MODEL = "gpt-4o-mini"
+PRICING_MODEL = "gpt-4o-mini"
+INGREDIENT_MODEL = "gpt-4o-mini"
+WEB_RECIPE_MODEL = "gpt-4o-mini"
 
-# Image models. dall-e-3 is the safe default — works on every OpenAI org.
-# gpt-image-1 needs org verification but produces nicer images when available.
-DEFAULT_IMAGE_MODEL = "dall-e-3"
-IMAGE_MODEL_FALLBACK = "gpt-image-1"
+# Image models. dall-e-3 was deprecated by OpenAI ("model does not exist"
+# on this org as of 2026), so primary is gpt-image-1 (current model, ~$0.04
+# per 1024px image). Some orgs require phone-verification to enable it; on
+# those accounts dall-e-2 is the safe last-resort fallback.
+DEFAULT_IMAGE_MODEL = "gpt-image-1"
+IMAGE_MODEL_FALLBACK = "dall-e-2"

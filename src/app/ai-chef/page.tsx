@@ -49,6 +49,13 @@ import { resolvedToCustom, saveCustomIngredient, findExistingByName, getCustomIn
 import { AIChefPantrySelector } from "@/components/ai/AIChefPantrySelector";
 import { Refrigerator } from "lucide-react";
 
+// Safe money formatter — AI sometimes returns missing or non-numeric cost
+// fields, which would crash the page with "undefined.toFixed is not a function".
+function money(n: unknown): string {
+  const v = typeof n === "number" ? n : Number(n);
+  return Number.isFinite(v) ? v.toFixed(2) : "—";
+}
+
 const STARTER_PROMPTS = [
   "I have rice, eggs, and frozen peas — make a cheap dinner.",
   "Spicy, cheap, high-protein, air fryer friendly.",
@@ -1178,7 +1185,7 @@ function AIChefPage() {
           <header className="space-y-3">
             <div className="flex flex-wrap gap-2">
               <Badge tone="green" icon={<Coins size={12} />}>
-                ${selectedOption.recipe.estimatedCostPerServing.toFixed(2)}/serving
+                ${money(selectedOption.recipe.estimatedCostPerServing)}/serving
               </Badge>
               <Badge tone="amber" icon={<Clock size={12} />}>
                 {selectedOption.recipe.totalTimeMinutes} min
@@ -1261,7 +1268,7 @@ function AIChefPage() {
                       </p>
                     </div>
                     <p className="text-sm font-medium text-stone-900">
-                      ${ing.estimatedCost.toFixed(2)}
+                      ${money(ing.estimatedCost)}
                     </p>
                   </li>
                 ))}
@@ -1341,7 +1348,7 @@ function AIChefPage() {
           <header className="space-y-3">
             <div className="flex flex-wrap gap-2">
               <Badge tone="green" icon={<Coins size={12} />}>
-                ${recipe.estimatedCostPerServing.toFixed(2)}/serving
+                ${money(recipe.estimatedCostPerServing)}/serving
               </Badge>
               <Badge tone="amber" icon={<Clock size={12} />}>
                 {recipe.totalTimeMinutes} min
@@ -1423,7 +1430,7 @@ function AIChefPage() {
                       </p>
                     </div>
                     <p className="text-sm font-medium text-stone-900">
-                      ${ing.estimatedCost.toFixed(2)}
+                      ${money(ing.estimatedCost)}
                     </p>
                   </li>
                 ))}
@@ -1462,7 +1469,7 @@ function AIChefPage() {
                       </p>
                     </div>
                     <p className="font-medium text-stone-900">
-                      ${m.estimatedCost.toFixed(2)}
+                      ${money(m.estimatedCost)}
                     </p>
                   </li>
                 ))}
