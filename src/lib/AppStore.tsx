@@ -189,7 +189,21 @@ export function useAppStore(): AppStoreValue {
 
 // Convenience helpers for use in components
 export function ingredientName(id: string): string {
-  return INGREDIENT_MAP.get(id)?.name ?? id;
+  const builtin = INGREDIENT_MAP.get(id)?.name;
+  if (builtin) return builtin;
+  if (typeof window === "undefined") return id;
+  // Lazy-import to avoid SSR issues
+  try {
+    const raw = window.localStorage.getItem("srf:custom-ingredients");
+    if (raw) {
+      const list = JSON.parse(raw) as Array<{ id: string; displayName?: string; canonicalName?: string }>;
+      const found = list.find((c) => c.id === id);
+      if (found) return found.displayName ?? found.canonicalName ?? id;
+    }
+  } catch {
+    /* ignore */
+  }
+  return id;
 }
 
 export function recipeName(id: string): string {

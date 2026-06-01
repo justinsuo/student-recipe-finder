@@ -9,7 +9,6 @@ import {
   Clock,
   Coins,
   Flame,
-  Soup,
   ShoppingBasket,
   ChefHat,
   Sparkles,
@@ -24,6 +23,12 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { RecipeImage } from "@/components/recipe/RecipeImage";
+import { CookingMethodCard } from "@/components/recipe/CookingMethodCard";
+import { EquipmentBadges } from "@/components/recipe/EquipmentBadge";
+import { DetailedSteps } from "@/components/recipe/DetailedSteps";
+import { IngredientPriceRow } from "@/components/pricing/IngredientPriceRow";
+import { RecipeAIRepriceButton } from "@/components/pricing/RecipeAIRepriceButton";
+import { quoteRecipe } from "@/lib/pricing/pricingEngine";
 import { useAppStore } from "@/lib/AppStore";
 import {
   calculateCostPerServing,
@@ -34,21 +39,17 @@ import {
 } from "@/lib/recipeScoring";
 import type { Recipe } from "@/lib/types";
 
-const equipmentLabel: Record<string, string> = {
-  microwave: "Microwave",
-  stovetop: "Stovetop",
-  oven: "Oven",
-  "rice-cooker": "Rice cooker",
-  "air-fryer": "Air fryer",
-  "no-kitchen": "No kitchen",
-};
-
 export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
   const { isSaved, toggleSaved, pantry, addGroceryItems } = useAppStore();
   const saved = isSaved(recipe.id);
+  // bump when the user edits a price so the breakdown re-quotes
+  const [priceRev, setPriceRev] = useState(0);
   const totalCost = calculateRecipeCost(recipe);
   const cps = calculateCostPerServing(recipe);
   const breakdown = ingredientCostBreakdown(recipe);
+  const localQuote = quoteRecipe(recipe);
+  // silence "unused" warning when priceRev only triggers re-render
+  void priceRev;
 
   const pantrySet = pantrySetFromItems(pantry);
   const missing = calculateMissingIngredients(recipe, pantrySet);
@@ -60,7 +61,7 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <Link
         href="/cheap-recipes"
         className="inline-flex items-center gap-1.5 text-sm font-medium text-stone-600 hover:text-emerald-700"
@@ -68,6 +69,68 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
         <ArrowLeft size={14} /> Back to recipes
       </Link>
 
+      {/* Identity first: title, description, key facts, primary actions */}
+      <header className="space-y-4">
+        <h1 className="text-3xl font-bold leading-tight text-stone-900 sm:text-4xl">
+          {recipe.name}
+        </h1>
+        <p className="max-w-3xl text-stone-600">{recipe.description}</p>
+
+        <div className="flex flex-wrap gap-2">
+          <Badge tone="green" icon={<Coins size={12} />}>
+            ${cps.toFixed(2)}/serving
+          </Badge>
+          <Badge tone="amber" icon={<Clock size={12} />}>
+            {recipe.totalTimeMinutes} min
+          </Badge>
+          <Badge tone="stone" icon={<Flame size={12} />}>
+            {recipe.difficulty}
+          </Badge>
+          <Badge tone="stone">{recipe.servings} servings</Badge>
+          {recipe.dietTags.map((d) => (
+            <Badge key={d} tone="emerald">
+              {d}
+            </Badge>
+          ))}
+        </div>
+        <EquipmentBadges recipe={recipe} />
+
+        <div className="flex flex-wrap gap-2 pt-1">
+          <Button onClick={() => setCookingMode(true)} leftIcon={<Play size={16} />}>
+            Start cooking
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => toggleSaved(recipe.id)}
+            leftIcon={
+              saved ? (
+                <BookmarkCheck size={16} className="text-emerald-600" />
+              ) : (
+                <Bookmark size={16} />
+              )
+            }
+          >
+            {saved ? "Saved" : "Save recipe"}
+          </Button>
+          {missing.length > 0 && (
+            <Button
+              variant="secondary"
+              onClick={() =>
+                addGroceryItems(
+                  recipe,
+                  missing.map((m) => m.ingredientId),
+                )
+              }
+              leftIcon={<ShoppingBasket size={16} />}
+              title={`Missing: ${missing.map((m) => m.ingredientId).slice(0, 5).join(", ")}${missing.length > 5 ? "…" : ""}`}
+            >
+              Add {missing.length} missing {missing.length === 1 ? "item" : "items"} to grocery list
+            </Button>
+          )}
+        </div>
+      </header>
+
+      {/* Media second */}
       <RecipeImage recipe={recipe} variant="hero" showAttribution className="overflow-hidden" />
 
       {recipe.youtubeId && (
@@ -88,93 +151,43 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
         </div>
       )}
 
-      <header className="grid gap-6 md:items-center">
-        <div className="space-y-4">
-          <div className="flex flex-wrap gap-2">
-            <Badge tone="green" icon={<Coins size={12} />}>
-              ${cps.toFixed(2)}/serving
-            </Badge>
-            <Badge tone="amber" icon={<Clock size={12} />}>
-              {recipe.totalTimeMinutes} min
-            </Badge>
-            <Badge tone="stone" icon={<Flame size={12} />}>
-              {recipe.difficulty}
-            </Badge>
-            <Badge tone="violet" icon={<Soup size={12} />}>
-              {equipmentLabel[recipe.equipment[0]] ?? recipe.equipment[0]}
-            </Badge>
-            {recipe.dietTags.map((d) => (
-              <Badge key={d} tone="emerald">
-                {d}
-              </Badge>
-            ))}
-          </div>
-          <h1 className="text-3xl font-bold text-stone-900 sm:text-4xl">
-            {recipe.name}
-          </h1>
-          <p className="text-stone-600">{recipe.description}</p>
-
-          <div className="flex flex-wrap gap-3 pt-2">
-            <Button onClick={() => setCookingMode(true)} leftIcon={<Play size={16} />}>
-              Start cooking
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => toggleSaved(recipe.id)}
-              leftIcon={
-                saved ? (
-                  <BookmarkCheck size={16} className="text-emerald-600" />
-                ) : (
-                  <Bookmark size={16} />
-                )
-              }
-            >
-              {saved ? "Saved" : "Save recipe"}
-            </Button>
-            {missing.length > 0 && (
-              <Button
-                variant="secondary"
-                onClick={() =>
-                  addGroceryItems(
-                    recipe,
-                    missing.map((m) => m.ingredientId),
-                  )
-                }
-                leftIcon={<ShoppingBasket size={16} />}
-              >
-                Add {missing.length} to grocery list
-              </Button>
-            )}
-          </div>
-        </div>
-
-      </header>
-
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-stone-700">
             <Coins size={16} /> Cost breakdown
           </h2>
+          <p className="mt-1 text-xs text-stone-500">
+            Prices applied at <span className="font-semibold text-stone-700">{localQuote.regionLabel}</span> (×{localQuote.multiplier.toFixed(2)}). Tap ✨ to estimate any single price with AI, or ✎ to set your own.
+          </p>
+          <div className="mt-3">
+            <RecipeAIRepriceButton
+              recipe={recipe}
+              onComplete={() => setPriceRev((n) => n + 1)}
+            />
+          </div>
           <ul className="mt-3 divide-y divide-stone-100">
-            {breakdown.map((b, idx) => (
-              <li
-                key={`${b.ingredient?.id ?? "x"}-${idx}`}
-                className="flex items-center justify-between py-2 text-sm"
-              >
-                <div>
-                  <p className="font-medium text-stone-800">
-                    {b.ingredient?.name}{" "}
-                    {b.optional && (
-                      <span className="text-xs text-stone-500">(optional)</span>
-                    )}
-                  </p>
-                  <p className="text-xs text-stone-500">
-                    {b.quantity} {b.ingredient?.unit}
-                  </p>
-                </div>
-                <p className="font-medium text-stone-900">${b.cost.toFixed(2)}</p>
-              </li>
-            ))}
+            {breakdown.map((b, idx) => {
+              if (!b.ingredient) {
+                return (
+                  <li
+                    key={`x-${idx}`}
+                    className="flex items-center justify-between py-2 text-sm"
+                  >
+                    <span className="text-stone-500">Unknown ingredient</span>
+                    <span className="font-medium text-stone-900">${b.cost.toFixed(2)}</span>
+                  </li>
+                );
+              }
+              return (
+                <IngredientPriceRow
+                  key={`${b.ingredient.id}-${idx}`}
+                  ingredient={b.ingredient}
+                  quantity={b.quantity}
+                  optional={b.optional}
+                  onChange={() => setPriceRev((n) => n + 1)}
+                />
+              );
+            })}
           </ul>
           <div className="mt-3 flex items-center justify-between rounded-2xl bg-emerald-50 px-4 py-3">
             <div>
@@ -210,6 +223,47 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
           </ol>
         </Card>
       </div>
+
+      {recipe.detailedSteps && recipe.detailedSteps.length > 0 && (
+        <DetailedSteps steps={recipe.detailedSteps} />
+      )}
+
+      {recipe.flavorExplanation && (
+        <Card>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-stone-700">
+            Why this tastes good
+          </h2>
+          <p className="mt-2 text-sm text-stone-700">{recipe.flavorExplanation}</p>
+        </Card>
+      )}
+
+      {(recipe.seasoningUpgrades?.length ?? 0) > 0 && (
+        <Card>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-amber-700">
+            Seasoning upgrades
+          </h2>
+          <ul className="mt-2 space-y-1 text-sm text-stone-700">
+            {recipe.seasoningUpgrades!.map((s, i) => (
+              <li key={i}>• {s}</li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
+      {(recipe.tasteTroubleshooting?.length ?? 0) > 0 && (
+        <Card>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-stone-700">
+            If it tastes flat
+          </h2>
+          <ul className="mt-2 space-y-1 text-sm text-stone-700">
+            {recipe.tasteTroubleshooting!.map((s, i) => (
+              <li key={i}>• {s}</li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
+      <CookingMethodCard recipe={recipe} />
 
       <div className="grid gap-6 md:grid-cols-2">
         {recipe.cheapTips.length > 0 && (

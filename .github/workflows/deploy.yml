@@ -34,6 +34,7 @@ jobs:
         env:
           GH_PAGES: "true"
           NEXT_PUBLIC_ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          NEXT_PUBLIC_WORKER_URL: ${{ secrets.WORKER_URL }}
 
       - name: Disable Jekyll
         run: touch out/.nojekyll

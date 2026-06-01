@@ -1,27 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { Bookmark, BookmarkCheck, Clock, Coins, Flame, ListChecks, Soup } from "lucide-react";
+import { Bookmark, BookmarkCheck, Clock, Coins, ListChecks } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { useAppStore } from "@/lib/AppStore";
 import type { Recipe, RecipeScoreResult } from "@/lib/types";
 import { calculateCostPerServing } from "@/lib/recipeScoring";
 import { RecipeImage } from "./RecipeImage";
+import { EquipmentBadges } from "./EquipmentBadge";
+import { TagChip } from "@/components/ui/TagChip";
 
 interface Props {
   result?: RecipeScoreResult;
   recipe?: Recipe;
   highlight?: string;
 }
-
-const equipmentLabel: Record<string, string> = {
-  microwave: "Microwave",
-  stovetop: "Stovetop",
-  oven: "Oven",
-  "rice-cooker": "Rice cooker",
-  "air-fryer": "Air fryer",
-  "no-kitchen": "No kitchen",
-};
 
 export function RecipeCard({ result, recipe, highlight }: Props) {
   const { isSaved, toggleSaved } = useAppStore();
@@ -78,24 +71,12 @@ export function RecipeCard({ result, recipe, highlight }: Props) {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1.5">
-          <Badge tone="stone" icon={<Flame size={12} />}>
-            {r.difficulty}
-          </Badge>
-          <Badge tone="violet" icon={<Soup size={12} />}>
-            {equipmentLabel[r.equipment[0]] ?? r.equipment[0]}
-          </Badge>
-        </div>
+        <EquipmentBadges recipe={r} />
 
         {(r.tags?.length ?? 0) > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {r.tags!.slice(0, 3).map((t) => (
-              <span
-                key={t}
-                className="rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-medium text-stone-600"
-              >
-                #{t}
-              </span>
+              <TagChip key={t}>{t}</TagChip>
             ))}
           </div>
         )}

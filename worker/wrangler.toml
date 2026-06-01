@@ -1,0 +1,37 @@
+name = "student-recipe-finder-api"
+main = "src/index.ts"
+compatibility_date = "2025-05-01"
+compatibility_flags = ["nodejs_compat"]
+
+# OPENAI_API_KEY and ALLOWED_ORIGIN are stored as worker secrets:
+#   wrangler secret put OPENAI_API_KEY
+#   wrangler secret put ALLOWED_ORIGIN  (e.g. https://justinsuo.github.io)
+
+# Model overrides are plain [vars] — change in code or via:
+#   wrangler secret put RECIPE_MODEL
+# All overrides are optional. Defaults pick real, available OpenAI models.
+
+[vars]
+# Text models. Aliases (no dated snapshots) so OpenAI auto-resolves to the
+# latest version. Override per-task to use bigger / cheaper models without
+# changing code.
+#
+# Defaults pinned to gpt-4o-mini. Tried gpt-5-nano (cheapest GPT-5) but its
+# hidden reasoning tokens add ~25s per call and it doesn't reliably follow
+# the recipe JSON schema (returns "quantity":"2 cups" instead of separate
+# {quantity:<number>, unit, estimatedCost} fields), which crashes the UI.
+# gpt-4o-mini: ~5s, strict JSON, ~$0.15/1M in / $0.60/1M out — still cheap.
+DEFAULT_TEXT_MODEL = "gpt-4o-mini"
+RECIPE_MODEL = "gpt-4o-mini"
+RECIPE_HIGH_QUALITY_MODEL = "gpt-4o-mini"
+LIGHTWEIGHT_MODEL = "gpt-4o-mini"
+PRICING_MODEL = "gpt-4o-mini"
+INGREDIENT_MODEL = "gpt-4o-mini"
+WEB_RECIPE_MODEL = "gpt-4o-mini"
+
+# Image models. dall-e-3 was deprecated by OpenAI ("model does not exist"
+# on this org as of 2026), so primary is gpt-image-1 (current model, ~$0.04
+# per 1024px image). Some orgs require phone-verification to enable it; on
+# those accounts dall-e-2 is the safe last-resort fallback.
+DEFAULT_IMAGE_MODEL = "gpt-image-1"
+IMAGE_MODEL_FALLBACK = "dall-e-2"

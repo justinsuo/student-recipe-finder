@@ -1,5 +1,9 @@
 import { INGREDIENT_MAP } from "@/data/ingredients";
 import { RECIPES } from "@/data/recipes";
+import {
+  quoteIngredient,
+  quoteRecipe,
+} from "@/lib/pricing/pricingEngine";
 import type {
   CheapFilters,
   PantryItem,
@@ -30,27 +34,28 @@ const SPICE_IDS = new Set(
 );
 
 export function calculateRecipeCost(recipe: Recipe): number {
-  return recipe.ingredients.reduce((sum, ri) => {
-    if (ri.optional) return sum;
-    const ing = INGREDIENT_MAP.get(ri.ingredientId);
-    if (!ing) return sum;
-    return sum + ing.estimatedUnitCost * ri.quantity;
-  }, 0);
+  return quoteRecipe(recipe).totalCost;
 }
 
 export function calculateCostPerServing(recipe: Recipe): number {
-  return calculateRecipeCost(recipe) / Math.max(recipe.servings, 1);
+  return quoteRecipe(recipe).costPerServing;
 }
 
 export function ingredientCostBreakdown(recipe: Recipe) {
   return recipe.ingredients.map((ri) => {
     const ing = INGREDIENT_MAP.get(ri.ingredientId);
+    const q = quoteIngredient(ri.ingredientId, ri.quantity);
     return {
       ingredient: ing,
       quantity: ri.quantity,
       optional: ri.optional ?? false,
       note: ri.note,
-      cost: ing ? ing.estimatedUnitCost * ri.quantity : 0,
+      cost: q?.totalCost ?? 0,
+      source: q?.source ?? "fallback",
+      confidence: q?.confidence ?? "low",
+      appliedUnitCost: q?.appliedUnitCost ?? 0,
+      multiplier: q?.multiplier ?? 1,
+      regionLabel: q?.regionLabel ?? "US avg",
     };
   });
 }
@@ -83,9 +88,8 @@ export function calculateMissingCost(
   pantrySet: Set<string>,
 ): number {
   return calculateMissingIngredients(recipe, pantrySet).reduce((sum, ri) => {
-    const ing = INGREDIENT_MAP.get(ri.ingredientId);
-    if (!ing) return sum;
-    return sum + ing.estimatedUnitCost * ri.quantity;
+    const q = quoteIngredient(ri.ingredientId, ri.quantity);
+    return sum + (q?.totalCost ?? 0);
   }, 0);
 }
 

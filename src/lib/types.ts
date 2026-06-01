@@ -69,6 +69,35 @@ export interface GuidedCookingStep {
   timerMinutes?: number;
 }
 
+export type HeatLevel =
+  | "low"
+  | "medium-low"
+  | "medium"
+  | "medium-high"
+  | "high"
+  | "none";
+
+export interface RecipeInstructionStep {
+  shortStep: string;
+  detailedExplanation: string;
+  timerMinutes?: number | null;
+  heatLevel?: HeatLevel;
+  textureCue?: string | null;
+  tasteCue?: string | null;
+  beginnerTip?: string | null;
+  safetyNote?: string | null;
+}
+
+export type FlavorBadge =
+  | "spicy"
+  | "tangy"
+  | "umami"
+  | "garlicky"
+  | "smoky"
+  | "savory"
+  | "creamy"
+  | "crispy";
+
 export interface RecipeImage {
   src: string;
   alt: string;
@@ -115,6 +144,29 @@ export interface Recipe {
   guidedCookingSteps?: GuidedCookingStep[];
   optionalAddIns?: string[];
   youtubeId?: string;
+
+  // Air-fryer + microwave method fields
+  primaryCookingMethod?:
+    | "stovetop"
+    | "oven"
+    | "rice-cooker"
+    | "air-fryer"
+    | "microwave"
+    | "air-fryer-and-microwave"
+    | "no-cook";
+  noStovetopRequired?: boolean;
+  crispinessLevel?: "soft" | "lightly crispy" | "crispy" | "extra crispy";
+  microwaveTimeMinutes?: number;
+  airFryerTimeMinutes?: number;
+  airFryerTemperatureF?: number;
+
+  // Beginner-friendly extended instructions + flavor metadata
+  // (optional; populated by AI Chef + opt-in for seed recipes)
+  detailedSteps?: RecipeInstructionStep[];
+  flavorExplanation?: string;
+  seasoningUpgrades?: string[];
+  tasteTroubleshooting?: string[];
+  flavorBadges?: FlavorBadge[];
 }
 
 export interface CheapFilters {

@@ -9,6 +9,7 @@ import {
 } from "@/data/ingredients";
 import { useAppStore } from "@/lib/AppStore";
 import { recommendSmartBuys } from "@/lib/recipeScoring";
+import { quoteIngredient } from "@/lib/pricing/pricingEngine";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { IngredientCategory } from "@/lib/types";
@@ -34,7 +35,8 @@ export default function GroceryListPage() {
     for (const item of grocery) {
       const ing = INGREDIENT_MAP.get(item.ingredientId);
       if (!ing) continue;
-      const cost = ing.estimatedUnitCost * item.quantity;
+      const quote = quoteIngredient(item.ingredientId, item.quantity);
+      const cost = quote?.totalCost ?? 0;
       total += cost;
       if (!item.checked) unchecked += cost;
       const list = map.get(ing.category) ?? [];

@@ -13,14 +13,20 @@ import {
 import { Button } from "@/components/ui/Button";
 import { useAppStore } from "@/lib/AppStore";
 import {
-  isAiEnabled,
-  recognizeIngredientsFromText,
-  type VisionResult,
-} from "@/lib/anthropic";
-import { INGREDIENT_MAP } from "@/data/ingredients";
+  isWorkerConfigured,
+  resolveIngredients,
+  type ResolvedIngredient,
+} from "@/lib/workerClient";
+import {
+  findExistingByName,
+  getCachedResolution,
+  resolvedToCustom,
+  saveCustomIngredient,
+  setCachedResolution,
+} from "@/lib/customIngredientStorage";
+import { INGREDIENTS } from "@/data/ingredients";
 
-// --- Web Speech API types (minimal, since lib.dom doesn't include these) ---
-
+// --- Web Speech API types ---
 interface SpeechRecognitionAlternative {
   transcript: string;
   confidence: number;
@@ -42,7 +48,6 @@ interface SpeechRecognitionEvent extends Event {
 }
 interface SpeechRecognitionErrorEvent extends Event {
   readonly error: string;
-  readonly message?: string;
 }
 interface SpeechRecognition extends EventTarget {
   lang: string;
@@ -74,7 +79,8 @@ export function PantryVoiceInput() {
   const [transcript, setTranscript] = useState("");
   const [interim, setInterim] = useState("");
   const [processing, setProcessing] = useState(false);
-  const [result, setResult] = useState<VisionResult | null>(null);
+  const [resolved, setResolved] = useState<ResolvedIngredient[] | null>(null);
+  const [ignoredText, setIgnoredText] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
 
@@ -84,11 +90,12 @@ export function PantryVoiceInput() {
     setSupported(!!Ctor);
   }, []);
 
-  if (!isAiEnabled() || !supported) return null;
+  if (!isWorkerConfigured() || !supported) return null;
 
   function start() {
     setError(null);
-    setResult(null);
+    setResolved(null);
+    setIgnoredText([]);
     setAddedIds(new Set());
     setTranscript("");
     setInterim("");
@@ -104,9 +111,9 @@ export function PantryVoiceInput() {
     rec.interimResults = true;
     rec.maxAlternatives = 1;
 
-    let finalText = "";
     rec.onresult = (event) => {
       let interimText = "";
+      let finalText = "";
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const r = event.results[i];
         const t = r[0].transcript;
@@ -114,7 +121,6 @@ export function PantryVoiceInput() {
         else interimText += t;
       }
       if (finalText) setTranscript((prev) => (prev + " " + finalText).trim());
-      finalText = "";
       setInterim(interimText);
     };
     rec.onerror = (e) => {
@@ -132,27 +138,23 @@ export function PantryVoiceInput() {
     recognitionRef.current?.stop();
     setListening(false);
     setInterim("");
-    // Use the accumulated transcript to extract ingredients
     const finalTranscript = (transcript + " " + interim).trim();
-    if (finalTranscript) extractIngredients(finalTranscript);
+    if (finalTranscript) resolve(finalTranscript);
   }
 
-  async function extractIngredients(text: string) {
+  async function resolve(text: string) {
     setProcessing(true);
     setError(null);
     try {
-      const res = await recognizeIngredientsFromText(text);
-      const valid = res.recognized.filter((r) => INGREDIENT_MAP.has(r.id));
-      setResult({
-        ...res,
-        recognized: valid,
-        unrecognized: [
-          ...res.unrecognized,
-          ...res.recognized
-            .filter((r) => !INGREDIENT_MAP.has(r.id))
-            .map((r) => r.name),
-        ],
-      });
+      // Cache lookup so the same phrase doesn't ping the worker twice
+      let items = getCachedResolution(text);
+      if (!items) {
+        const result = await resolveIngredients(text, "voice");
+        items = result.ingredients;
+        setIgnoredText(result.ignoredText || []);
+        setCachedResolution(text, items);
+      }
+      setResolved(items);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn't process voice input");
     } finally {
@@ -160,22 +162,36 @@ export function PantryVoiceInput() {
     }
   }
 
-  function addAll() {
-    if (!result) return;
-    const next = new Set(addedIds);
-    for (const r of result.recognized) {
-      if (!pantry.some((p) => p.ingredientId === r.id)) {
-        addPantryItem({ ingredientId: r.id });
-      }
-      next.add(r.id);
+  function addOne(r: ResolvedIngredient) {
+    // Either reuse an existing built-in/custom id, or create a new custom one
+    const existing = findExistingByName(
+      r.canonicalName,
+      INGREDIENTS.map((i) => ({ name: i.name, id: i.id })),
+    );
+    let ingredientId: string;
+    if (existing) {
+      ingredientId = existing.id;
+    } else {
+      const custom = resolvedToCustom(r);
+      saveCustomIngredient(custom);
+      ingredientId = custom.id;
     }
-    setAddedIds(next);
+    if (!pantry.some((p) => p.ingredientId === ingredientId)) {
+      addPantryItem({ ingredientId, useSoon: r.useSoon });
+    }
+    setAddedIds((prev) => new Set([...prev, r.canonicalName.toLowerCase()]));
+  }
+
+  function addAll() {
+    if (!resolved) return;
+    for (const r of resolved) addOne(r);
   }
 
   function reset() {
     setTranscript("");
     setInterim("");
-    setResult(null);
+    setResolved(null);
+    setIgnoredText([]);
     setError(null);
     setAddedIds(new Set());
   }
@@ -187,8 +203,9 @@ export function PantryVoiceInput() {
           <Sparkles size={16} /> Speak your pantry
         </h2>
         <p className="mt-1 text-sm text-sky-900">
-          Hit the mic, say what you have — &ldquo;rice, eggs, some peanut
-          butter, frozen veg, two tortillas&rdquo; — and we&apos;ll add them.
+          Hit the mic, say what you have — &ldquo;apple cider vinegar, eggs, frozen
+          broccoli, some old tortillas&rdquo; — and we&apos;ll keep multi-word
+          ingredients together.
         </p>
       </div>
 
@@ -211,7 +228,7 @@ export function PantryVoiceInput() {
             Stop & add
           </Button>
         )}
-        {(transcript || result || error) && (
+        {(transcript || resolved || error) && (
           <Button onClick={reset} variant="ghost" size="sm">
             Clear
           </Button>
@@ -238,7 +255,7 @@ export function PantryVoiceInput() {
 
       {processing && (
         <div className="mt-3 flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm text-sky-800">
-          <Loader2 size={16} className="animate-spin" /> Picking out
+          <Loader2 size={16} className="animate-spin" /> Understanding
           ingredients…
         </div>
       )}
@@ -249,14 +266,14 @@ export function PantryVoiceInput() {
         </div>
       )}
 
-      {result && (
+      {resolved && (
         <div className="mt-4 space-y-3">
           <div className="rounded-2xl bg-white p-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold text-stone-900">
-                Recognized ({result.recognized.length})
+                Recognized ({resolved.length})
               </h3>
-              {result.recognized.length > 0 && (
+              {resolved.length > 0 && (
                 <Button
                   size="sm"
                   onClick={addAll}
@@ -266,38 +283,39 @@ export function PantryVoiceInput() {
                 </Button>
               )}
             </div>
-            {result.recognized.length === 0 ? (
+            {resolved.length === 0 ? (
               <p className="mt-2 text-sm text-stone-600">
-                Didn&apos;t catch any catalog ingredients. Try again or add
-                items manually.
+                Didn&apos;t pick out any ingredients. Try again or add items
+                manually.
               </p>
             ) : (
               <div className="mt-3 flex flex-wrap gap-2">
-                {result.recognized.map((r) => {
-                  const ing = INGREDIENT_MAP.get(r.id);
-                  const already =
-                    addedIds.has(r.id) ||
-                    pantry.some((p) => p.ingredientId === r.id);
+                {resolved.map((r, idx) => {
+                  const key = r.canonicalName.toLowerCase();
+                  const already = addedIds.has(key);
                   return (
                     <button
-                      key={r.id}
+                      key={`${key}-${idx}`}
                       disabled={already}
-                      onClick={() => {
-                        addPantryItem({ ingredientId: r.id });
-                        setAddedIds(new Set([...addedIds, r.id]));
-                      }}
+                      onClick={() => addOne(r)}
                       className={
                         already
-                          ? "inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-medium text-emerald-700"
-                          : "inline-flex items-center gap-1 rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5 text-xs font-medium text-stone-800 hover:border-emerald-300 hover:bg-emerald-50"
+                          ? "inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-medium text-emerald-700"
+                          : "inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5 text-xs font-medium text-stone-800 hover:border-emerald-300 hover:bg-emerald-50"
                       }
+                      title={`${r.category} · ${r.ingredientRole}`}
                     >
                       {already ? (
                         <CheckCircle2 size={12} />
                       ) : (
                         <Plus size={12} />
                       )}
-                      {ing?.name ?? r.name}
+                      {r.displayName || r.canonicalName}
+                      {r.useSoon && (
+                        <span className="ml-0.5 rounded-full bg-amber-200 px-1.5 text-[10px] font-semibold text-amber-900">
+                          use soon
+                        </span>
+                      )}
                     </button>
                   );
                 })}
@@ -305,21 +323,9 @@ export function PantryVoiceInput() {
             )}
           </div>
 
-          {result.unrecognized.length > 0 && (
-            <div className="rounded-2xl bg-amber-50 p-4">
-              <h3 className="text-sm font-semibold text-amber-900">
-                Not in our catalog ({result.unrecognized.length})
-              </h3>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {result.unrecognized.map((u, i) => (
-                  <span
-                    key={`${u}-${i}`}
-                    className="rounded-full bg-white px-3 py-1.5 text-xs text-amber-900"
-                  >
-                    {u}
-                  </span>
-                ))}
-              </div>
+          {ignoredText.length > 0 && (
+            <div className="rounded-2xl bg-amber-50 p-3 text-xs text-amber-900">
+              Ignored as non-food: {ignoredText.join(", ")}
             </div>
           )}
         </div>

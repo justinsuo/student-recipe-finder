@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import {
   Refrigerator,
   Plus,
@@ -28,7 +29,10 @@ import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PantryPhotoUpload } from "@/components/pantry/PantryPhotoUpload";
 import { PantryVoiceInput } from "@/components/pantry/PantryVoiceInput";
+import { PantrySmartAdd } from "@/components/pantry/PantrySmartAdd";
 import { PantryAIChat } from "@/components/pantry/PantryAIChat";
+import { LocationSetup } from "@/components/pricing/LocationSetup";
+import { getCustomIngredients } from "@/lib/customIngredientStorage";
 import type { Ingredient, IngredientCategory } from "@/lib/types";
 
 export default function PantryPage() {
@@ -62,13 +66,32 @@ export default function PantryPage() {
   }, [search, pantry]);
 
   const grouped = useMemo(() => {
-    const map = new Map<IngredientCategory, Ingredient[]>();
+    const map = new Map<IngredientCategory | "custom", Ingredient[]>();
+    const customMap = new Map(
+      getCustomIngredients().map((c) => [c.id, c]),
+    );
     for (const item of pantry) {
       const ing = INGREDIENT_MAP.get(item.ingredientId);
-      if (!ing) continue;
-      const list = map.get(ing.category) ?? [];
-      list.push(ing);
-      map.set(ing.category, list);
+      if (ing) {
+        const list = map.get(ing.category) ?? [];
+        list.push(ing);
+        map.set(ing.category, list);
+        continue;
+      }
+      // Custom ingredient — represent as a built-in shape so display logic
+      // doesn't need to change.
+      const c = customMap.get(item.ingredientId);
+      if (!c) continue;
+      const proxy: Ingredient = {
+        id: c.id,
+        name: c.displayName || c.canonicalName,
+        category: "snack" as IngredientCategory,
+        estimatedUnitCost: c.estimatedUnitCost ?? 0,
+        unit: c.unit ?? "each",
+      };
+      const list = map.get("custom") ?? [];
+      list.push(proxy);
+      map.set("custom", list);
     }
     return map;
   }, [pantry]);
@@ -87,11 +110,21 @@ export default function PantryPage() {
           </h1>
           <p className="mt-2 max-w-xl text-sm text-stone-600">
             Add what&apos;s in your kitchen. We&apos;ll surface recipes you can
-            make, ones you can make with 1–2 cheap items, and meals to use up
-            anything expiring.
+            make, and AI Chef can generate brand-new recipes from these same
+            ingredients without making you retype them.
           </p>
         </div>
+        {pantry.length > 0 && (
+          <Link
+            href="/ai-chef?usePantry=true"
+            className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-emerald-700"
+          >
+            ✨ Use these in AI Chef
+          </Link>
+        )}
       </header>
+
+      <LocationSetup />
 
       <section className="rounded-3xl border border-stone-200 bg-white p-5 sm:p-6">
         <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-stone-700">
@@ -122,6 +155,8 @@ export default function PantryPage() {
           ))}
         </div>
       </section>
+
+      <PantrySmartAdd />
 
       <PantryVoiceInput />
 
@@ -210,7 +245,9 @@ export default function PantryPage() {
             {Array.from(grouped.entries()).map(([category, items]) => (
               <div key={category}>
                 <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-stone-500">
-                  {CATEGORY_LABEL[category]}
+                  {category === "custom"
+                    ? "Custom / AI-recognized"
+                    : CATEGORY_LABEL[category]}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {items.map((ing) => {
