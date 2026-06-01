@@ -15,10 +15,12 @@ import {
   getStoredRecipeImage,
   imageDataUrl,
 } from "@/lib/customRecipeStorage";
+import { useToast } from "@/components/ui/Toast";
 import type { CustomRecipe } from "@/lib/customRecipeTypes";
 
 export default function RecipeStudioPage() {
   const [recipes, setRecipes] = useState<CustomRecipe[]>([]);
+  const toast = useToast();
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -31,6 +33,7 @@ export default function RecipeStudioPage() {
     if (!window.confirm(`Delete "${name}"? This can't be undone.`)) return;
     deleteCustomRecipe(id);
     setRecipes(getCustomRecipes());
+    toast.info(`Deleted "${name}"`);
   }
 
   const aiOnes = recipes.filter((r) => r.isAIGenerated);

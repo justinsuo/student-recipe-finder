@@ -343,6 +343,35 @@ export default function CheapRecipesPage() {
                 <span>$0.50</span>
                 <span>$30.00</span>
               </div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {[
+                  { label: "Under $2", value: 2 },
+                  { label: "Under $3", value: 3 },
+                  { label: "Under $5", value: 5 },
+                  { label: "Under $8", value: 8 },
+                  { label: "Any budget", value: 30 },
+                ].map((p) => {
+                  const active =
+                    filters.budgetPerServing === p.value;
+                  return (
+                    <button
+                      key={p.label}
+                      type="button"
+                      onClick={() =>
+                        setFilters((f) => ({ ...f, budgetPerServing: p.value }))
+                      }
+                      aria-pressed={active}
+                      className={
+                        active
+                          ? "rounded-full bg-emerald-600 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm"
+                          : "rounded-full border border-stone-200 bg-white px-2.5 py-1 text-[11px] font-medium text-stone-700 hover:border-emerald-300 hover:bg-emerald-50"
+                      }
+                    >
+                      {p.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div>

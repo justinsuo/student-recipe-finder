@@ -49,6 +49,7 @@ import { AIChefPantrySelector } from "@/components/ai/AIChefPantrySelector";
 import { Refrigerator } from "lucide-react";
 import { calculateNutritionForFreeForm } from "@/lib/nutritionEngine";
 import { generateRecipeQuick, generateRecipeQuickOptions, isAiEnabled } from "@/lib/anthropic";
+import { useToast } from "@/components/ui/Toast";
 
 // If the AI's ingredient list maps cleanly to our catalog, replace its
 // guessed macros with the deterministic engine result. Falls back to the
@@ -103,6 +104,7 @@ export default function AIChefPageWrapper() {
 
 function AIChefPage() {
   const { addGroceryItems, toggleSaved, isSaved, pantry } = useAppStore();
+  const toast = useToast();
 
   const [mode, setMode] = useState<"pantry" | "have" | "imagine" | "web" | "url" | "paste">("pantry");
   const [selectedPantryIds, setSelectedPantryIds] = useState<Set<string>>(
@@ -324,6 +326,7 @@ function AIChefPage() {
       };
       saveCustomRecipe(ai);
       setSavedId(id);
+      toast.reward(`Created "${r.name}" — saved to Recipe Studio`);
 
       if (autoImage) {
         setImageLoading(true);
@@ -556,8 +559,16 @@ function AIChefPage() {
       if (mainOpt && !append) {
         void generateImageForOption(mainOpt);
       }
+      const count = res.options.length;
+      toast.reward(
+        append
+          ? `Added ${count} more recipe idea${count === 1 ? "" : "s"}`
+          : `Created ${count} recipe idea${count === 1 ? "" : "s"} 🎉`,
+      );
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Generation failed");
+      const msg = e instanceof Error ? e.message : "Generation failed";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
       setAppending(false);
@@ -621,6 +632,10 @@ function AIChefPage() {
         } as never,
         [ingredientId],
       );
+    }
+    const n = recipe.missingIngredients?.length ?? 0;
+    if (n > 0) {
+      toast.success(`Added ${n} missing item${n === 1 ? "" : "s"} to Grocery`);
     }
     void items;
   }

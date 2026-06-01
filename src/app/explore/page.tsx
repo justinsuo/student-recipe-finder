@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import type { ExploreFilters, ExternalRecipe } from "@/lib/externalTypes";
 import { searchExternalRecipes } from "@/lib/services/exploreService";
+import { SkeletonRecipeGrid } from "@/components/ui/SkeletonRecipeCard";
 
 // ─── Filter option lists ──────────────────────────────────────────────────────
 
@@ -635,20 +636,7 @@ export default function ExplorePage() {
 
       {/* Grid + states */}
       {loading ? (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div
-              key={i}
-              className="animate-pulse overflow-hidden rounded-2xl border border-stone-200 bg-white"
-            >
-              <div className="aspect-[4/3] bg-stone-200" />
-              <div className="space-y-2 p-3">
-                <div className="h-4 w-3/4 rounded-lg bg-stone-200" />
-                <div className="h-3 w-1/2 rounded-lg bg-stone-200" />
-              </div>
-            </div>
-          ))}
-        </div>
+        <SkeletonRecipeGrid count={8} />
       ) : recipes.length === 0 ? (
         <div className="flex flex-col items-center rounded-3xl border-2 border-dashed border-stone-200 bg-white px-6 py-14 text-center">
           <span className="mb-4 text-5xl">🍽️</span>

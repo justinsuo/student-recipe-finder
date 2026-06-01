@@ -12,6 +12,7 @@ import {
   imageDataUrl,
 } from "@/lib/customRecipeStorage";
 import type { CustomRecipe } from "@/lib/customRecipeTypes";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function SavedPage() {
   const { saved, hydrated } = useAppStore();
@@ -54,32 +55,27 @@ export default function SavedPage() {
       </header>
 
       {hydrated && totalCount === 0 ? (
-        <div className="rounded-2xl border-2 border-dashed border-stone-200 bg-white px-6 py-16 text-center">
-          <div className="mb-3 text-5xl" aria-hidden>
-            🔖
-          </div>
-          <h3 className="text-lg font-semibold text-stone-900">
-            No saved recipes yet
-          </h3>
-          <p className="mt-1 text-sm text-stone-600">
-            Browse recipes and tap the bookmark icon, or build one with AI
-            Chef.
-          </p>
-          <div className="mt-5 flex flex-wrap justify-center gap-2">
-            <Link
-              href="/cheap-recipes"
-              className="rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
-            >
-              Find recipes
-            </Link>
-            <Link
-              href="/ai-chef"
-              className="rounded-full border border-stone-300 bg-white px-5 py-2.5 text-sm font-semibold text-stone-800 hover:bg-stone-50"
-            >
-              Try AI Chef
-            </Link>
-          </div>
-        </div>
+        <EmptyState
+          emoji="🔖"
+          title="Your recipe box is empty"
+          description="Save recipes you want to cook later, or have AI Chef invent one from what you have."
+          action={
+            <div className="flex flex-wrap justify-center gap-2">
+              <Link
+                href="/cheap-recipes"
+                className="rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
+              >
+                Find cheap recipes
+              </Link>
+              <Link
+                href="/ai-chef"
+                className="rounded-full border border-stone-300 bg-white px-5 py-2.5 text-sm font-semibold text-stone-800 hover:bg-stone-50"
+              >
+                Ask AI Chef
+              </Link>
+            </div>
+          }
+        />
       ) : (
         <>
           <div className="flex flex-wrap gap-2">

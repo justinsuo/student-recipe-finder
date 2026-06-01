@@ -53,16 +53,18 @@ export function SelectablePill({
       disabled={disabled}
       {...ariaProps}
       className={clsx(
-        "inline-flex items-center gap-1.5 rounded-full font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1",
+        "inline-flex items-center gap-1.5 rounded-full font-medium transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1 motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100",
         SIZES[size],
         disabled
           ? "cursor-not-allowed border border-stone-200 bg-stone-100 text-stone-400"
           : active
-            ? "border border-emerald-600 bg-emerald-600 text-white shadow-sm hover:bg-emerald-700"
-            : "border border-stone-200 bg-white text-stone-700 hover:border-emerald-300 hover:bg-emerald-50",
+            ? "scale-[1.02] border border-emerald-600 bg-emerald-600 text-white shadow-sm shadow-emerald-200 hover:bg-emerald-700"
+            : "border border-stone-200 bg-white text-stone-700 hover:-translate-y-px hover:border-emerald-300 hover:bg-emerald-50 active:translate-y-0",
       )}
     >
-      {showCheck && active && <Check size={11} className="-ml-0.5" />}
+      {showCheck && active && (
+        <Check size={11} className="-ml-0.5 motion-safe:animate-[fadeIn_150ms_ease-out]" />
+      )}
       {icon}
       {children}
     </button>

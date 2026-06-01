@@ -4,6 +4,7 @@ import "./globals.css";
 import { AppStoreProvider } from "@/lib/AppStore";
 import { Navbar } from "@/components/layout/Navbar";
 import { Chatbot } from "@/components/layout/Chatbot";
+import { ToastProvider } from "@/components/ui/Toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,11 +31,13 @@ export default function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="min-h-screen bg-stone-50 text-stone-900 antialiased">
         <AppStoreProvider>
-          <Navbar />
-          <main className="app-main mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
-            {children}
-          </main>
-          <Chatbot />
+          <ToastProvider>
+            <Navbar />
+            <main className="app-main mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
+              {children}
+            </main>
+            <Chatbot />
+          </ToastProvider>
         </AppStoreProvider>
       </body>
     </html>
