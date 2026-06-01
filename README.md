@@ -23,32 +23,41 @@ Includes an in-app AI assistant (**Pesto**) that answers questions about budget,
 - **100 recipes** spanning rice bowls, pasta, breakfast, dorm/microwave meals, soups, potato meals, and meal prep — all with realistic per-serving cost estimates.
 - **166 ingredients** across grains, proteins, produce, dairy, condiments, spices, frozen, and snacks.
 - **8 pantry starter presets** (Dorm Starter, Broke College, Vegan Basics, High-Protein Gym, Asian Pantry, Mexican Pantry, Breakfast Hero, Fully Stocked Fridge) — populate your pantry in one click.
-- **AI photo upload** — snap or upload a fridge/pantry photo and Claude Haiku identifies ingredients and adds them.
-- **Dedicated pantry AI chat** — a Haiku assistant primed with your exact pantry contents to suggest meals, swaps, and cheap upgrades.
+- **AI photo upload** — snap or upload a fridge/pantry photo and the app spots the ingredients and adds them.
+- **Dedicated pantry AI chat** — Pesto, primed with your exact pantry contents, suggests meals, swaps, and cheap upgrades.
 - **Real food photography** — Creative Commons photos from Wikimedia Commons for the most popular recipes, with attribution shown on detail pages. Recipes without a curated photo get a polished emoji-on-gradient hero (the documented fallback).
 
 ---
 
-## AI features (Anthropic Haiku)
+## AI features
 
-The Pantry page has two AI features powered by Claude Haiku, called directly from the browser:
+Three seamless AI helpers on the Pantry page — no setup, no key prompts:
 
-1. **Fridge/pantry photo upload** — Haiku 4.5 vision identifies ingredients in your photo, maps them to the app's ingredient catalog, and adds them with a single click.
-2. **Primed pantry chat** — a separate chat panel where Haiku is system-prompted with your current pantry contents and acts as a cheap-eats cooking assistant.
+1. **Voice input** — tap the mic, say what you have ("rice, eggs, peanut butter, frozen veg"), and the app extracts the items and adds them.
+2. **Photo upload** — snap or upload a fridge/pantry shot; the app spots the items and one-click-adds them.
+3. **Pesto chat** — a chat panel primed with your exact pantry contents that suggests meals, swaps, and what to grab next.
 
-**Setup:** click the API-key icon on the Pantry page once and paste your Anthropic key. It's stored only in `localStorage` on your device and sent directly to `api.anthropic.com` — never to any other server. Get a key at [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys).
+The AI key is injected at build time from a GitHub Actions secret (`ANTHROPIC_API_KEY`) into `NEXT_PUBLIC_ANTHROPIC_API_KEY`. To run a fork:
 
-The general-purpose **Pesto** chatbot (floating green bubble on every page) is rules-based and works without any API key.
+```bash
+gh secret set ANTHROPIC_API_KEY --body "your-key"
+# or locally for `npm run dev`:
+echo 'NEXT_PUBLIC_ANTHROPIC_API_KEY=your-key' > .env.local
+```
+
+⚠️ Because this is a static site, the key is visible to anyone who inspects the deployed JS bundle. Set a monthly spend cap on the key in the Anthropic console as a guardrail.
+
+The general-purpose **Pesto** chatbot (floating green bubble on every page) is rules-based and works without any AI calls.
 
 ---
 
 ## Image / photo strategy
 
 - **Source:** Wikimedia Commons (CC BY / CC BY-SA / public domain).
-- **Coverage:** ~56 of the 100 recipes have curated, manually-keyword-filtered real food photos.
-- **Fallback:** Recipes without a curated photo render a polished emoji + accent-gradient hero — never a broken image.
-- **Attribution:** Photographer + license + source link appear under the hero image on every recipe detail page that uses a CC photo.
-- **How to add more:** drop a new entry into [src/data/recipeImages.ts](src/data/recipeImages.ts) — the type and component pick it up automatically.
+- **Coverage:** All 100 recipes have curated real food photos.
+- **Attribution:** Photographer + license + source link appear under the hero image on every recipe detail page.
+- **Fallback:** If a Wikimedia URL fails to load at runtime, the component falls back to an emoji-on-gradient hero — defensive only.
+- **How to swap photos:** edit the entry in [src/data/recipeImages.ts](src/data/recipeImages.ts) — the type and component pick it up automatically.
 
 ---
 

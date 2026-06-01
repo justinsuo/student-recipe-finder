@@ -33,6 +33,7 @@ jobs:
         run: npm run build
         env:
           GH_PAGES: "true"
+          NEXT_PUBLIC_ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
       - name: Disable Jekyll
         run: touch out/.nojekyll
