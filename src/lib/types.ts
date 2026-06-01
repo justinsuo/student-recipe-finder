@@ -114,6 +114,7 @@ export interface Recipe {
   reheatingInstructions?: string;
   guidedCookingSteps?: GuidedCookingStep[];
   optionalAddIns?: string[];
+  youtubeId?: string;
 }
 
 export interface CheapFilters {

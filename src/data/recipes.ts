@@ -45,6 +45,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Built around pantry staples (rice, eggs, soy sauce) you probably already own.",
     storageInstructions: "Fridge in airtight container up to 3 days.",
     reheatingInstructions: "Microwave 60-90s with a splash of water, stir halfway.",
+    youtubeId: "qH__o17xHls",
   },
   {
     id: "tuna-mayo-rice-bowl",
@@ -89,6 +90,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "One tuna can plus leftover rice equals a complete meal under $2.50.",
     storageInstructions: "Best eaten fresh; tuna mix keeps in fridge 1 day.",
     reheatingInstructions: "Eat cold or microwave rice separately for 60s.",
+    youtubeId: "5uOjMJUBgCQ",
   },
   {
     id: "black-bean-burrito-bowl",
@@ -134,6 +136,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Beans plus rice is the cheapest complete-protein combo there is.",
     storageInstructions: "Fridge 4 days in separate containers.",
     reheatingInstructions: "Microwave rice and beans 90s, add fresh toppings.",
+    youtubeId: "9DskJTdWI9M",
   },
   {
     id: "chickpea-curry-rice-bowl",
@@ -181,6 +184,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Canned chickpeas and pantry spices feed three for under $6.",
     storageInstructions: "Fridge 5 days or freeze 2 months.",
     reheatingInstructions: "Microwave 2 min with a splash of water; stir halfway.",
+    youtubeId: "FVo7Sre0xQU",
   },
   {
     id: "lentil-dal-rice-bowl",
@@ -227,6 +231,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "1 cup of dry lentils makes 4 hearty servings for around $1 total.",
     storageInstructions: "Fridge 5 days or freeze 2 months.",
     reheatingInstructions: "Microwave 2 min with extra water since dal thickens in fridge.",
+    youtubeId: "X8XAZLZJLWc",
   },
   {
     id: "tofu-vegetable-rice-bowl",
@@ -272,6 +277,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "One $2.50 block of tofu feeds two with leftovers for dinner.",
     storageInstructions: "Fridge 4 days.",
     reheatingInstructions: "Microwave 90s, stir; tofu crisps less but tastes fine.",
+    youtubeId: "XORa7QtjRi8",
   },
   {
     id: "teriyaki-chicken-rice-bowl",
@@ -317,6 +323,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Chicken thighs run about $2.50/lb on sale.",
     storageInstructions: "Fridge 4 days.",
     reheatingInstructions: "Microwave 90s; add splash of water to rice.",
+    youtubeId: "uyEgp3clk6s",
   },
   {
     id: "kimchi-egg-rice-bowl",
@@ -362,6 +369,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Kimchi, eggs, and rice come in under $2.50 with big flavor.",
     storageInstructions: "Best fresh; rice base keeps 2 days.",
     reheatingInstructions: "Reheat rice 90s; cook a fresh egg.",
+    youtubeId: "k9pBENgJl0I",
   },
   {
     id: "soy-garlic-cabbage-rice-bowl",
@@ -407,6 +415,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Cabbage is one of the cheapest vegetables in the store — pennies per cup.",
     storageInstructions: "Fridge 4 days.",
     reheatingInstructions: "Microwave 90s; cabbage stays great.",
+    youtubeId: "qoLzgcujGpo",
   },
   {
     id: "rice-cooker-congee",
@@ -451,6 +460,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "A single cup of rice plus water yields breakfast for the week.",
     storageInstructions: "Fridge 5 days; will thicken — add water when reheating.",
     reheatingInstructions: "Microwave 2 min with a splash of water; stir well.",
+    youtubeId: "SrnBalc6m5w",
   },
   {
     id: "chili-rice-bowl",
@@ -497,6 +507,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Two cans of beans plus a can of tomatoes feeds three.",
     storageInstructions: "Fridge 5 days or freeze 2 months.",
     reheatingInstructions: "Microwave 2 min; stir halfway.",
+    youtubeId: "v1D6jn6LKpQ",
   },
   {
     id: "sweet-potato-black-bean-bowl",
@@ -541,6 +552,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Two sweet potatoes and a can of beans feed two for under $4.50.",
     storageInstructions: "Fridge 4 days, components separate.",
     reheatingInstructions: "Microwave 90s.",
+    youtubeId: "VWaSVPiZqD4",
   },
   {
     id: "peanut-tofu-rice-bowl",
@@ -587,6 +599,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Peanut butter is the most underrated cheap pantry protein.",
     storageInstructions: "Fridge 4 days.",
     reheatingInstructions: "Microwave 90s; loosen sauce with a splash of water.",
+    youtubeId: "y0o83kiOR1M",
   },
   {
     id: "lemon-chickpea-rice-bowl",
@@ -632,6 +645,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Chickpeas plus rice plus a lemon equals a complete meal for under $5 total.",
     storageInstructions: "Fridge 4 days.",
     reheatingInstructions: "Microwave 90s or eat cold as a salad.",
+    youtubeId: "Lkn99CpPJg8",
   },
   {
     id: "canned-salmon-rice-bowl",
@@ -677,6 +691,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Canned salmon is rich in omega-3s and far cheaper than fresh fish.",
     storageInstructions: "Eat fresh.",
     reheatingInstructions: "Eat cold or microwave rice 60s separately.",
+    youtubeId: "kZIUFcLsX3M",
   },
   {
     id: "garlic-butter-noodles",
@@ -721,6 +736,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Five-ingredient pantry dinner under $3 total.",
     storageInstructions: "Best fresh; fridge 2 days.",
     reheatingInstructions: "Microwave 90s with a splash of water.",
+    youtubeId: "ILXKYNpPZ2w",
   },
   {
     id: "tomato-pasta",
@@ -766,6 +782,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Pantry sauce ingredients cost about $3 for three servings.",
     storageInstructions: "Fridge 4 days.",
     reheatingInstructions: "Microwave 90s with a splash of water.",
+    youtubeId: "q22HcpoJpd8",
   },
   {
     id: "tuna-pasta",
@@ -811,6 +828,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Canned tuna is the cheapest seafood per gram of protein.",
     storageInstructions: "Fridge 3 days.",
     reheatingInstructions: "Microwave 90s with a splash of water.",
+    youtubeId: "oeUsxBE2gKA",
   },
   {
     id: "lentil-bolognese",
@@ -857,6 +875,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Lentils make a meatless ragu for a fraction of beef-based versions.",
     storageInstructions: "Fridge 5 days or freeze 2 months.",
     reheatingInstructions: "Microwave 2 min, stir, add splash of water.",
+    youtubeId: "gFIg2JO9rqA",
   },
   {
     id: "peanut-noodles",
@@ -903,6 +922,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Pantry-only sauce — no fancy ingredients required.",
     storageInstructions: "Fridge 3 days.",
     reheatingInstructions: "Microwave 60s with a splash of water and toss.",
+    youtubeId: "hu1MdSVsMAw",
   },
   {
     id: "chili-oil-egg-noodles",
@@ -948,6 +968,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Five pantry items make a satisfying solo dinner.",
     storageInstructions: "Best fresh.",
     reheatingInstructions: "Eat right away.",
+    youtubeId: "gCrBxuS-kQo",
   },
   {
     id: "ramen-egg-bowl",
@@ -992,6 +1013,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Ramen + an egg is the iconic dorm meal under $1.50.",
     storageInstructions: "Best fresh.",
     reheatingInstructions: "Eat right away.",
+    youtubeId: "5DyiC1HTw-c",
   },
   {
     id: "ramen-stir-fry",
@@ -1037,6 +1059,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Ramen is the cheapest noodle on earth — upgrade it with what you have.",
     storageInstructions: "Fridge 2 days.",
     reheatingInstructions: "Microwave 90s with a splash of water.",
+    youtubeId: "KIGOowU0fFk",
   },
   {
     id: "pesto-pasta-with-peas",
@@ -1081,6 +1104,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "A small jar of pesto stretches across multiple meals.",
     storageInstructions: "Fridge 3 days.",
     reheatingInstructions: "Microwave 90s with a splash of water.",
+    youtubeId: "J-z9ysGBAMM",
   },
   {
     id: "one-pot-mac-and-cheese",
@@ -1126,6 +1150,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Pasta + milk + cheese is the cheapest comfort food trifecta.",
     storageInstructions: "Fridge 3 days.",
     reheatingInstructions: "Microwave 90s with a splash of milk; stir.",
+    youtubeId: "TCGZPOFtlTQ",
   },
   {
     id: "sardine-lemon-pasta",
@@ -1171,6 +1196,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Sardines are nutrient-dense and dirt cheap.",
     storageInstructions: "Fridge 2 days.",
     reheatingInstructions: "Eat fresh; microwave 60s if you must.",
+    youtubeId: "EXkAJStiLxE",
   },
   {
     id: "udon-egg-drop-soup",
@@ -1217,6 +1243,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Udon and broth make restaurant-style soup at home for $5.",
     storageInstructions: "Best fresh; fridge 1 day.",
     reheatingInstructions: "Reheat broth + add noodles fresh if possible.",
+    youtubeId: "XUgU5wb9Zj0",
   },
   {
     id: "sesame-cold-noodles",
@@ -1262,6 +1289,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Pantry-only sauce with cheap cucumber and noodles.",
     storageInstructions: "Fridge 3 days.",
     reheatingInstructions: "Eat cold straight from the fridge.",
+    youtubeId: "qb6qqJd8Hlg",
   },
   {
     id: "tomato-chickpea-pasta",
@@ -1308,6 +1336,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "A can of chickpeas adds protein to pasta for $1.10 total.",
     storageInstructions: "Fridge 4 days.",
     reheatingInstructions: "Microwave 90s with a splash of water.",
+    youtubeId: "Eaf0QUqbFAQ",
   },
   {
     id: "cabbage-garlic-noodles",
@@ -1353,6 +1382,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Cabbage is the cheapest vegetable in the produce aisle.",
     storageInstructions: "Fridge 3 days.",
     reheatingInstructions: "Microwave 90s.",
+    youtubeId: "RlAXfrgYqXQ",
   },
   {
     id: "pb-banana-oats",
@@ -1395,6 +1425,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Oats + milk + a banana = under $1.25 every morning.",
     storageInstructions: "Best fresh.",
     reheatingInstructions: "Eat immediately.",
+    youtubeId: "Hb31xBWhbb8",
   },
   {
     id: "apple-cinnamon-oats",
@@ -1438,6 +1469,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Apples and oats are cheap, filling, and full of fiber.",
     storageInstructions: "Best fresh.",
     reheatingInstructions: "Eat immediately.",
+    youtubeId: "y5IvPbsjhCw",
   },
   {
     id: "overnight-oats-jar",
@@ -1481,6 +1513,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Half a cup of oats and yogurt is breakfast under $2.",
     storageInstructions: "Fridge up to 4 days.",
     reheatingInstructions: "Eat cold.",
+    youtubeId: "Lkl9_3-jX6c",
   },
   {
     id: "savory-egg-oats",
@@ -1523,6 +1556,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Oats meet savory in the most underrated breakfast move.",
     storageInstructions: "Eat fresh.",
     reheatingInstructions: "Eat right away.",
+    youtubeId: "n0v-lPwIXQU",
   },
   {
     id: "greek-yogurt-granola-bowl",
@@ -1564,6 +1598,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Yogurt and granola are pantry basics; fruit comes in season.",
     storageInstructions: "Eat fresh.",
     reheatingInstructions: "Eat immediately.",
+    youtubeId: "9GHpWm3vHKE",
   },
   {
     id: "egg-toast",
@@ -1607,6 +1642,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Eggs and toast under $1.50 per plate.",
     storageInstructions: "Eat fresh.",
     reheatingInstructions: "Eat right away.",
+    youtubeId: "Mjoqk61yOsU",
   },
   {
     id: "cottage-cheese-toast",
@@ -1649,6 +1685,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Cottage cheese tubs are way cheaper than protein bars per gram.",
     storageInstructions: "Eat fresh.",
     reheatingInstructions: "Eat cold.",
+    youtubeId: "idjVK34Ut6A",
   },
   {
     id: "breakfast-burrito",
@@ -1692,6 +1729,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Eggs + tortilla + beans = budget breakfast that travels well.",
     storageInstructions: "Wrap in foil; fridge 3 days or freeze 1 month.",
     reheatingInstructions: "Microwave 90s; or unwrap and toast.",
+    youtubeId: "8rWIIQfCG1k",
   },
   {
     id: "potato-egg-hash",
@@ -1736,6 +1774,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Potatoes are pennies per pound and crisp up beautifully.",
     storageInstructions: "Fridge 3 days.",
     reheatingInstructions: "Reheat in a pan for crisp; microwave is fine but soggier.",
+    youtubeId: "OXoSjpCg2eg",
   },
   {
     id: "microwave-mug-omelet",
@@ -1778,6 +1817,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Eggs + microwave = breakfast for under $1.50.",
     storageInstructions: "Eat fresh.",
     reheatingInstructions: "Eat immediately.",
+    youtubeId: "wg3jHKA4YUc",
   },
   {
     id: "tofu-scramble-toast",
@@ -1823,6 +1863,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Tofu is the cheapest plant protein per gram.",
     storageInstructions: "Fridge 3 days.",
     reheatingInstructions: "Microwave 60s.",
+    youtubeId: "_Um4APOb1WU",
   },
   {
     id: "banana-peanut-butter-quesadilla",
@@ -1865,6 +1906,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Three pantry staples, full snack under $1.50.",
     storageInstructions: "Eat fresh.",
     reheatingInstructions: "Eat right away.",
+    youtubeId: "zx4gzricTdI",
   },
   {
     id: "bean-cheese-quesadilla",
@@ -1907,6 +1949,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Two tortillas, beans, and cheese — total under $1.75.",
     storageInstructions: "Best fresh.",
     reheatingInstructions: "Reheat in dry pan to crisp; microwave works but loses crunch.",
+    youtubeId: "G2ibFQX5KqU",
   },
   {
     id: "black-bean-tacos",
@@ -1952,6 +1995,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "One $1 can of beans makes 4 tacos.",
     storageInstructions: "Components fridge 3 days.",
     reheatingInstructions: "Warm beans and tortillas separately.",
+    youtubeId: "eQyAuO0GjGw",
   },
   {
     id: "potato-tacos",
@@ -1996,6 +2040,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Potatoes are pennies per pound.",
     storageInstructions: "Fridge 3 days.",
     reheatingInstructions: "Reheat potatoes in a pan to re-crisp.",
+    youtubeId: "-bgQvNer-4I",
   },
   {
     id: "tuna-melt-tortilla",
@@ -2039,6 +2084,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Tuna and tortillas are pantry staples.",
     storageInstructions: "Best fresh.",
     reheatingInstructions: "Eat right away.",
+    youtubeId: "CVemh0pixgA",
   },
   {
     id: "egg-salad-sandwich",
@@ -2081,6 +2127,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Eggs and bread are the cheapest sandwich filling around.",
     storageInstructions: "Egg salad fridge 3 days.",
     reheatingInstructions: "Eat cold.",
+    youtubeId: "qsHGG-zJM-4",
   },
   {
     id: "chickpea-salad-sandwich",
@@ -2124,6 +2171,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Chickpea salad costs about $2 to make and lasts days.",
     storageInstructions: "Fridge 3 days.",
     reheatingInstructions: "Eat cold.",
+    youtubeId: "Xhk9OxCs8lM",
   },
   {
     id: "hummus-veggie-wrap",
@@ -2167,6 +2215,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "One tub of hummus = a week of lunches.",
     storageInstructions: "Eat fresh; veggies wilt.",
     reheatingInstructions: "Eat cold.",
+    youtubeId: "xsOivPX8di8",
   },
   {
     id: "chicken-salad-wrap",
@@ -2211,6 +2260,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Canned chicken stretches further than fresh.",
     storageInstructions: "Fridge 3 days.",
     reheatingInstructions: "Eat cold.",
+    youtubeId: "m8HYd9lrk2s",
   },
   {
     id: "pizza-tortilla",
@@ -2254,6 +2304,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Tortilla + sauce + cheese under $2.25.",
     storageInstructions: "Eat fresh.",
     reheatingInstructions: "Reheat in toaster oven for crisp.",
+    youtubeId: "5BWcsJnibzc",
   },
   {
     id: "breakfast-quesadilla",
@@ -2297,6 +2348,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Eggs and tortillas are an unbeatable pairing.",
     storageInstructions: "Eat fresh.",
     reheatingInstructions: "Eat right away.",
+    youtubeId: "j2z1ABDaaxg",
   },
   {
     id: "grilled-cheese-tomato-soup",
@@ -2340,6 +2392,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Tomato soup is around $1, grilled cheese is pantry.",
     storageInstructions: "Eat fresh.",
     reheatingInstructions: "Eat right away.",
+    youtubeId: "LVdbf8qqY3w",
   },
   {
     id: "peanut-butter-apple-sandwich",
@@ -2381,6 +2434,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "PB and an apple cost under $1 total.",
     storageInstructions: "Eat fresh.",
     reheatingInstructions: "Eat cold.",
+    youtubeId: "5YbMR68coDo",
   },
   {
     id: "basic-lentil-soup",
@@ -2426,6 +2480,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Lentils are the cheapest filling protein.",
     storageInstructions: "Fridge 5 days or freeze 2 months.",
     reheatingInstructions: "Microwave 2 min, add water if thickened.",
+    youtubeId: "lOYeUASTBPo",
   },
   {
     id: "black-bean-soup",
@@ -2472,6 +2527,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Two cans of beans, broth, and pantry spices feed three.",
     storageInstructions: "Fridge 5 days or freeze.",
     reheatingInstructions: "Microwave 2 min.",
+    youtubeId: "iKqSZcCl3g0",
   },
   {
     id: "white-bean-tomato-soup",
@@ -2517,6 +2573,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Pantry beans + tomato + onion + herbs.",
     storageInstructions: "Fridge 5 days.",
     reheatingInstructions: "Microwave 2 min.",
+    youtubeId: "V8vYSulsl1M",
   },
   {
     id: "chickpea-tomato-stew",
@@ -2562,6 +2619,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Canned chickpeas + canned tomato + pantry spices.",
     storageInstructions: "Fridge 5 days.",
     reheatingInstructions: "Microwave 2 min.",
+    youtubeId: "qhCPjItfyk4",
   },
   {
     id: "potato-corn-chowder",
@@ -2608,6 +2666,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Potatoes and frozen corn make a filling pot for under $6.",
     storageInstructions: "Fridge 4 days.",
     reheatingInstructions: "Microwave 2 min, add splash of milk.",
+    youtubeId: "QnAVLVo0CUw",
   },
   {
     id: "vegetable-curry",
@@ -2653,6 +2712,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Pantry curry — feeds three for around $7.",
     storageInstructions: "Fridge 4 days.",
     reheatingInstructions: "Microwave 2 min.",
+    youtubeId: "-7MrKfR1E8w",
   },
   {
     id: "cabbage-bean-stew",
@@ -2699,6 +2759,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Cabbage and beans are the cheapest stew duo.",
     storageInstructions: "Fridge 5 days.",
     reheatingInstructions: "Microwave 2 min.",
+    youtubeId: "tu6otkP4aS8",
   },
   {
     id: "split-pea-soup",
@@ -2744,6 +2805,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Dry split peas feed 4 for under $4 total.",
     storageInstructions: "Fridge 5 days or freeze.",
     reheatingInstructions: "Microwave 2 min with splash of water.",
+    youtubeId: "LUcWb8eemzs",
   },
   {
     id: "budget-chicken-noodle-soup",
@@ -2789,6 +2851,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Canned chicken replaces fresh and saves $3.",
     storageInstructions: "Fridge 4 days; pasta absorbs broth.",
     reheatingInstructions: "Add water when reheating.",
+    youtubeId: "rUpfo__42x4",
   },
   {
     id: "miso-tofu-soup",
@@ -2834,6 +2897,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Miso paste is a flavor multiplier — one tablespoon does a lot.",
     storageInstructions: "Best fresh; fridge 2 days.",
     reheatingInstructions: "Reheat gently — don't boil miso.",
+    youtubeId: "qqa5axX-5aM",
   },
   {
     id: "shakshuka-style-eggs",
@@ -2880,6 +2944,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Eggs and canned tomato carry the whole dish.",
     storageInstructions: "Best fresh.",
     reheatingInstructions: "Reheat in pan covered.",
+    youtubeId: "urMyZ1WosYE",
   },
   {
     id: "japanese-curry-rice",
@@ -2927,6 +2992,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Stretches 2 chicken thighs into 3 servings with veg and rice.",
     storageInstructions: "Fridge 4 days.",
     reheatingInstructions: "Microwave 2 min, add water.",
+    youtubeId: "UuOI5uT00T4",
   },
   {
     id: "loaded-baked-potato",
@@ -2971,6 +3037,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "A 40-cent potato is a whole dinner.",
     storageInstructions: "Eat fresh.",
     reheatingInstructions: "Microwave 90s.",
+    youtubeId: "lflWSqIYxtM",
   },
   {
     id: "tuna-jacket-potato",
@@ -3014,6 +3081,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "One potato + one tuna can stays under $2.75.",
     storageInstructions: "Eat fresh.",
     reheatingInstructions: "Eat right away.",
+    youtubeId: "BtD0AqfnLwA",
   },
   {
     id: "broccoli-cheese-potato",
@@ -3058,6 +3126,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Frozen broccoli and a potato come in under $2.25.",
     storageInstructions: "Eat fresh.",
     reheatingInstructions: "Microwave 90s.",
+    youtubeId: "jaRNJ7wvU3s",
   },
   {
     id: "potato-lentil-curry",
@@ -3104,6 +3173,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Potato + lentils = cheapest filling dinner around.",
     storageInstructions: "Fridge 5 days or freeze.",
     reheatingInstructions: "Microwave 2 min with water.",
+    youtubeId: "hbcvdrfFRrA",
   },
   {
     id: "air-fryer-potato-wedges-beans",
@@ -3148,6 +3218,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Three potatoes and a can of beans for under $4.",
     storageInstructions: "Fridge 3 days.",
     reheatingInstructions: "Re-air fry wedges 4 min for crisp.",
+    youtubeId: "nXf63vN73BE",
   },
   {
     id: "mashed-potato-bowl",
@@ -3192,6 +3263,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Pantry potatoes and a gravy packet make a stacked bowl.",
     storageInstructions: "Fridge 3 days.",
     reheatingInstructions: "Microwave 2 min with splash of milk.",
+    youtubeId: "jhTGpBG5IIs",
   },
   {
     id: "sweet-potato-chickpea-curry",
@@ -3238,6 +3310,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Two sweet potatoes + a can of chickpeas feed three.",
     storageInstructions: "Fridge 5 days.",
     reheatingInstructions: "Microwave 2 min with water.",
+    youtubeId: "jjKaS0iOI60",
   },
   {
     id: "breakfast-potato-skillet",
@@ -3283,6 +3356,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Potatoes + eggs = the most affordable hearty breakfast.",
     storageInstructions: "Fridge 3 days.",
     reheatingInstructions: "Re-crisp in pan.",
+    youtubeId: "A_JQooplG6s",
   },
   {
     id: "potato-cabbage-skillet",
@@ -3328,6 +3402,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Cabbage and potatoes are the cheapest two vegetables in the store.",
     storageInstructions: "Fridge 3 days.",
     reheatingInstructions: "Re-crisp in pan or microwave 90s.",
+    youtubeId: "V12Aqzgk2mA",
   },
   {
     id: "microwave-nachos",
@@ -3371,6 +3446,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Half a can of beans + chips + cheese = $2.25 snack-meal.",
     storageInstructions: "Eat fresh.",
     reheatingInstructions: "Microwave 30s if needed.",
+    youtubeId: "utxLo9ufMhE",
   },
   {
     id: "microwave-bean-burrito",
@@ -3414,6 +3490,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Two pantry items + cheese = full meal under $1.75.",
     storageInstructions: "Fridge 2 days wrapped.",
     reheatingInstructions: "Microwave 90s.",
+    youtubeId: "haqwI-zSW1s",
   },
   {
     id: "instant-couscous-chickpea-salad",
@@ -3457,6 +3534,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Couscous and chickpeas are budget pantry champs.",
     storageInstructions: "Fridge 3 days.",
     reheatingInstructions: "Eat cold or microwave 60s.",
+    youtubeId: "5GjTO4U9OfU",
   },
   {
     id: "no-cook-tuna-white-bean-salad",
@@ -3500,6 +3578,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Two cans and a lemon stretch into two lunches.",
     storageInstructions: "Fridge 3 days.",
     reheatingInstructions: "Eat cold.",
+    youtubeId: "ZYQ142DtrUI",
   },
   {
     id: "hummus-snack-plate",
@@ -3542,6 +3621,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Hummus tub stretches across many snacks.",
     storageInstructions: "Eat fresh; hummus keeps a week.",
     reheatingInstructions: "Eat cold.",
+    youtubeId: "2SMFq3zBetI",
   },
   {
     id: "rice-cake-pb-banana-stack",
@@ -3583,6 +3663,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Three cheap pantry items under $1.50.",
     storageInstructions: "Eat fresh.",
     reheatingInstructions: "Eat right away.",
+    youtubeId: "OphgvBuNizo",
   },
   {
     id: "microwave-egg-fried-rice",
@@ -3626,6 +3707,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Repurposes leftover rice into a 5-minute lunch.",
     storageInstructions: "Eat fresh.",
     reheatingInstructions: "Eat right away.",
+    youtubeId: "ZT9Db5N2WgA",
   },
   {
     id: "microwave-mac-and-peas",
@@ -3669,6 +3751,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Pasta and cheese cooked entirely in a microwave bowl.",
     storageInstructions: "Eat fresh.",
     reheatingInstructions: "Microwave 60s with splash of milk.",
+    youtubeId: "YluZnnMyWzo",
   },
   {
     id: "yogurt-oat-bowl",
@@ -3710,6 +3793,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Cheap pantry breakfast under $2.",
     storageInstructions: "Best fresh.",
     reheatingInstructions: "Eat cold.",
+    youtubeId: "ysP3BFZKPhw",
   },
   {
     id: "tortilla-tuna-crunch-wrap",
@@ -3753,6 +3837,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Tuna can + tortilla + chips you already have = $2.75.",
     storageInstructions: "Eat fresh.",
     reheatingInstructions: "Eat cold.",
+    youtubeId: "CWDJ5QlBPbY",
   },
   {
     id: "dorm-ramen-upgrade",
@@ -3796,6 +3881,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "A pack of ramen + an egg + odds and ends = under $1.75.",
     storageInstructions: "Best fresh.",
     reheatingInstructions: "Eat right away.",
+    youtubeId: "dL229NiqO3g",
   },
   {
     id: "canned-chili-baked-potato",
@@ -3838,6 +3924,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Two potatoes and a can of chili stretch under $3 per serving.",
     storageInstructions: "Components fridge 4 days.",
     reheatingInstructions: "Microwave 90s.",
+    youtubeId: "5hg145qHLv0",
   },
   {
     id: "chicken-rice-veggie-meal-prep",
@@ -3885,6 +3972,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Sheet-pan chicken stretches cheaper than restaurant servings.",
     storageInstructions: "Fridge 4 days.",
     reheatingInstructions: "Microwave 2 min with splash of water on rice.",
+    youtubeId: "HLbbIqE4pDU",
   },
   {
     id: "turkey-or-lentil-chili-meal-prep",
@@ -3932,6 +4020,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Beans stretch the meat; one pot lasts the week.",
     storageInstructions: "Fridge 5 days or freeze 2 months.",
     reheatingInstructions: "Microwave 2 min, stir.",
+    youtubeId: "ZGBJTMJ1NoU",
   },
   {
     id: "lentil-taco-filling",
@@ -3977,6 +4066,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Dry lentils + pantry seasoning = bulk taco filling under $4.",
     storageInstructions: "Fridge 5 days or freeze 2 months.",
     reheatingInstructions: "Microwave 90s with splash of water.",
+    youtubeId: "diNwZyKIS6M",
   },
   {
     id: "chickpea-curry-meal-prep",
@@ -4024,6 +4114,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Pantry curry that improves with age.",
     storageInstructions: "Fridge 5 days or freeze 2 months.",
     reheatingInstructions: "Microwave 2 min with splash of water.",
+    youtubeId: "ZmwXYDROIPU",
   },
   {
     id: "tofu-peanut-meal-prep-bowls",
@@ -4071,6 +4162,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Tofu plus pantry sauce stretches 4 lunches.",
     storageInstructions: "Fridge 4 days.",
     reheatingInstructions: "Microwave 90s, then drizzle sauce.",
+    youtubeId: "cqAFexFXYfw",
   },
   {
     id: "pasta-bake",
@@ -4118,6 +4210,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Three pantry cans feed four for under $10.",
     storageInstructions: "Fridge 4 days or freeze.",
     reheatingInstructions: "Microwave 2 min or oven 10 min at 350F.",
+    youtubeId: "BXMog5E0qTs",
   },
   {
     id: "freezer-burritos",
@@ -4163,6 +4256,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Six pantry burritos under $12 total.",
     storageInstructions: "Freeze 3 months wrapped.",
     reheatingInstructions: "Microwave from frozen 2.5 min, flip halfway.",
+    youtubeId: "jG6fcdYugjY",
   },
   {
     id: "overnight-oats-four-ways",
@@ -4211,6 +4305,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Oats + milk + yogurt under $7 for 4 jars.",
     storageInstructions: "Fridge up to 4 days.",
     reheatingInstructions: "Eat cold.",
+    youtubeId: "uhBMJRFqGaU",
   },
   {
     id: "egg-muffin-cups",
@@ -4257,6 +4352,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "8 eggs make 8 muffins for the week.",
     storageInstructions: "Fridge 5 days or freeze.",
     reheatingInstructions: "Microwave 45s.",
+    youtubeId: "Ev9QcU-EmGc",
   },
   {
     id: "tuna-pasta-salad",
@@ -4303,6 +4399,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Pasta + tuna = the cheapest packed lunch.",
     storageInstructions: "Fridge 4 days.",
     reheatingInstructions: "Eat cold.",
+    youtubeId: "lmNS7I4i4w8",
   },
   {
     id: "bean-enchilada-bake",
@@ -4349,6 +4446,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Tortillas + canned beans + salsa = casserole magic.",
     storageInstructions: "Fridge 4 days or freeze.",
     reheatingInstructions: "Microwave 2 min or oven 10 min.",
+    youtubeId: "B4vfLfI4X0E",
   },
   {
     id: "rice-cooker-chicken-congee",
@@ -4395,6 +4493,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "One cup of rice + two chicken thighs feeds 4.",
     storageInstructions: "Fridge 5 days.",
     reheatingInstructions: "Microwave 2 min with water; stir well.",
+    youtubeId: "j5FnReh6guw",
   },
   {
     id: "cabbage-tofu-stir-fry-meal-prep",
@@ -4442,6 +4541,7 @@ export const RECIPES: Recipe[] = [
     whyCheap: "Cabbage + tofu + rice = 4 lunches under $8 total.",
     storageInstructions: "Fridge 4 days.",
     reheatingInstructions: "Microwave 90s.",
+    youtubeId: "u8Tk-h34hOg",
   },
 ];
 

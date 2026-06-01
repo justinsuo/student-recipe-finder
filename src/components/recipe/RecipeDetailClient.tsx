@@ -70,6 +70,24 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
 
       <RecipeImage recipe={recipe} variant="hero" showAttribution className="overflow-hidden" />
 
+      {recipe.youtubeId && (
+        <div className="overflow-hidden rounded-3xl shadow-sm">
+          <div className="flex items-center gap-2 bg-stone-100 px-4 py-2.5">
+            <Play size={14} className="text-red-500 fill-red-500" />
+            <span className="text-sm font-medium text-stone-700">Watch how to make it</span>
+          </div>
+          <div className="relative aspect-video w-full">
+            <iframe
+              src={`https://www.youtube.com/embed/${recipe.youtubeId}`}
+              title={`How to make ${recipe.name}`}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="absolute inset-0 h-full w-full"
+            />
+          </div>
+        </div>
+      )}
+
       <header className="grid gap-6 md:items-center">
         <div className="space-y-4">
           <div className="flex flex-wrap gap-2">
