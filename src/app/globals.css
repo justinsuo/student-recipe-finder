@@ -25,10 +25,16 @@ body {
 }
 
 .app-main {
-  padding-bottom: 5rem;
+  padding-bottom: 6rem; /* room for the floating chat button */
 }
 @media (min-width: 768px) {
   .app-main {
-    padding-bottom: 2rem;
+    padding-bottom: 3rem;
   }
+}
+
+/* Tooltip helper used by the floating Pesto button */
+.tooltip-anchor:hover .tooltip-bubble,
+.tooltip-anchor:focus-within .tooltip-bubble {
+  opacity: 1;
 }

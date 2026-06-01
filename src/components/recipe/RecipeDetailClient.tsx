@@ -59,7 +59,7 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <Link
         href="/cheap-recipes"
         className="inline-flex items-center gap-1.5 text-sm font-medium text-stone-600 hover:text-emerald-700"
@@ -67,6 +67,68 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
         <ArrowLeft size={14} /> Back to recipes
       </Link>
 
+      {/* Identity first: title, description, key facts, primary actions */}
+      <header className="space-y-4">
+        <h1 className="text-3xl font-bold leading-tight text-stone-900 sm:text-4xl">
+          {recipe.name}
+        </h1>
+        <p className="max-w-3xl text-stone-600">{recipe.description}</p>
+
+        <div className="flex flex-wrap gap-2">
+          <Badge tone="green" icon={<Coins size={12} />}>
+            ${cps.toFixed(2)}/serving
+          </Badge>
+          <Badge tone="amber" icon={<Clock size={12} />}>
+            {recipe.totalTimeMinutes} min
+          </Badge>
+          <Badge tone="stone" icon={<Flame size={12} />}>
+            {recipe.difficulty}
+          </Badge>
+          <Badge tone="stone">{recipe.servings} servings</Badge>
+          {recipe.dietTags.map((d) => (
+            <Badge key={d} tone="emerald">
+              {d}
+            </Badge>
+          ))}
+        </div>
+        <EquipmentBadges recipe={recipe} />
+
+        <div className="flex flex-wrap gap-2 pt-1">
+          <Button onClick={() => setCookingMode(true)} leftIcon={<Play size={16} />}>
+            Start cooking
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => toggleSaved(recipe.id)}
+            leftIcon={
+              saved ? (
+                <BookmarkCheck size={16} className="text-emerald-600" />
+              ) : (
+                <Bookmark size={16} />
+              )
+            }
+          >
+            {saved ? "Saved" : "Save recipe"}
+          </Button>
+          {missing.length > 0 && (
+            <Button
+              variant="secondary"
+              onClick={() =>
+                addGroceryItems(
+                  recipe,
+                  missing.map((m) => m.ingredientId),
+                )
+              }
+              leftIcon={<ShoppingBasket size={16} />}
+              title={`Missing: ${missing.map((m) => m.ingredientId).slice(0, 5).join(", ")}${missing.length > 5 ? "…" : ""}`}
+            >
+              Add {missing.length} missing {missing.length === 1 ? "item" : "items"} to grocery list
+            </Button>
+          )}
+        </div>
+      </header>
+
+      {/* Media second */}
       <RecipeImage recipe={recipe} variant="hero" showAttribution className="overflow-hidden" />
 
       {recipe.youtubeId && (
@@ -86,66 +148,6 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
           </div>
         </div>
       )}
-
-      <header className="grid gap-6 md:items-center">
-        <div className="space-y-4">
-          <div className="flex flex-wrap gap-2">
-            <Badge tone="green" icon={<Coins size={12} />}>
-              ${cps.toFixed(2)}/serving
-            </Badge>
-            <Badge tone="amber" icon={<Clock size={12} />}>
-              {recipe.totalTimeMinutes} min
-            </Badge>
-            <Badge tone="stone" icon={<Flame size={12} />}>
-              {recipe.difficulty}
-            </Badge>
-            {recipe.dietTags.map((d) => (
-              <Badge key={d} tone="emerald">
-                {d}
-              </Badge>
-            ))}
-          </div>
-          <EquipmentBadges recipe={recipe} />
-          <h1 className="text-3xl font-bold text-stone-900 sm:text-4xl">
-            {recipe.name}
-          </h1>
-          <p className="text-stone-600">{recipe.description}</p>
-
-          <div className="flex flex-wrap gap-3 pt-2">
-            <Button onClick={() => setCookingMode(true)} leftIcon={<Play size={16} />}>
-              Start cooking
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => toggleSaved(recipe.id)}
-              leftIcon={
-                saved ? (
-                  <BookmarkCheck size={16} className="text-emerald-600" />
-                ) : (
-                  <Bookmark size={16} />
-                )
-              }
-            >
-              {saved ? "Saved" : "Save recipe"}
-            </Button>
-            {missing.length > 0 && (
-              <Button
-                variant="secondary"
-                onClick={() =>
-                  addGroceryItems(
-                    recipe,
-                    missing.map((m) => m.ingredientId),
-                  )
-                }
-                leftIcon={<ShoppingBasket size={16} />}
-              >
-                Add {missing.length} to grocery list
-              </Button>
-            )}
-          </div>
-        </div>
-
-      </header>
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>

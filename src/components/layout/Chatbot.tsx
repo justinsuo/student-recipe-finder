@@ -66,19 +66,32 @@ export function Chatbot() {
 
   return (
     <>
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className={clsx(
-          "fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-105 md:bottom-6 md:right-6",
-          open ? "bg-stone-900" : "bg-emerald-600",
-        )}
-        aria-label={open ? "Close chat" : "Open chat"}
-      >
-        {open ? <X size={22} /> : <MessageCircle size={22} />}
-      </button>
+      <div className="group fixed bottom-5 right-4 z-50 flex items-center gap-2 sm:bottom-6 sm:right-6">
+        {/* Tooltip — visible on hover/focus */}
+        <span
+          role="tooltip"
+          className={clsx(
+            "pointer-events-none rounded-full bg-stone-900 px-2.5 py-1 text-xs font-medium text-white shadow opacity-0 transition-opacity duration-150",
+            !open && "group-hover:opacity-100 group-focus-within:opacity-100",
+          )}
+        >
+          Ask Pesto
+        </span>
+        <button
+          onClick={() => setOpen((o) => !o)}
+          className={clsx(
+            "flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2",
+            open ? "bg-stone-900" : "bg-emerald-600",
+          )}
+          aria-label={open ? "Close chat with Pesto" : "Ask Pesto, the cooking assistant"}
+          aria-expanded={open}
+        >
+          {open ? <X size={22} /> : <MessageCircle size={22} />}
+        </button>
+      </div>
 
       {open && (
-        <div className="fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[80vh] w-full max-w-md flex-col rounded-t-3xl border border-stone-200 bg-white shadow-2xl md:bottom-24 md:right-6 md:left-auto md:rounded-3xl">
+        <div className="fixed inset-x-3 bottom-24 z-50 mx-auto flex max-h-[72vh] w-auto max-w-md flex-col rounded-3xl border border-stone-200 bg-white shadow-2xl sm:inset-x-auto sm:right-6 sm:left-auto">
           <div className="flex items-center justify-between border-b border-stone-200 px-4 py-3">
             <div className="flex items-center gap-2">
               <div className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-600 text-white">

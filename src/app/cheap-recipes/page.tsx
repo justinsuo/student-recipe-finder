@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Coins, Filter, RefreshCcw, Search } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { RecipeGrid } from "@/components/recipe/RecipeGrid";
@@ -66,6 +66,8 @@ const DEFAULTS: CheapFilters = {
 
 type Sort = "cheapest" | "fastest" | "protein" | "best";
 
+const PAGE_SIZE = 12;
+
 export default function CheapRecipesPage() {
   const [filters, setFilters] = useState<CheapFilters>(DEFAULTS);
   const [sort, setSort] = useState<Sort>("best");
@@ -75,6 +77,7 @@ export default function CheapRecipesPage() {
   const [methodOnly, setMethodOnly] = useState<
     "any" | "air-fryer" | "microwave" | "no-stove" | "under-2"
   >("any");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const results = useMemo(() => {
     let r = rankCheapRecipes(filters);
@@ -122,6 +125,68 @@ export default function CheapRecipesPage() {
       );
     return sorted;
   }, [filters, sort, query, dormOnly, mealPrepOnly, methodOnly]);
+
+  // Reset page size when filters change
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setVisibleCount(PAGE_SIZE);
+  }, [filters, sort, query, dormOnly, mealPrepOnly, methodOnly]);
+
+  function clearAllFilters() {
+    setFilters(DEFAULTS);
+    setSort("best");
+    setQuery("");
+    setDormOnly(false);
+    setMealPrepOnly(false);
+    setMethodOnly("any");
+  }
+
+  const activeChips: { label: string; clear: () => void }[] = [];
+  if (query.trim()) activeChips.push({ label: `"${query.trim()}"`, clear: () => setQuery("") });
+  if (methodOnly !== "any") {
+    const lbl: Record<string, string> = {
+      "air-fryer": "Air fryer",
+      microwave: "Microwave only",
+      "no-stove": "No stovetop",
+      "under-2": "Under $2/serving",
+    };
+    activeChips.push({ label: lbl[methodOnly] || methodOnly, clear: () => setMethodOnly("any") });
+  }
+  if (dormOnly) activeChips.push({ label: "Dorm-friendly", clear: () => setDormOnly(false) });
+  if (mealPrepOnly) activeChips.push({ label: "Meal prep", clear: () => setMealPrepOnly(false) });
+  for (const eq of filters.equipment) {
+    activeChips.push({
+      label: `Equipment: ${eq.replace("-", " ")}`,
+      clear: () => setFilters((f) => ({ ...f, equipment: f.equipment.filter((e) => e !== eq) })),
+    });
+  }
+  for (const d of filters.diet) {
+    activeChips.push({
+      label: `Diet: ${d.replace("-", " ")}`,
+      clear: () => setFilters((f) => ({ ...f, diet: f.diet.filter((x) => x !== d) })),
+    });
+  }
+  if (filters.time !== "any") {
+    activeChips.push({
+      label: `Time: ${filters.time.replace("-", " ")}`,
+      clear: () => setFilters((f) => ({ ...f, time: "any" })),
+    });
+  }
+  if (filters.mealType && filters.mealType !== "any") {
+    activeChips.push({
+      label: `Meal: ${filters.mealType}`,
+      clear: () => setFilters((f) => ({ ...f, mealType: "any" })),
+    });
+  }
+  if (filters.budgetPerServing < DEFAULTS.budgetPerServing) {
+    activeChips.push({
+      label: `Budget ≤ $${filters.budgetPerServing.toFixed(2)}`,
+      clear: () =>
+        setFilters((f) => ({ ...f, budgetPerServing: DEFAULTS.budgetPerServing })),
+    });
+  }
+
+  const visible = results.slice(0, visibleCount);
 
   function toggleEquipment(eq: Equipment) {
     setFilters((f) =>
@@ -374,26 +439,64 @@ export default function CheapRecipesPage() {
       </section>
 
       <section>
+        {activeChips.length > 0 && (
+          <div className="mb-4 rounded-2xl border border-stone-200 bg-white p-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wide text-stone-500">
+                Active filters
+              </span>
+              {activeChips.map((chip, i) => (
+                <button
+                  key={`${chip.label}-${i}`}
+                  onClick={chip.clear}
+                  className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-emerald-700"
+                  aria-label={`Remove filter ${chip.label}`}
+                >
+                  {chip.label}
+                  <span aria-hidden>×</span>
+                </button>
+              ))}
+              <button
+                onClick={clearAllFilters}
+                className="ml-auto text-xs font-semibold text-stone-600 hover:text-emerald-700 hover:underline"
+              >
+                Clear all
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="mb-4 flex items-center justify-between">
           <p className="text-sm text-stone-600">
+            Showing{" "}
+            <span className="font-semibold text-stone-900">
+              {Math.min(visibleCount, results.length)}
+            </span>{" "}
+            of{" "}
             <span className="font-semibold text-stone-900">{results.length}</span>{" "}
-            recipes match
+            {results.length === 1 ? "recipe" : "recipes"}
           </p>
         </div>
         <RecipeGrid
-          results={results}
+          results={visible}
           emptyTitle="No recipes match these filters"
           emptyDescription="Try raising your budget, allowing more equipment, or removing a diet restriction."
           emptyAction={
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setFilters(DEFAULTS)}
-            >
-              Reset filters
+            <Button variant="outline" size="sm" onClick={clearAllFilters}>
+              Clear all filters
             </Button>
           }
         />
+        {visible.length < results.length && (
+          <div className="mt-6 flex justify-center">
+            <Button
+              variant="outline"
+              onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+            >
+              Load more recipes ({results.length - visible.length} left)
+            </Button>
+          </div>
+        )}
       </section>
     </div>
   );

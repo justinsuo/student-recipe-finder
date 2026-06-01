@@ -337,15 +337,33 @@ export default function AIChefPage() {
 
       {!isWorkerConfigured() && (
         <Card className="border-amber-200 bg-amber-50">
-          <div className="flex items-start gap-2 text-sm text-amber-900">
-            <AlertCircle size={16} className="mt-0.5 flex-none" />
-            <div>
-              <p className="font-semibold">AI Chef is not configured yet.</p>
-              <p className="mt-1">
-                Deploy the Cloudflare Worker (in <code>worker/</code>) and set
-                the <code>WORKER_URL</code> GitHub secret. See
-                <code> worker/README.md</code>.
+          <div className="flex flex-wrap items-start gap-4">
+            <div className="grid h-10 w-10 flex-none place-items-center rounded-xl bg-amber-100 text-amber-700">
+              <ChefHat size={18} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-amber-900">
+                AI Chef is taking a break.
               </p>
+              <p className="mt-1 text-sm text-amber-900">
+                The recipe generator is offline right now. You can still browse
+                hundreds of student-friendly recipes, build your pantry, and
+                use Pantry-to-Plate to find meals you can make.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Link
+                  href="/cheap-recipes"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
+                >
+                  Browse cheap recipes
+                </Link>
+                <Link
+                  href="/pantry"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-stone-300 bg-white px-3 py-1.5 text-xs font-semibold text-stone-800 hover:bg-stone-50"
+                >
+                  Use my pantry
+                </Link>
+              </div>
             </div>
           </div>
         </Card>

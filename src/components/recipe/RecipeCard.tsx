@@ -8,6 +8,7 @@ import type { Recipe, RecipeScoreResult } from "@/lib/types";
 import { calculateCostPerServing } from "@/lib/recipeScoring";
 import { RecipeImage } from "./RecipeImage";
 import { EquipmentBadges } from "./EquipmentBadge";
+import { TagChip } from "@/components/ui/TagChip";
 
 interface Props {
   result?: RecipeScoreResult;
@@ -75,12 +76,7 @@ export function RecipeCard({ result, recipe, highlight }: Props) {
         {(r.tags?.length ?? 0) > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {r.tags!.slice(0, 3).map((t) => (
-              <span
-                key={t}
-                className="rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-medium text-stone-600"
-              >
-                #{t}
-              </span>
+              <TagChip key={t}>{t}</TagChip>
             ))}
           </div>
         )}
