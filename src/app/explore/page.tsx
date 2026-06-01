@@ -222,7 +222,7 @@ export default function ExplorePage() {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<ExternalRecipe | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const apiEnabled = isExploreApiEnabled();
   const source = getExploreSource();
   const totalPages = Math.ceil(total / 20);
