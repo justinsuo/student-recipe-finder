@@ -114,7 +114,7 @@ function AIChefPage() {
   const [sourceMeta, setSourceMeta] = useState<RecipeSourceMetadata | null>(null);
   const [budget, setBudget] = useState<number>(3);
   const [servings, setServings] = useState<number>(2);
-  const [equipment, setEquipment] = useState<string[]>(["microwave", "stovetop"]);
+  const [equipment, setEquipment] = useState<string[]>([...EQUIPMENT_OPTS]);
   const [diet, setDiet] = useState<string[]>([]);
   const [timeLimit, setTimeLimit] = useState("any");
   const [creativity, setCreativity] = useState<"practical" | "balanced" | "creative">("balanced");
