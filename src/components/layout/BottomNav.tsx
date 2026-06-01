@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Home,
   Coins,
-  Refrigerator,
+  Globe,
   ShoppingBasket,
   Bookmark,
 } from "lucide-react";
@@ -14,7 +14,7 @@ import { clsx } from "clsx";
 const links = [
   { href: "/", label: "Home", icon: Home },
   { href: "/cheap-recipes", label: "Cheap", icon: Coins },
-  { href: "/pantry", label: "Pantry", icon: Refrigerator },
+  { href: "/explore", label: "Explore", icon: Globe },
   { href: "/grocery-list", label: "List", icon: ShoppingBasket },
   { href: "/saved", label: "Saved", icon: Bookmark },
 ];

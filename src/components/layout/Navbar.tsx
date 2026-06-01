@@ -10,12 +10,14 @@ import {
   Bookmark,
   Info,
   Sparkles,
+  Globe,
 } from "lucide-react";
 import { clsx } from "clsx";
 
 const links = [
   { href: "/", label: "Home", icon: Home },
   { href: "/cheap-recipes", label: "Cheap Coach", icon: Coins },
+  { href: "/explore", label: "Explore World", icon: Globe },
   { href: "/pantry", label: "Pantry", icon: Refrigerator },
   { href: "/grocery-list", label: "Grocery", icon: ShoppingBasket },
   { href: "/saved", label: "Saved", icon: Bookmark },
