@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Search, Globe, Clock, SlidersHorizontal, X, Star, ExternalLink, Info, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import type { ExploreFilters, ExternalRecipe } from "@/lib/externalTypes";
-import { searchExternalRecipes, isExploreApiEnabled, getExploreSource } from "@/lib/services/exploreService";
+import { searchExternalRecipes, getExploreSource } from "@/lib/services/exploreService";
 
 // ─── Filters ──────────────────────────────────────────────────────────────────
 
@@ -223,7 +223,6 @@ export default function ExplorePage() {
   const [selected, setSelected] = useState<ExternalRecipe | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const apiEnabled = isExploreApiEnabled();
   const source = getExploreSource();
   const totalPages = Math.ceil(total / 20);
 
@@ -257,16 +256,8 @@ export default function ExplorePage() {
         </div>
         <h1 className="text-3xl font-bold text-stone-900 sm:text-4xl">Explore Global Cuisine</h1>
         <p className="mt-2 max-w-xl text-sm text-stone-600">
-          Discover recipes from 60+ cuisines around the world
-          {apiEnabled
-            ? ` — live data from ${source.charAt(0).toUpperCase() + source.slice(1)}.`
-            : " — demo mode. Add an API key in .env.local to unlock thousands of real recipes."}
+          Discover authentic recipes from cuisines around the world — search, filter by cuisine, diet, or cooking time.
         </p>
-        {!apiEnabled && (
-          <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-800">
-            <strong>Demo mode:</strong> showing sample recipes. Set <code className="bg-amber-100 px-1 rounded font-mono">NEXT_PUBLIC_EXPLORE_SOURCE=spoonacular</code> + your API key to unlock real data.
-          </div>
-        )}
       </header>
 
       {/* Search + filter bar */}
@@ -346,7 +337,7 @@ export default function ExplorePage() {
         <p className="text-sm text-stone-600">
           {loading ? "Searching…" : <><span className="font-semibold text-stone-900">{total.toLocaleString()}</span> recipes found</>}
         </p>
-        {apiEnabled && <SourceBadge source={source} />}
+        <SourceBadge source={source} />
       </div>
 
       {/* Grid */}
