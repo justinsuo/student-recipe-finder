@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Bookmark, BookmarkCheck, Clock, Coins, ListChecks } from "lucide-react";
+import { Bookmark, BookmarkCheck, Clock, Coins, ListChecks, Flame } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { useAppStore } from "@/lib/AppStore";
 import type { Recipe, RecipeScoreResult } from "@/lib/types";
 import { calculateCostPerServing } from "@/lib/recipeScoring";
+import { bestEffortNutrition } from "@/lib/nutritionEngine";
 import { RecipeImage } from "./RecipeImage";
 import { EquipmentBadges } from "./EquipmentBadge";
 import { TagChip } from "@/components/ui/TagChip";
@@ -22,6 +23,7 @@ export function RecipeCard({ result, recipe, highlight }: Props) {
   if (!r) return null;
   const saved = isSaved(r.id);
   const costPerServing = result?.costPerServing ?? calculateCostPerServing(r);
+  const nutrition = bestEffortNutrition(r).estimate;
 
   return (
     <Link
@@ -72,6 +74,13 @@ export function RecipeCard({ result, recipe, highlight }: Props) {
         </div>
 
         <EquipmentBadges recipe={r} />
+
+        <div className="flex items-center gap-2 text-xs text-stone-600">
+          <Flame size={12} className="text-orange-500" />
+          <span>{nutrition.calories} cal</span>
+          <span className="text-stone-300">·</span>
+          <span>{nutrition.protein}g protein</span>
+        </div>
 
         {(r.tags?.length ?? 0) > 0 && (
           <div className="flex flex-wrap gap-1.5">
