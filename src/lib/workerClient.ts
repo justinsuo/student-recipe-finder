@@ -240,6 +240,54 @@ export async function generateRecipe(
   return postJson<GeneratedRecipe>("/generate-recipe", input);
 }
 
+// ============== Multi-option Recipe Generation ==============
+
+export type OptionLabel =
+  | "best-match"
+  | "cheapest"
+  | "fastest"
+  | "most-creative"
+  | "uses-most-pantry"
+  | "high-protein"
+  | "comfort-food"
+  | "wildcard";
+
+export interface GeneratedRecipeOption {
+  id: string;
+  optionLabel: OptionLabel;
+  shortReason: string;
+  pantryMatchScore: number;
+  selectedByDefault: boolean;
+  notesInfluenceSummary?: string;
+  recipe: GeneratedRecipe;
+}
+
+export interface GeneratedRecipeOptionSet {
+  mainOptionId: string;
+  options: GeneratedRecipeOption[];
+}
+
+export interface GenerateOptionsInput {
+  pantryIngredients?: string[];
+  selectedPantryIngredientIds?: string[];
+  ingredients?: string[];
+  aiNotes?: string;
+  cravingText?: string;
+  budgetPerServing?: number;
+  servings?: number;
+  equipment?: string[];
+  dietTags?: string[];
+  creativityLevel?: "practical" | "balanced" | "creative";
+  appendToExisting?: boolean;
+  previousOptions?: Array<{ recipe: { name: string } }>;
+}
+
+export async function generateRecipeOptions(
+  input: GenerateOptionsInput,
+): Promise<GeneratedRecipeOptionSet> {
+  return postJson<GeneratedRecipeOptionSet>("/generate-recipe-options", input);
+}
+
 // ============== Image Generation ==============
 
 export interface GenerateImageResult {

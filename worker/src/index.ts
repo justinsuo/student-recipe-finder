@@ -98,36 +98,72 @@ async function openaiChatJson(opts: {
   }
 }
 
+interface ImageResult {
+  b64_json?: string;
+  url?: string;
+  model: string;
+}
+
+/**
+ * Generate an image with graceful fallback. Tries the requested/default
+ * model first; if OpenAI returns a verification/permission error (common
+ * with `gpt-image-1` on unverified accounts), automatically falls back to
+ * `dall-e-3` so the user still gets an image.
+ */
 async function openaiImage(
   env: Env,
   prompt: string,
   size: "1024x1024" | "1024x1536" | "1536x1024" = "1024x1024",
-): Promise<{ b64_json?: string; url?: string }> {
-  const model = env.DEFAULT_IMAGE_MODEL || IMAGE_MODEL_DEFAULT;
-  const body = {
-    model,
-    prompt,
-    n: 1,
-    size,
-  };
-  const res = await fetch("https://api.openai.com/v1/images/generations", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${env.OPENAI_API_KEY}`,
-    },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`OpenAI image ${res.status}: ${text.slice(0, 300)}`);
+): Promise<ImageResult> {
+  const primary = env.DEFAULT_IMAGE_MODEL || IMAGE_MODEL_DEFAULT;
+  const fallback = "dall-e-3";
+
+  async function attempt(model: string): Promise<ImageResult> {
+    const body: Record<string, unknown> = { model, prompt, n: 1, size };
+    // gpt-image-1 always returns b64; dall-e-3 returns a URL by default.
+    const res = await fetch(
+      "https://api.openai.com/v1/images/generations",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${env.OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify(body),
+      },
+    );
+    if (!res.ok) {
+      const text = await res.text();
+      const err = new Error(
+        `OpenAI image ${res.status}: ${text.slice(0, 400)}`,
+      );
+      // Attach a flag so caller can decide to retry
+      (err as Error & { transient?: boolean; status?: number }).status = res.status;
+      throw err;
+    }
+    const json = (await res.json()) as {
+      data?: Array<{ b64_json?: string; url?: string }>;
+    };
+    const first = json.data?.[0];
+    if (!first) throw new Error("No image returned");
+    return { b64_json: first.b64_json, url: first.url, model };
   }
-  const json = (await res.json()) as {
-    data?: Array<{ b64_json?: string; url?: string }>;
-  };
-  const first = json.data?.[0];
-  if (!first) throw new Error("No image returned");
-  return first;
+
+  try {
+    return await attempt(primary);
+  } catch (e) {
+    const err = e as Error & { status?: number };
+    const msg = err.message || "";
+    const isPermissionish =
+      err.status === 403 ||
+      err.status === 401 ||
+      /verified|verification|access|permission|must be/i.test(msg);
+    if (primary !== fallback && isPermissionish) {
+      // One automatic retry on a model that doesn't require verification
+      return await attempt(fallback);
+    }
+    throw err;
+  }
 }
 
 // ---------- Route: /ingredients/resolve ----------
@@ -429,6 +465,113 @@ function buildRecipeUserPrompt(body: Record<string, unknown>): string {
   return lines.join("\n");
 }
 
+// ---------- Route: /generate-recipe-options ----------
+//
+// Generates 1 main recommendation + 3 alternates in a single LLM call.
+// Each alternate uses a meaningfully different format (bowl / wrap / soup /
+// crispy / no-cook etc.), not minor variations of the same dish.
+
+const OPTIONS_SYSTEM = `You are an expert budget cooking assistant for college students. Generate MULTIPLE recipe options (one main recommendation + 3 alternates) based on the user's available ingredients, budget, equipment, time, dietary needs, cravings, and free-text "notes for AI".
+
+Hard rules:
+- Pick ONE clear MAIN recipe that best fits ALL constraints (pantry, budget, equipment, diet, notes).
+- The other 3 must be MEANINGFULLY DIFFERENT dishes — different format (bowl / wrap / roll / soup / snack plate / fried / no-cook / meal-prep), not minor variations of the main.
+- Use the user's pantry as much as possible. Only add missing ingredients when they are cheap and meaningfully improve the dish.
+- Respect equipment strictly. If the user only has a microwave, do NOT include stovetop/oven/air-fryer steps.
+- Use the user's "aiNotes" as creative direction. If they say "make something like a sushi roll using rice and seaweed", build something inspired by that — don't force a stovetop sushi if they only have a microwave; make a student-friendly bowl/wrap version.
+- Each recipe must be realistic, cheap, safe, and student-friendly.
+- Include cost-aware ingredient quantities, missing ingredients, steps, safety notes naturally (microwave-safe bowl, no metal, pierce potatoes, steam caution, chicken cooked through, air fryer basket spacing).
+
+Always respond with ONLY valid JSON in this exact schema (no markdown):
+{
+  "mainOptionId": "opt-1",
+  "options": [
+    {
+      "id": "opt-1",
+      "optionLabel": "best-match|cheapest|fastest|most-creative|uses-most-pantry|high-protein|comfort-food|wildcard",
+      "shortReason": "1 sentence why this option exists",
+      "pantryMatchScore": <0..1>,
+      "selectedByDefault": true,
+      "notesInfluenceSummary": "1 sentence — how the user's aiNotes shaped this recipe (empty string if no notes)",
+      "recipe": <full GeneratedRecipe object matching the single-recipe schema, including: name, description, userRequestSummary, whyThisFits, mealType, cuisineStyle, servings, prepTimeMinutes, cookTimeMinutes, totalTimeMinutes, difficulty, equipment, primaryCookingMethod, noStovetopRequired, estimatedTotalCost, estimatedCostPerServing, estimatedMissingIngredientCost, ingredients[], missingIngredients[], steps[], guidedCookingSteps[], cheapTips[], substitutions[], makeItCheaper[], makeItHealthier[], makeItHigherProtein[], pantryStaplesUsed[], optionalAddIns[], studentTips[], storageInstructions, reheatingInstructions, safetyNotes[], estimatedNutrition {calories,protein,carbs,fat,fiber}, tags[], imagePromptHint>
+    },
+    {"id": "opt-2", ...},
+    {"id": "opt-3", ...},
+    {"id": "opt-4", ...}
+  ]
+}
+
+Pick optionLabel values that reflect what each variant emphasizes.
+selectedByDefault must be true for exactly one option (the main) and false for the rest.`;
+
+async function handleGenerateRecipeOptions(
+  req: Request,
+  env: Env,
+): Promise<Response> {
+  const origin = req.headers.get("Origin");
+  let body: Record<string, unknown>;
+  try {
+    body = await req.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400, env, origin);
+  }
+  const userPrompt = buildOptionsUserPrompt(body);
+  try {
+    const result = await openaiChatJson({
+      env,
+      system: OPTIONS_SYSTEM,
+      user: userPrompt,
+      maxTokens: 6000,
+      temperature: 0.7,
+    });
+    return jsonResponse(result, 200, env, origin);
+  } catch (e) {
+    return jsonResponse(
+      { error: e instanceof Error ? e.message : "options generation failed" },
+      500,
+      env,
+      origin,
+    );
+  }
+}
+
+function buildOptionsUserPrompt(body: Record<string, unknown>): string {
+  const lines: string[] = [];
+  const pantry = (body.pantryIngredients as string[]) ?? (body.ingredients as string[]) ?? [];
+  if (pantry.length) lines.push(`Pantry ingredients on hand: ${pantry.join(", ")}`);
+  const selected = body.selectedPantryIngredientIds as string[] | undefined;
+  if (selected?.length) lines.push(`User selected these for this recipe: ${selected.join(", ")}`);
+  const notes = body.aiNotes as string | undefined;
+  if (notes?.trim()) lines.push(`Notes for AI (creative direction): ${notes.trim()}`);
+  const cravings = body.cravingText as string | undefined;
+  if (cravings?.trim()) lines.push(`Cravings: ${cravings.trim()}`);
+  const budget = body.budgetPerServing as number | undefined;
+  if (budget) lines.push(`Budget per serving: $${budget}`);
+  const servings = body.servings as number | undefined;
+  if (servings) lines.push(`Servings: ${servings}`);
+  const equipment = (body.equipment as string[]) ?? [];
+  if (equipment.length) lines.push(`Equipment: ${equipment.join(", ")}`);
+  const diet = (body.dietTags as string[]) ?? [];
+  if (diet.length) lines.push(`Diet: ${diet.join(", ")}`);
+  const creativity = body.creativityLevel as string | undefined;
+  if (creativity) lines.push(`Creativity: ${creativity}`);
+  const append = body.appendToExisting as boolean | undefined;
+  const prev = body.previousOptions as Array<{ recipe?: { name?: string } }> | undefined;
+  if (append && prev?.length) {
+    const names = prev
+      .map((p) => p.recipe?.name)
+      .filter(Boolean)
+      .join(", ");
+    if (names) {
+      lines.push(
+        `Already-generated options (do NOT repeat these dish concepts; offer different formats): ${names}`,
+      );
+    }
+  }
+  lines.push("\nReturn ONLY valid JSON matching the options schema (1 main + 3 alternates).");
+  return lines.join("\n");
+}
+
 // ---------- Route: /generate-recipe-image ----------
 
 async function handleGenerateImage(req: Request, env: Env): Promise<Response> {
@@ -450,7 +593,7 @@ async function handleGenerateImage(req: Request, env: Env): Promise<Response> {
         b64_json: image.b64_json,
         url: image.url,
         prompt,
-        model: env.DEFAULT_IMAGE_MODEL || IMAGE_MODEL_DEFAULT,
+        model: image.model,
       },
       200,
       env,
@@ -1193,6 +1336,8 @@ export default {
         return handleMatch(req, env);
       case "/generate-recipe":
         return handleGenerateRecipe(req, env);
+      case "/generate-recipe-options":
+        return handleGenerateRecipeOptions(req, env);
       case "/generate-recipe-image":
         return handleGenerateImage(req, env);
       case "/recipes/import-url":

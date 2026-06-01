@@ -22,21 +22,25 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import {
   generateRecipe,
+  generateRecipeOptions,
   generateRecipeImage,
   importRecipeUrl,
   importRecipeText,
   webSearchRecipes,
   isWorkerConfigured,
   type GeneratedRecipe,
+  type GeneratedRecipeOption,
   type RecipeSourceMetadata,
   type WebRecipeCandidate,
 } from "@/lib/workerClient";
+import { GeneratedRecipeOptionBubbles } from "@/components/ai/GeneratedRecipeOptionBubbles";
 import {
   fallbackImageMeta,
   imageDataUrl,
   makeCustomRecipeId,
   saveCustomRecipe,
   storeRecipeImage,
+  getCustomRecipes,
 } from "@/lib/customRecipeStorage";
 import type { AIGeneratedRecipe } from "@/lib/customRecipeTypes";
 import { useAppStore } from "@/lib/AppStore";
@@ -123,6 +127,16 @@ function AIChefPage() {
   const [recipe, setRecipe] = useState<GeneratedRecipe | null>(null);
   const [savedId, setSavedId] = useState<string | null>(null);
   const [savedImageDataUrl, setSavedImageDataUrl] = useState<string | null>(null);
+
+  // Multi-option flow
+  const [aiNotes, setAiNotes] = useState("");
+  const [options, setOptions] = useState<GeneratedRecipeOption[]>([]);
+  const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
+  const [optionImages, setOptionImages] = useState<Record<string, string>>({});
+  const [optionSavedIds, setOptionSavedIds] = useState<Record<string, string>>({});
+  const [generatingImageIds, setGeneratingImageIds] = useState<Set<string>>(new Set());
+  const [appending, setAppending] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   // Resolve a pantry ingredient ID to a human-readable name (built-in OR custom)
   const pantryNamesById = useMemo(() => {
@@ -330,6 +344,179 @@ function AIChefPage() {
     }
   }
 
+  // ---- Multi-option helpers ----
+
+  async function generateImageForOption(o: GeneratedRecipeOption) {
+    setImageError(null);
+    setGeneratingImageIds((s) => new Set(s).add(o.id));
+    try {
+      const img = await generateRecipeImage({
+        recipeName: o.recipe.name,
+        ingredients: o.recipe.ingredients.map((i) => i.name).slice(0, 8),
+        method: o.recipe.primaryCookingMethod,
+        prompt: o.recipe.imagePromptHint,
+      });
+      const src = img.b64_json
+        ? `data:image/png;base64,${img.b64_json}`
+        : img.url;
+      if (src) {
+        setOptionImages((m) => ({ ...m, [o.id]: src }));
+        // Update saved recipe with image URL
+        const saved = optionSavedIds[o.id];
+        if (saved) {
+          const existing = getCustomRecipes().find((r) => r.id === saved);
+          if (existing) {
+            saveCustomRecipe({
+              ...existing,
+              image: {
+                src,
+                alt: o.recipe.name,
+                sourceName: "AI generated",
+                license: "Generated image",
+                isAIGenerated: true,
+                isFallback: false,
+                generatedPrompt: img.prompt,
+                generatedAt: new Date().toISOString(),
+                model: img.model,
+              },
+            });
+          }
+        }
+      }
+    } catch (e) {
+      setImageError(
+        e instanceof Error
+          ? e.message.includes("verified") || e.message.includes("403")
+            ? "Image generation needs OpenAI organization verification. Add a phone number at platform.openai.com/settings/organization/general or the worker will auto-fall-back to dall-e-3 on next try."
+            : `Couldn't generate image: ${e.message}`
+          : "Image generation failed",
+      );
+    } finally {
+      setGeneratingImageIds((s) => {
+        const next = new Set(s);
+        next.delete(o.id);
+        return next;
+      });
+    }
+  }
+
+  function persistOption(o: GeneratedRecipeOption): string {
+    const id = optionSavedIds[o.id] ?? makeCustomRecipeId(o.recipe.name, "gen");
+    const r = o.recipe;
+    const ai: AIGeneratedRecipe = {
+      id,
+      isAIGenerated: true,
+      isUserCreated: false,
+      name: r.name,
+      description: r.description,
+      userRequestSummary: r.userRequestSummary,
+      whyThisFits: r.whyThisFits,
+      mealType: r.mealType,
+      cuisineStyle: r.cuisineStyle,
+      servings: r.servings,
+      prepTimeMinutes: r.prepTimeMinutes,
+      cookTimeMinutes: r.cookTimeMinutes,
+      totalTimeMinutes: r.totalTimeMinutes,
+      difficulty: r.difficulty,
+      equipment: r.equipment,
+      primaryCookingMethod: r.primaryCookingMethod,
+      noStovetopRequired: r.noStovetopRequired,
+      estimatedTotalCost: r.estimatedTotalCost,
+      estimatedCostPerServing: r.estimatedCostPerServing,
+      estimatedMissingIngredientCost: r.estimatedMissingIngredientCost,
+      ingredients: r.ingredients,
+      missingIngredients: r.missingIngredients,
+      steps: r.steps,
+      guidedCookingSteps: r.guidedCookingSteps,
+      cheapTips: r.cheapTips,
+      substitutions: r.substitutions,
+      makeItCheaper: r.makeItCheaper,
+      makeItHealthier: r.makeItHealthier,
+      makeItHigherProtein: r.makeItHigherProtein,
+      studentTips: r.studentTips,
+      storageInstructions: r.storageInstructions,
+      reheatingInstructions: r.reheatingInstructions,
+      safetyNotes: r.safetyNotes,
+      estimatedNutrition: r.estimatedNutrition,
+      tags: r.tags,
+      image: fallbackImageMeta(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    saveCustomRecipe(ai);
+    setOptionSavedIds((m) => ({ ...m, [o.id]: id }));
+    return id;
+  }
+
+  async function runOptions(append = false) {
+    if (!isWorkerConfigured()) return;
+    setLoading(true);
+    setError(null);
+    setImageError(null);
+    if (!append) {
+      setOptions([]);
+      setSelectedOptionId(null);
+      setOptionImages({});
+      setOptionSavedIds({});
+    }
+    setAppending(append);
+    try {
+      const pantryNames =
+        mode === "pantry"
+          ? Array.from(selectedPantryIds)
+              .map((id) => pantryNamesById.get(id))
+              .filter((n): n is string => !!n)
+          : ingredients
+              .split(/[\n,]+/)
+              .map((s) => s.trim())
+              .filter(Boolean);
+      const res = await generateRecipeOptions({
+        pantryIngredients: pantryNames,
+        selectedPantryIngredientIds: Array.from(selectedPantryIds),
+        aiNotes: aiNotes.trim() || undefined,
+        cravingText: cravings.trim() || undefined,
+        budgetPerServing: budget,
+        servings,
+        equipment,
+        dietTags: diet,
+        creativityLevel: creativity,
+        appendToExisting: append,
+        previousOptions: append
+          ? options.map((o) => ({ recipe: { name: o.recipe.name } }))
+          : undefined,
+      });
+      const merged = append ? [...options, ...res.options] : res.options;
+      setOptions(merged);
+      const mainId = append
+        ? selectedOptionId ?? res.mainOptionId
+        : res.mainOptionId;
+      setSelectedOptionId(mainId);
+      // Persist every option (cheap — JSON only). Image gen is lazy.
+      for (const o of res.options) persistOption(o);
+      // Generate image for the main option right away
+      const mainOpt = res.options.find((o) => o.id === res.mainOptionId);
+      if (mainOpt && !append) {
+        void generateImageForOption(mainOpt);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Generation failed");
+    } finally {
+      setLoading(false);
+      setAppending(false);
+    }
+  }
+
+  function selectOption(id: string) {
+    setSelectedOptionId(id);
+    if (!optionImages[id] && !generatingImageIds.has(id) && autoImage) {
+      const o = options.find((x) => x.id === id);
+      if (o) void generateImageForOption(o);
+    }
+  }
+
+  const selectedOption =
+    options.find((o) => o.id === selectedOptionId) ?? null;
+
   function addAllMissingToGrocery() {
     if (!recipe || !savedId) return;
     const items: { recipeId: string; ingredients: { name: string; cost: number }[] } = {
@@ -481,6 +668,22 @@ function AIChefPage() {
               selectedIds={selectedPantryIds}
               onChange={setSelectedPantryIds}
             />
+            <div>
+              <label className="flex items-center gap-1.5 text-sm font-medium text-stone-800">
+                <Sparkles size={14} className="text-violet-600" /> Notes for AI
+              </label>
+              <textarea
+                value={aiNotes}
+                onChange={(e) => setAiNotes(e.target.value)}
+                rows={3}
+                placeholder="Make something like a sushi roll using rice and seaweed. Keep it cheap, use what I already have, prefer microwave."
+                className="mt-1 w-full rounded-2xl border border-violet-200 bg-violet-50/50 p-3 text-sm focus:border-violet-400 focus:bg-white focus:outline-none"
+              />
+              <p className="mt-1 text-xs text-stone-500">
+                Tell the AI your idea, vibe, or craving. It treats this as
+                creative direction.
+              </p>
+            </div>
             <div>
               <label className="text-sm font-medium text-stone-800">
                 Optional craving (what kind of dish?)
@@ -737,7 +940,7 @@ function AIChefPage() {
 
         <div className="mt-5 flex flex-wrap gap-2">
           <Button
-            onClick={() => run()}
+            onClick={() => (mode === "pantry" || mode === "imagine" || mode === "have" ? runOptions(false) : run())}
             disabled={
               loading ||
               !isWorkerConfigured() ||
@@ -862,6 +1065,226 @@ function AIChefPage() {
             </div>
           )}
         </section>
+      )}
+
+      {selectedOption && selectedOptionId && (
+        <article className="space-y-4">
+          {/* Option bubbles strip */}
+          <div className="rounded-3xl border border-stone-200 bg-white p-4">
+            <div className="mb-2 flex flex-wrap items-end justify-between gap-2">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-stone-700">
+                Your options ({options.length})
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => runOptions(true)}
+                  disabled={loading}
+                  leftIcon={
+                    appending && loading ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <Sparkles size={14} />
+                    )
+                  }
+                >
+                  {appending && loading ? "Generating…" : "Generate more options"}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => runOptions(false)}
+                  disabled={loading}
+                  leftIcon={<RefreshCw size={14} />}
+                >
+                  Replace all
+                </Button>
+              </div>
+            </div>
+            <GeneratedRecipeOptionBubbles
+              options={options}
+              selectedId={selectedOptionId}
+              onSelect={selectOption}
+              images={optionImages}
+              generatingImageIds={generatingImageIds}
+            />
+          </div>
+
+          {/* Notes influence summary */}
+          {selectedOption.notesInfluenceSummary && (
+            <Card className="border-violet-200 bg-violet-50">
+              <p className="text-xs font-semibold uppercase tracking-wide text-violet-800">
+                How your notes influenced this recipe
+              </p>
+              <p className="mt-1 text-sm text-violet-900">
+                {selectedOption.notesInfluenceSummary}
+              </p>
+            </Card>
+          )}
+
+          {/* Main recipe panel */}
+          <div className="overflow-hidden rounded-3xl shadow-sm">
+            <div className="relative aspect-[16/9] bg-stone-100">
+              {optionImages[selectedOptionId] ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={optionImages[selectedOptionId]}
+                  alt={selectedOption.recipe.name}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              ) : generatingImageIds.has(selectedOptionId) ? (
+                <div className="flex h-full items-center justify-center text-stone-600">
+                  <Loader2 size={20} className="mr-2 animate-spin" /> Generating
+                  recipe image…
+                </div>
+              ) : (
+                <div className="flex h-full flex-col items-center justify-center bg-gradient-to-br from-emerald-100 to-amber-50 text-stone-500">
+                  <ChefHat size={48} />
+                  <button
+                    onClick={() => generateImageForOption(selectedOption)}
+                    className="mt-2 rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700"
+                  >
+                    Generate image
+                  </button>
+                </div>
+              )}
+              <div className="absolute right-3 top-3 flex gap-2">
+                <Badge tone="violet">
+                  <Sparkles size={11} className="mr-1" /> AI Generated
+                </Badge>
+                {optionImages[selectedOptionId] && (
+                  <button
+                    onClick={() => generateImageForOption(selectedOption)}
+                    disabled={generatingImageIds.has(selectedOptionId)}
+                    className="rounded-full bg-stone-900/80 px-2 py-1 text-[10px] font-semibold text-white hover:bg-stone-900"
+                    title="Regenerate image"
+                  >
+                    {generatingImageIds.has(selectedOptionId) ? (
+                      <Loader2 size={10} className="animate-spin" />
+                    ) : (
+                      "Regenerate"
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
+            {imageError && (
+              <div className="border-t border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-900">
+                ⚠ {imageError}
+              </div>
+            )}
+          </div>
+
+          <header className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              <Badge tone="green" icon={<Coins size={12} />}>
+                ${selectedOption.recipe.estimatedCostPerServing.toFixed(2)}/serving
+              </Badge>
+              <Badge tone="amber" icon={<Clock size={12} />}>
+                {selectedOption.recipe.totalTimeMinutes} min
+              </Badge>
+              <Badge tone="stone" icon={<Flame size={12} />}>
+                {selectedOption.recipe.difficulty}
+              </Badge>
+            </div>
+            <h2 className="text-3xl font-bold text-stone-900">
+              {selectedOption.recipe.name}
+            </h2>
+            <p className="text-stone-700">{selectedOption.recipe.description}</p>
+            {selectedOption.recipe.whyThisFits && (
+              <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                <p className="text-xs font-semibold uppercase tracking-wide">
+                  Why this fits your request
+                </p>
+                <p className="mt-1">{selectedOption.recipe.whyThisFits}</p>
+              </div>
+            )}
+            <div className="flex flex-wrap gap-2 pt-1">
+              {optionSavedIds[selectedOption.id] && (
+                <>
+                  <Button
+                    onClick={() =>
+                      toggleSaved(optionSavedIds[selectedOption.id])
+                    }
+                    variant="outline"
+                    size="sm"
+                    leftIcon={
+                      isSaved(optionSavedIds[selectedOption.id]) ? (
+                        <BookmarkCheck size={14} className="text-emerald-600" />
+                      ) : (
+                        <Bookmark size={14} />
+                      )
+                    }
+                  >
+                    {isSaved(optionSavedIds[selectedOption.id])
+                      ? "Saved"
+                      : "Save recipe"}
+                  </Button>
+                  <Link
+                    href={`/recipes/custom?id=${optionSavedIds[selectedOption.id]}`}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-800 hover:bg-stone-50"
+                  >
+                    Open full page <ArrowRight size={14} />
+                  </Link>
+                </>
+              )}
+            </div>
+          </header>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card>
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-stone-700">
+                Ingredients
+              </h3>
+              <ul className="mt-3 divide-y divide-stone-100">
+                {selectedOption.recipe.ingredients.map((ing, i) => (
+                  <li
+                    key={i}
+                    className="flex items-center justify-between py-2 text-sm"
+                  >
+                    <div>
+                      <p
+                        className={
+                          ing.userAlreadyHas
+                            ? "font-medium text-emerald-700"
+                            : "font-medium text-stone-800"
+                        }
+                      >
+                        {ing.name}{" "}
+                        {ing.optional && (
+                          <span className="text-xs text-stone-500">(optional)</span>
+                        )}
+                      </p>
+                      <p className="text-xs text-stone-500">
+                        {ing.quantity} {ing.unit}
+                        {ing.userAlreadyHas && " · you have"}
+                      </p>
+                    </div>
+                    <p className="text-sm font-medium text-stone-900">
+                      ${ing.estimatedCost.toFixed(2)}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+            <Card>
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-stone-700">
+                Steps
+              </h3>
+              <ol className="mt-3 space-y-3">
+                {selectedOption.recipe.steps.map((s, i) => (
+                  <li key={i} className="flex gap-3 text-sm">
+                    <span className="mt-0.5 grid h-6 w-6 flex-none place-items-center rounded-full bg-emerald-600 text-xs font-bold text-white">
+                      {i + 1}
+                    </span>
+                    <p>{s}</p>
+                  </li>
+                ))}
+              </ol>
+            </Card>
+          </div>
+        </article>
       )}
 
       {recipe && savedId && (
