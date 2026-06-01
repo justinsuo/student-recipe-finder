@@ -60,6 +60,24 @@ export interface NutritionEstimate {
   protein: number; // grams
   carbs: number; // grams
   fat: number; // grams
+  fiber?: number; // grams (optional)
+}
+
+export interface GuidedCookingStep {
+  title: string;
+  instruction: string;
+  timerMinutes?: number;
+}
+
+export interface RecipeImage {
+  src: string;
+  alt: string;
+  sourceName: string;
+  sourceUrl: string;
+  license: string;
+  attributionRequired: boolean;
+  attributionText?: string;
+  verifiedMatch: boolean;
 }
 
 export interface Recipe {
@@ -84,6 +102,18 @@ export interface Recipe {
   accentColor: string; // tailwind bg class
   cuisine?: string;
   tags?: string[]; // e.g. "dorm-friendly", "one-pot"
+
+  // Extended optional fields used by the larger recipe set
+  prepTimeMinutes?: number;
+  cookTimeMinutes?: number;
+  dormFriendly?: boolean;
+  mealPrepFriendly?: boolean;
+  allergyTags?: string[]; // contains-nuts, contains-soy, etc.
+  whyCheap?: string;
+  storageInstructions?: string;
+  reheatingInstructions?: string;
+  guidedCookingSteps?: GuidedCookingStep[];
+  optionalAddIns?: string[];
 }
 
 export interface CheapFilters {

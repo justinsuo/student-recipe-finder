@@ -11,9 +11,15 @@ import {
 } from "lucide-react";
 import { RecipeCard } from "@/components/recipe/RecipeCard";
 import { RECIPES } from "@/data/recipes";
+import { RECIPE_IMAGES } from "@/data/recipeImages";
 import { calculateCostPerServing } from "@/lib/recipeScoring";
 
 export default function HomePage() {
+  // Prefer recipes that have curated photos for the hero collage
+  const recipesWithPhotos = RECIPES.filter((r) => RECIPE_IMAGES[r.id]);
+  const collage = [...recipesWithPhotos]
+    .sort((a, b) => calculateCostPerServing(a) - calculateCostPerServing(b))
+    .slice(0, 4);
   const featured = [...RECIPES]
     .sort((a, b) => calculateCostPerServing(a) - calculateCostPerServing(b))
     .slice(0, 6);
@@ -54,26 +60,33 @@ export default function HomePage() {
         </div>
         <div className="relative">
           <div className="grid grid-cols-2 gap-4">
-            {featured.slice(0, 4).map((r, i) => (
-              <div
-                key={r.id}
-                className={`flex aspect-square flex-col justify-between rounded-3xl p-5 shadow-sm ${r.accentColor} ${
-                  i === 1 || i === 2 ? "translate-y-6" : ""
-                }`}
-              >
-                <span className="text-4xl" aria-hidden>
-                  {r.emoji}
-                </span>
-                <div>
-                  <p className="text-sm font-semibold text-stone-900">
-                    {r.name}
-                  </p>
-                  <p className="mt-1 text-xs text-stone-700">
-                    ${calculateCostPerServing(r).toFixed(2)}/serving
-                  </p>
-                </div>
-              </div>
-            ))}
+            {collage.map((r, i) => {
+              const photo = RECIPE_IMAGES[r.id];
+              return (
+                <Link
+                  key={r.id}
+                  href={`/recipes/${r.id}`}
+                  className={`group relative flex aspect-square flex-col justify-between overflow-hidden rounded-3xl shadow-sm ${
+                    i === 1 || i === 2 ? "translate-y-6" : ""
+                  }`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={photo.src}
+                    alt={photo.alt || r.name}
+                    loading="lazy"
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent" />
+                  <div className="relative mt-auto p-4 text-white">
+                    <p className="text-sm font-semibold">{r.name}</p>
+                    <p className="mt-1 text-xs">
+                      ${calculateCostPerServing(r).toFixed(2)}/serving
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>

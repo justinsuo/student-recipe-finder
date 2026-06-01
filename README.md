@@ -20,7 +20,35 @@ Includes an in-app AI assistant (**Pesto**) that answers questions about budget,
 - **Guided cooking mode** with one-step-at-a-time layout, large text, progress bar, and automatic timer detection from step text (e.g. "simmer 5 minutes" → 5 min timer).
 - **AI chatbot (Pesto)** — recognizes intents like "what can I make with rice and eggs," "cheap high-protein dinner under $2," "vegan meal prep," and surfaces matching recipe cards inline.
 - **Mobile-first**, sticky desktop navbar + mobile bottom nav, soft-rounded cards, warm neutral palette, accessible contrast.
-- 20+ realistic student-friendly recipes, 50+ ingredients with per-unit cost estimates.
+- **100 recipes** spanning rice bowls, pasta, breakfast, dorm/microwave meals, soups, potato meals, and meal prep — all with realistic per-serving cost estimates.
+- **166 ingredients** across grains, proteins, produce, dairy, condiments, spices, frozen, and snacks.
+- **8 pantry starter presets** (Dorm Starter, Broke College, Vegan Basics, High-Protein Gym, Asian Pantry, Mexican Pantry, Breakfast Hero, Fully Stocked Fridge) — populate your pantry in one click.
+- **AI photo upload** — snap or upload a fridge/pantry photo and Claude Haiku identifies ingredients and adds them.
+- **Dedicated pantry AI chat** — a Haiku assistant primed with your exact pantry contents to suggest meals, swaps, and cheap upgrades.
+- **Real food photography** — Creative Commons photos from Wikimedia Commons for the most popular recipes, with attribution shown on detail pages. Recipes without a curated photo get a polished emoji-on-gradient hero (the documented fallback).
+
+---
+
+## AI features (Anthropic Haiku)
+
+The Pantry page has two AI features powered by Claude Haiku, called directly from the browser:
+
+1. **Fridge/pantry photo upload** — Haiku 4.5 vision identifies ingredients in your photo, maps them to the app's ingredient catalog, and adds them with a single click.
+2. **Primed pantry chat** — a separate chat panel where Haiku is system-prompted with your current pantry contents and acts as a cheap-eats cooking assistant.
+
+**Setup:** click the API-key icon on the Pantry page once and paste your Anthropic key. It's stored only in `localStorage` on your device and sent directly to `api.anthropic.com` — never to any other server. Get a key at [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys).
+
+The general-purpose **Pesto** chatbot (floating green bubble on every page) is rules-based and works without any API key.
+
+---
+
+## Image / photo strategy
+
+- **Source:** Wikimedia Commons (CC BY / CC BY-SA / public domain).
+- **Coverage:** ~56 of the 100 recipes have curated, manually-keyword-filtered real food photos.
+- **Fallback:** Recipes without a curated photo render a polished emoji + accent-gradient hero — never a broken image.
+- **Attribution:** Photographer + license + source link appear under the hero image on every recipe detail page that uses a CC photo.
+- **How to add more:** drop a new entry into [src/data/recipeImages.ts](src/data/recipeImages.ts) — the type and component pick it up automatically.
 
 ---
 
@@ -123,8 +151,3 @@ The chatbot ([`src/lib/chatbot.ts`](src/lib/chatbot.ts)) uses lightweight intent
 - **No real photos** — recipe cards use emoji + colored panels to stay copyright-clean and load fast. Swap in real images via `next/image` if desired.
 - **20 recipes** in the seed — plenty for a working MVP, but a real app would want hundreds with nutrition data from a verified source.
 
----
-
-## License
-
-MIT

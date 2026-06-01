@@ -1,10 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Coins, Filter, RefreshCcw } from "lucide-react";
+import { Coins, Filter, RefreshCcw, Search } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { RecipeGrid } from "@/components/recipe/RecipeGrid";
 import { rankCheapRecipes } from "@/lib/recipeScoring";
+import { INGREDIENT_MAP } from "@/data/ingredients";
 import type {
   CheapFilters,
   DietTag,
@@ -61,9 +62,39 @@ type Sort = "cheapest" | "fastest" | "protein" | "best";
 export default function CheapRecipesPage() {
   const [filters, setFilters] = useState<CheapFilters>(DEFAULTS);
   const [sort, setSort] = useState<Sort>("best");
+  const [query, setQuery] = useState("");
+  const [dormOnly, setDormOnly] = useState(false);
+  const [mealPrepOnly, setMealPrepOnly] = useState(false);
 
   const results = useMemo(() => {
-    const r = rankCheapRecipes(filters);
+    let r = rankCheapRecipes(filters);
+    if (dormOnly) {
+      r = r.filter(
+        (x) =>
+          x.recipe.dormFriendly ||
+          x.recipe.equipment.includes("microwave") ||
+          x.recipe.equipment.includes("no-kitchen"),
+      );
+    }
+    if (mealPrepOnly) {
+      r = r.filter(
+        (x) =>
+          x.recipe.mealPrepFriendly ||
+          x.recipe.mealType === "meal-prep" ||
+          (x.recipe.tags ?? []).includes("meal-prep"),
+      );
+    }
+    if (query.trim()) {
+      const q = query.trim().toLowerCase();
+      r = r.filter((x) => {
+        if (x.recipe.name.toLowerCase().includes(q)) return true;
+        if (x.recipe.description.toLowerCase().includes(q)) return true;
+        return x.recipe.ingredients.some((ri) => {
+          const ing = INGREDIENT_MAP.get(ri.ingredientId);
+          return ing?.name.toLowerCase().includes(q);
+        });
+      });
+    }
     const sorted = [...r];
     if (sort === "cheapest") sorted.sort((a, b) => a.costPerServing - b.costPerServing);
     else if (sort === "fastest")
@@ -73,7 +104,7 @@ export default function CheapRecipesPage() {
         (a, b) => b.recipe.estimatedNutrition.protein - a.recipe.estimatedNutrition.protein,
       );
     return sorted;
-  }, [filters, sort]);
+  }, [filters, sort, query, dormOnly, mealPrepOnly]);
 
   function toggleEquipment(eq: Equipment) {
     setFilters((f) =>
@@ -121,6 +152,29 @@ export default function CheapRecipesPage() {
         <div className="mb-5 flex items-center gap-2 text-stone-700">
           <Filter size={16} />
           <h2 className="text-sm font-semibold uppercase tracking-wide">Filters</h2>
+        </div>
+
+        <div className="relative mb-5">
+          <Search
+            size={16}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
+          />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by recipe name or ingredient (rice, tofu, pasta…)"
+            className="w-full rounded-full border border-stone-200 bg-stone-50 py-2.5 pl-10 pr-4 text-sm focus:border-emerald-400 focus:bg-white focus:outline-none"
+            aria-label="Search recipes"
+          />
+        </div>
+
+        <div className="mb-5 flex flex-wrap gap-2">
+          <Chip active={dormOnly} onClick={() => setDormOnly((v) => !v)}>
+            🏠 Dorm-friendly only
+          </Chip>
+          <Chip active={mealPrepOnly} onClick={() => setMealPrepOnly((v) => !v)}>
+            🥡 Meal prep only
+          </Chip>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">

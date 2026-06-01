@@ -23,6 +23,7 @@ import {
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { RecipeImage } from "@/components/recipe/RecipeImage";
 import { useAppStore } from "@/lib/AppStore";
 import {
   calculateCostPerServing,
@@ -67,7 +68,9 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
         <ArrowLeft size={14} /> Back to recipes
       </Link>
 
-      <header className="grid gap-6 md:grid-cols-[1.4fr_1fr] md:items-center">
+      <RecipeImage recipe={recipe} variant="hero" showAttribution className="overflow-hidden" />
+
+      <header className="grid gap-6 md:items-center">
         <div className="space-y-4">
           <div className="flex flex-wrap gap-2">
             <Badge tone="green" icon={<Coins size={12} />}>
@@ -127,13 +130,6 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
           </div>
         </div>
 
-        <div
-          className={`flex aspect-square w-full max-w-xs items-center justify-center justify-self-center rounded-3xl ${recipe.accentColor} shadow-sm md:justify-self-end`}
-        >
-          <span className="text-8xl" aria-hidden>
-            {recipe.emoji}
-          </span>
-        </div>
       </header>
 
       <div className="grid gap-6 md:grid-cols-2">

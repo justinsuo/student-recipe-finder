@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 import { useAppStore } from "@/lib/AppStore";
 import type { Recipe, RecipeScoreResult } from "@/lib/types";
 import { calculateCostPerServing } from "@/lib/recipeScoring";
+import { RecipeImage } from "./RecipeImage";
 
 interface Props {
   result?: RecipeScoreResult;
@@ -34,12 +35,8 @@ export function RecipeCard({ result, recipe, highlight }: Props) {
       href={`/recipes/${r.id}`}
       className="group flex flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
     >
-      <div
-        className={`relative flex h-32 items-center justify-center ${r.accentColor}`}
-      >
-        <span className="text-5xl" aria-hidden>
-          {r.emoji}
-        </span>
+      <div className="relative">
+        <RecipeImage recipe={r} variant="card" />
         <button
           onClick={(e) => {
             e.preventDefault();
@@ -61,6 +58,14 @@ export function RecipeCard({ result, recipe, highlight }: Props) {
             </Badge>
           </div>
         )}
+        <div className="absolute bottom-3 left-3 flex gap-1.5">
+          <Badge tone="green" icon={<Coins size={12} />}>
+            ${costPerServing.toFixed(2)}/serving
+          </Badge>
+          <Badge tone="amber" icon={<Clock size={12} />}>
+            {r.totalTimeMinutes} min
+          </Badge>
+        </div>
       </div>
 
       <div className="flex flex-1 flex-col gap-3 p-4">
@@ -74,12 +79,6 @@ export function RecipeCard({ result, recipe, highlight }: Props) {
         </div>
 
         <div className="flex flex-wrap items-center gap-1.5">
-          <Badge tone="green" icon={<Coins size={12} />}>
-            ${costPerServing.toFixed(2)}/serving
-          </Badge>
-          <Badge tone="amber" icon={<Clock size={12} />}>
-            {r.totalTimeMinutes} min
-          </Badge>
           <Badge tone="stone" icon={<Flame size={12} />}>
             {r.difficulty}
           </Badge>

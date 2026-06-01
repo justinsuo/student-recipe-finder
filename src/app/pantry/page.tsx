@@ -8,6 +8,7 @@ import {
   Search,
   Clock4,
   Sparkles,
+  Wand2,
 } from "lucide-react";
 import {
   INGREDIENTS,
@@ -15,6 +16,7 @@ import {
   CATEGORY_LABEL,
   QUICK_ADD_STAPLES,
 } from "@/data/ingredients";
+import { PANTRY_PRESETS } from "@/data/pantryPresets";
 import { useAppStore } from "@/lib/AppStore";
 import {
   groupPantryResults,
@@ -24,6 +26,9 @@ import {
 import { RecipeCard } from "@/components/recipe/RecipeCard";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ApiKeyDialog } from "@/components/pantry/ApiKeyDialog";
+import { PantryPhotoUpload } from "@/components/pantry/PantryPhotoUpload";
+import { PantryAIChat } from "@/components/pantry/PantryAIChat";
 import type { Ingredient, IngredientCategory } from "@/lib/types";
 
 export default function PantryPage() {
@@ -37,6 +42,15 @@ export default function PantryPage() {
   } = useAppStore();
 
   const [search, setSearch] = useState("");
+  const [apiKeyOpen, setApiKeyOpen] = useState(false);
+
+  function loadPreset(ingredientIds: string[]) {
+    for (const id of ingredientIds) {
+      if (pantry.some((p) => p.ingredientId === id)) continue;
+      if (!INGREDIENT_MAP.has(id)) continue;
+      addPantryItem({ ingredientId: id });
+    }
+  }
 
   const filtered = useMemo(() => {
     if (!search.trim()) return [] as Ingredient[];
@@ -66,17 +80,55 @@ export default function PantryPage() {
 
   return (
     <div className="space-y-10">
-      <header>
-        <p className="text-sm font-medium text-emerald-700">Pantry-to-Plate</p>
-        <h1 className="mt-1 text-3xl font-bold text-stone-900 sm:text-4xl">
-          What can you make right now?
-        </h1>
-        <p className="mt-2 max-w-xl text-sm text-stone-600">
-          Add what&apos;s in your kitchen. We&apos;ll surface recipes you can
-          make, ones you can make with 1–2 cheap items, and meals to use up
-          anything expiring.
-        </p>
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-medium text-emerald-700">Pantry-to-Plate</p>
+          <h1 className="mt-1 text-3xl font-bold text-stone-900 sm:text-4xl">
+            What can you make right now?
+          </h1>
+          <p className="mt-2 max-w-xl text-sm text-stone-600">
+            Add what&apos;s in your kitchen. We&apos;ll surface recipes you can
+            make, ones you can make with 1–2 cheap items, and meals to use up
+            anything expiring.
+          </p>
+        </div>
       </header>
+
+      <section className="rounded-3xl border border-stone-200 bg-white p-5 sm:p-6">
+        <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-stone-700">
+          <Wand2 size={16} /> Quick start presets
+        </h2>
+        <p className="mt-1 text-sm text-stone-600">
+          Pick a starter pack to populate your pantry instantly. Anything
+          already in your pantry is kept.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {PANTRY_PRESETS.map((preset) => (
+            <button
+              key={preset.id}
+              onClick={() => loadPreset(preset.ingredientIds)}
+              className="group flex flex-col items-start gap-2 rounded-2xl border border-stone-200 bg-stone-50 p-3 text-left transition-colors hover:border-emerald-300 hover:bg-emerald-50"
+            >
+              <span className="text-2xl" aria-hidden>
+                {preset.emoji}
+              </span>
+              <p className="text-sm font-semibold text-stone-900 group-hover:text-emerald-800">
+                {preset.name}
+              </p>
+              <p className="text-xs text-stone-600">{preset.description}</p>
+              <span className="mt-1 text-[11px] font-medium text-stone-500">
+                Adds {preset.ingredientIds.length} items
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <PantryPhotoUpload onRequestApiKey={() => setApiKeyOpen(true)} />
+
+      <PantryAIChat onRequestApiKey={() => setApiKeyOpen(true)} />
+
+      <ApiKeyDialog open={apiKeyOpen} onClose={() => setApiKeyOpen(false)} />
 
       <section className="rounded-3xl border border-stone-200 bg-white p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">

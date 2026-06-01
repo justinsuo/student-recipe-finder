@@ -5,7 +5,14 @@ const repo = "student-recipe-finder";
 
 const nextConfig: NextConfig = {
   output: "export",
-  images: { unoptimized: true },
+  images: {
+    unoptimized: true,
+    remotePatterns: [
+      { protocol: "https", hostname: "upload.wikimedia.org" },
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "images.pexels.com" },
+    ],
+  },
   trailingSlash: true,
   // Required for GitHub Pages project hosting (served at /<repo>/)
   basePath: isGhPages ? `/${repo}` : undefined,
