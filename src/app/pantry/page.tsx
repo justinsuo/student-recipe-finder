@@ -28,7 +28,9 @@ import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PantryPhotoUpload } from "@/components/pantry/PantryPhotoUpload";
 import { PantryVoiceInput } from "@/components/pantry/PantryVoiceInput";
+import { PantrySmartAdd } from "@/components/pantry/PantrySmartAdd";
 import { PantryAIChat } from "@/components/pantry/PantryAIChat";
+import { getCustomIngredients } from "@/lib/customIngredientStorage";
 import type { Ingredient, IngredientCategory } from "@/lib/types";
 
 export default function PantryPage() {
@@ -62,13 +64,32 @@ export default function PantryPage() {
   }, [search, pantry]);
 
   const grouped = useMemo(() => {
-    const map = new Map<IngredientCategory, Ingredient[]>();
+    const map = new Map<IngredientCategory | "custom", Ingredient[]>();
+    const customMap = new Map(
+      getCustomIngredients().map((c) => [c.id, c]),
+    );
     for (const item of pantry) {
       const ing = INGREDIENT_MAP.get(item.ingredientId);
-      if (!ing) continue;
-      const list = map.get(ing.category) ?? [];
-      list.push(ing);
-      map.set(ing.category, list);
+      if (ing) {
+        const list = map.get(ing.category) ?? [];
+        list.push(ing);
+        map.set(ing.category, list);
+        continue;
+      }
+      // Custom ingredient — represent as a built-in shape so display logic
+      // doesn't need to change.
+      const c = customMap.get(item.ingredientId);
+      if (!c) continue;
+      const proxy: Ingredient = {
+        id: c.id,
+        name: c.displayName || c.canonicalName,
+        category: "snack" as IngredientCategory,
+        estimatedUnitCost: c.estimatedUnitCost ?? 0,
+        unit: c.unit ?? "each",
+      };
+      const list = map.get("custom") ?? [];
+      list.push(proxy);
+      map.set("custom", list);
     }
     return map;
   }, [pantry]);
@@ -122,6 +143,8 @@ export default function PantryPage() {
           ))}
         </div>
       </section>
+
+      <PantrySmartAdd />
 
       <PantryVoiceInput />
 
@@ -210,7 +233,9 @@ export default function PantryPage() {
             {Array.from(grouped.entries()).map(([category, items]) => (
               <div key={category}>
                 <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-stone-500">
-                  {CATEGORY_LABEL[category]}
+                  {category === "custom"
+                    ? "Custom / AI-recognized"
+                    : CATEGORY_LABEL[category]}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {items.map((ing) => {

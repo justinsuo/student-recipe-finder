@@ -1,0 +1,12 @@
+name = "student-recipe-finder-api"
+main = "src/index.ts"
+compatibility_date = "2025-05-01"
+compatibility_flags = ["nodejs_compat"]
+
+# OPENAI_API_KEY and ALLOWED_ORIGIN are stored as secrets:
+#   wrangler secret put OPENAI_API_KEY
+#   wrangler secret put ALLOWED_ORIGIN  (e.g. https://justinsuo.github.io)
+
+[vars]
+DEFAULT_TEXT_MODEL = "gpt-4o-mini"
+DEFAULT_IMAGE_MODEL = "gpt-image-1"

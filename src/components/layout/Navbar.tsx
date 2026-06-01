@@ -10,13 +10,17 @@ import {
   Bookmark,
   Info,
   Sparkles,
+  ChefHat,
+  Wand2,
 } from "lucide-react";
 import { clsx } from "clsx";
 
 const links = [
   { href: "/", label: "Home", icon: Home },
-  { href: "/cheap-recipes", label: "Cheap Coach", icon: Coins },
+  { href: "/ai-chef", label: "AI Chef", icon: ChefHat, emphasis: true },
+  { href: "/recipe-studio", label: "Studio", icon: Wand2 },
   { href: "/pantry", label: "Pantry", icon: Refrigerator },
+  { href: "/cheap-recipes", label: "Cheap", icon: Coins },
   { href: "/grocery-list", label: "Grocery", icon: ShoppingBasket },
   { href: "/saved", label: "Saved", icon: Bookmark },
   { href: "/about", label: "About", icon: Info },
@@ -51,7 +55,9 @@ export function Navbar() {
                 href={link.href}
                 className={clsx(
                   "flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-colors",
-                  active
+                  link.emphasis && !active
+                    ? "border border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
+                    : active
                     ? "bg-stone-900 text-white"
                     : "text-stone-700 hover:bg-stone-100",
                 )}

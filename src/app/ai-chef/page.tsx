@@ -1,0 +1,742 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import {
+  Sparkles,
+  ChefHat,
+  Loader2,
+  RefreshCw,
+  Coins,
+  Clock,
+  Flame,
+  ShoppingBasket,
+  Bookmark,
+  BookmarkCheck,
+  AlertCircle,
+  ArrowRight,
+} from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import {
+  generateRecipe,
+  generateRecipeImage,
+  isWorkerConfigured,
+  type GeneratedRecipe,
+} from "@/lib/workerClient";
+import {
+  fallbackImageMeta,
+  imageDataUrl,
+  makeCustomRecipeId,
+  saveCustomRecipe,
+  storeRecipeImage,
+} from "@/lib/customRecipeStorage";
+import type { AIGeneratedRecipe } from "@/lib/customRecipeTypes";
+import { useAppStore } from "@/lib/AppStore";
+import { INGREDIENTS } from "@/data/ingredients";
+import { resolvedToCustom, saveCustomIngredient, findExistingByName } from "@/lib/customIngredientStorage";
+
+const STARTER_PROMPTS = [
+  "I have rice, eggs, and frozen peas — make a cheap dinner.",
+  "Spicy, cheap, high-protein, air fryer friendly.",
+  "Something like fried rice but using leftover tortillas.",
+  "Microwave-only breakfast under $1.50 with oats and banana.",
+];
+
+const EQUIPMENT_OPTS = [
+  "microwave",
+  "stovetop",
+  "oven",
+  "rice-cooker",
+  "air-fryer",
+  "no-kitchen",
+];
+
+const DIET_OPTS = ["vegetarian", "vegan", "high-protein", "gluten-free", "dairy-free"];
+
+export default function AIChefPage() {
+  const { addGroceryItems, toggleSaved, isSaved, pantry } = useAppStore();
+
+  const [mode, setMode] = useState<"have" | "imagine">("have");
+  const [ingredients, setIngredients] = useState("");
+  const [cravings, setCravings] = useState("");
+  const [budget, setBudget] = useState<number>(3);
+  const [servings, setServings] = useState<number>(2);
+  const [equipment, setEquipment] = useState<string[]>(["microwave", "stovetop"]);
+  const [diet, setDiet] = useState<string[]>([]);
+  const [timeLimit, setTimeLimit] = useState("any");
+  const [creativity, setCreativity] = useState<"practical" | "balanced" | "creative">("balanced");
+  const [autoImage, setAutoImage] = useState(true);
+
+  const [loading, setLoading] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [recipe, setRecipe] = useState<GeneratedRecipe | null>(null);
+  const [savedId, setSavedId] = useState<string | null>(null);
+  const [savedImageDataUrl, setSavedImageDataUrl] = useState<string | null>(null);
+
+  function toggleSet(set: string[], v: string): string[] {
+    return set.includes(v) ? set.filter((x) => x !== v) : [...set, v];
+  }
+
+  async function run(refinement?: string) {
+    setLoading(true);
+    setError(null);
+    if (!refinement) {
+      setRecipe(null);
+      setSavedId(null);
+      setSavedImageDataUrl(null);
+    }
+    try {
+      const fromPantry =
+        ingredients.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);
+      const r = await generateRecipe({
+        ingredients: fromPantry,
+        budgetPerServing: budget,
+        servings,
+        equipment,
+        timeLimit,
+        dietTags: diet,
+        cravings: mode === "imagine" ? cravings : undefined,
+        creativity,
+        refinement,
+      });
+      setRecipe(r);
+      // Persist + (optionally) generate image
+      const id = makeCustomRecipeId(r.name, "gen");
+      const ai: AIGeneratedRecipe = {
+        id,
+        isAIGenerated: true,
+        isUserCreated: false,
+        name: r.name,
+        description: r.description,
+        userRequestSummary: r.userRequestSummary,
+        whyThisFits: r.whyThisFits,
+        mealType: r.mealType,
+        cuisineStyle: r.cuisineStyle,
+        servings: r.servings,
+        prepTimeMinutes: r.prepTimeMinutes,
+        cookTimeMinutes: r.cookTimeMinutes,
+        totalTimeMinutes: r.totalTimeMinutes,
+        difficulty: r.difficulty,
+        equipment: r.equipment,
+        primaryCookingMethod: r.primaryCookingMethod,
+        noStovetopRequired: r.noStovetopRequired,
+        estimatedTotalCost: r.estimatedTotalCost,
+        estimatedCostPerServing: r.estimatedCostPerServing,
+        estimatedMissingIngredientCost: r.estimatedMissingIngredientCost,
+        ingredients: r.ingredients,
+        missingIngredients: r.missingIngredients,
+        steps: r.steps,
+        guidedCookingSteps: r.guidedCookingSteps,
+        cheapTips: r.cheapTips,
+        substitutions: r.substitutions,
+        makeItCheaper: r.makeItCheaper,
+        makeItHealthier: r.makeItHealthier,
+        makeItHigherProtein: r.makeItHigherProtein,
+        studentTips: r.studentTips,
+        storageInstructions: r.storageInstructions,
+        reheatingInstructions: r.reheatingInstructions,
+        safetyNotes: r.safetyNotes,
+        estimatedNutrition: r.estimatedNutrition,
+        tags: r.tags,
+        image: fallbackImageMeta(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      saveCustomRecipe(ai);
+      setSavedId(id);
+
+      if (autoImage) {
+        setImageLoading(true);
+        try {
+          const img = await generateRecipeImage({
+            recipeName: r.name,
+            ingredients: r.ingredients.map((i) => i.name).slice(0, 8),
+            method: r.primaryCookingMethod,
+            prompt: r.imagePromptHint,
+          });
+          if (img.b64_json) {
+            const stored = storeRecipeImage(id, img.b64_json, {
+              prompt: img.prompt,
+              model: img.model,
+            });
+            if (stored.ok) {
+              const dataUrl = imageDataUrl(img.b64_json);
+              setSavedImageDataUrl(dataUrl);
+              saveCustomRecipe({
+                ...ai,
+                image: {
+                  src: dataUrl,
+                  alt: r.name,
+                  sourceName: "AI generated",
+                  license: "Generated image",
+                  isAIGenerated: true,
+                  isFallback: false,
+                  generatedPrompt: img.prompt,
+                  generatedAt: new Date().toISOString(),
+                  model: img.model,
+                },
+              });
+            }
+          } else if (img.url) {
+            setSavedImageDataUrl(img.url);
+            saveCustomRecipe({
+              ...ai,
+              image: {
+                src: img.url,
+                alt: r.name,
+                sourceName: "AI generated",
+                license: "Generated image",
+                isAIGenerated: true,
+                isFallback: false,
+                generatedPrompt: img.prompt,
+                generatedAt: new Date().toISOString(),
+                model: img.model,
+              },
+            });
+          }
+        } catch {
+          // image errors are non-fatal
+        } finally {
+          setImageLoading(false);
+        }
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Generation failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function addAllMissingToGrocery() {
+    if (!recipe || !savedId) return;
+    const items: { recipeId: string; ingredients: { name: string; cost: number }[] } = {
+      recipeId: savedId,
+      ingredients: (recipe.missingIngredients || []).map((m) => ({
+        name: m.name,
+        cost: m.estimatedCost,
+      })),
+    };
+    // Reuse existing grocery store via custom ingredients
+    for (const m of recipe.missingIngredients || []) {
+      const ex = findExistingByName(
+        m.name,
+        INGREDIENTS.map((i) => ({ name: i.name, id: i.id })),
+      );
+      const ingredientId = ex
+        ? ex.id
+        : (() => {
+            const c = resolvedToCustom({
+              canonicalName: m.name,
+              displayName: m.name,
+              originalText: m.name,
+              aliases: [],
+              category: "other",
+              ingredientRole: "other",
+              storageType: "unknown",
+              estimatedUnitCost: m.estimatedCost,
+              unit: "each",
+              dietaryTags: [],
+              allergyTags: [],
+              confidence: 0.8,
+            });
+            saveCustomIngredient(c);
+            return c.id;
+          })();
+      // Build a minimal Recipe-like object to satisfy addGroceryItems signature
+      addGroceryItems(
+        {
+          id: savedId,
+          name: recipe.name,
+          ingredients: [
+            { ingredientId, quantity: 1 } as { ingredientId: string; quantity: number },
+          ],
+        } as never,
+        [ingredientId],
+      );
+    }
+    void items;
+  }
+
+  return (
+    <div className="space-y-10">
+      <header>
+        <p className="flex items-center gap-1.5 text-sm font-medium text-emerald-700">
+          <ChefHat size={14} /> AI Chef
+        </p>
+        <h1 className="mt-1 text-3xl font-bold text-stone-900 sm:text-4xl">
+          Tell the AI what you have. Get a cheap recipe.
+        </h1>
+        <p className="mt-2 max-w-2xl text-sm text-stone-600">
+          Generates an original recipe based on your ingredients, budget, gear,
+          diet, and cravings — including an AI-generated photo.
+        </p>
+      </header>
+
+      {!isWorkerConfigured() && (
+        <Card className="border-amber-200 bg-amber-50">
+          <div className="flex items-start gap-2 text-sm text-amber-900">
+            <AlertCircle size={16} className="mt-0.5 flex-none" />
+            <div>
+              <p className="font-semibold">AI Chef is not configured yet.</p>
+              <p className="mt-1">
+                Deploy the Cloudflare Worker (in <code>worker/</code>) and set
+                the <code>WORKER_URL</code> GitHub secret. See
+                <code> worker/README.md</code>.
+              </p>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      <section className="rounded-3xl border border-stone-200 bg-white p-5 sm:p-6">
+        <div className="mb-5 flex flex-wrap gap-2">
+          <ModeChip active={mode === "have"} onClick={() => setMode("have")}>
+            Generate from what I have
+          </ModeChip>
+          <ModeChip
+            active={mode === "imagine"}
+            onClick={() => setMode("imagine")}
+          >
+            Make something creative
+          </ModeChip>
+        </div>
+
+        {mode === "have" ? (
+          <div>
+            <label className="text-sm font-medium text-stone-800">
+              Ingredients you have
+            </label>
+            <textarea
+              value={ingredients}
+              onChange={(e) => setIngredients(e.target.value)}
+              rows={2}
+              placeholder="rice, eggs, frozen peas, soy sauce, scallions"
+              className="mt-1 w-full rounded-2xl border border-stone-200 bg-stone-50 p-3 text-sm focus:border-emerald-400 focus:bg-white focus:outline-none"
+            />
+            <button
+              type="button"
+              className="mt-1 text-xs font-medium text-emerald-700 hover:underline"
+              onClick={() =>
+                setIngredients(
+                  pantry
+                    .map((p) => {
+                      const found = INGREDIENTS.find(
+                        (i) => i.id === p.ingredientId,
+                      );
+                      return found?.name;
+                    })
+                    .filter(Boolean)
+                    .join(", "),
+                )
+              }
+            >
+              Use my pantry →
+            </button>
+          </div>
+        ) : (
+          <div>
+            <label className="text-sm font-medium text-stone-800">
+              What are you craving?
+            </label>
+            <textarea
+              value={cravings}
+              onChange={(e) => setCravings(e.target.value)}
+              rows={2}
+              placeholder="I want something like Korean fried rice but cheaper and healthier."
+              className="mt-1 w-full rounded-2xl border border-stone-200 bg-stone-50 p-3 text-sm focus:border-emerald-400 focus:bg-white focus:outline-none"
+            />
+            <div className="mt-2 flex flex-wrap gap-2">
+              {STARTER_PROMPTS.map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setCravings(p)}
+                  className="rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5 text-xs text-stone-700 hover:border-emerald-300 hover:bg-emerald-50"
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="mt-5 grid gap-5 lg:grid-cols-2">
+          <div>
+            <label className="text-sm font-medium text-stone-800">
+              Budget per serving (${budget.toFixed(2)})
+            </label>
+            <input
+              type="range"
+              min={0.5}
+              max={6}
+              step={0.25}
+              value={budget}
+              onChange={(e) => setBudget(parseFloat(e.target.value))}
+              className="mt-2 w-full accent-emerald-600"
+            />
+            <label className="mt-3 block text-sm font-medium text-stone-800">
+              Servings ({servings})
+            </label>
+            <input
+              type="range"
+              min={1}
+              max={6}
+              step={1}
+              value={servings}
+              onChange={(e) => setServings(parseInt(e.target.value, 10))}
+              className="mt-2 w-full accent-emerald-600"
+            />
+            <label className="mt-3 block text-sm font-medium text-stone-800">
+              Time limit
+            </label>
+            <select
+              value={timeLimit}
+              onChange={(e) => setTimeLimit(e.target.value)}
+              className="mt-1 w-full rounded-full border border-stone-200 bg-stone-50 px-3 py-2 text-sm focus:border-emerald-400 focus:bg-white focus:outline-none"
+            >
+              <option value="any">Any</option>
+              <option value="under 10 minutes">Under 10 min</option>
+              <option value="under 20 minutes">Under 20 min</option>
+              <option value="under 30 minutes">Under 30 min</option>
+              <option value="meal prep">Meal prep</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-stone-800">Equipment</label>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {EQUIPMENT_OPTS.map((eq) => (
+                <Chip
+                  key={eq}
+                  active={equipment.includes(eq)}
+                  onClick={() => setEquipment(toggleSet(equipment, eq))}
+                >
+                  {eq}
+                </Chip>
+              ))}
+            </div>
+            <label className="mt-3 block text-sm font-medium text-stone-800">
+              Diet
+            </label>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {DIET_OPTS.map((d) => (
+                <Chip
+                  key={d}
+                  active={diet.includes(d)}
+                  onClick={() => setDiet(toggleSet(diet, d))}
+                >
+                  {d}
+                </Chip>
+              ))}
+            </div>
+            <label className="mt-3 block text-sm font-medium text-stone-800">
+              Creativity
+            </label>
+            <div className="mt-2 flex gap-2">
+              {(["practical", "balanced", "creative"] as const).map((v) => (
+                <Chip
+                  key={v}
+                  active={creativity === v}
+                  onClick={() => setCreativity(v)}
+                >
+                  {v}
+                </Chip>
+              ))}
+            </div>
+            <label className="mt-3 flex items-center gap-2 text-sm text-stone-800">
+              <input
+                type="checkbox"
+                checked={autoImage}
+                onChange={(e) => setAutoImage(e.target.checked)}
+                className="h-4 w-4 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500"
+              />
+              Generate an image automatically
+            </label>
+          </div>
+        </div>
+
+        <div className="mt-5 flex flex-wrap gap-2">
+          <Button
+            onClick={() => run()}
+            disabled={loading || !isWorkerConfigured()}
+            leftIcon={
+              loading ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Sparkles size={16} />
+              )
+            }
+          >
+            {loading ? "Thinking…" : "Generate my recipe"}
+          </Button>
+          {recipe && (
+            <>
+              <Button
+                onClick={() => run("regenerate with new creative angle")}
+                variant="outline"
+                leftIcon={<RefreshCw size={14} />}
+              >
+                Regenerate
+              </Button>
+              <Button
+                onClick={() => run("make it cheaper")}
+                variant="ghost"
+                size="sm"
+              >
+                Cheaper
+              </Button>
+              <Button
+                onClick={() => run("make it higher protein")}
+                variant="ghost"
+                size="sm"
+              >
+                Higher protein
+              </Button>
+              <Button
+                onClick={() => run("make it faster")}
+                variant="ghost"
+                size="sm"
+              >
+                Faster
+              </Button>
+              <Button
+                onClick={() => run("use fewer missing ingredients")}
+                variant="ghost"
+                size="sm"
+              >
+                Fewer missing items
+              </Button>
+            </>
+          )}
+        </div>
+      </section>
+
+      {error && (
+        <Card className="border-red-200 bg-red-50">
+          <div className="flex items-start gap-2 text-sm text-red-800">
+            <AlertCircle size={16} className="mt-0.5 flex-none" />
+            <div>
+              <p className="font-semibold">AI Chef couldn&apos;t finish.</p>
+              <p className="mt-1">{error}</p>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {recipe && savedId && (
+        <article className="space-y-6">
+          <div className="overflow-hidden rounded-3xl shadow-sm">
+            <div className="relative aspect-[16/9] bg-stone-100">
+              {savedImageDataUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={savedImageDataUrl}
+                  alt={recipe.name}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              ) : imageLoading ? (
+                <div className="flex h-full items-center justify-center text-stone-600">
+                  <Loader2 size={20} className="mr-2 animate-spin" /> Generating
+                  recipe image…
+                </div>
+              ) : (
+                <div className="flex h-full flex-col items-center justify-center bg-gradient-to-br from-emerald-100 to-amber-50 text-stone-500">
+                  <ChefHat size={48} />
+                  <p className="mt-2 text-xs uppercase tracking-wide">
+                    Image not generated
+                  </p>
+                </div>
+              )}
+              <div className="absolute right-3 top-3 flex gap-2">
+                <Badge tone="violet">
+                  <Sparkles size={11} className="mr-1" /> AI Generated
+                </Badge>
+              </div>
+            </div>
+          </div>
+
+          <header className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              <Badge tone="green" icon={<Coins size={12} />}>
+                ${recipe.estimatedCostPerServing.toFixed(2)}/serving
+              </Badge>
+              <Badge tone="amber" icon={<Clock size={12} />}>
+                {recipe.totalTimeMinutes} min
+              </Badge>
+              <Badge tone="stone" icon={<Flame size={12} />}>
+                {recipe.difficulty}
+              </Badge>
+            </div>
+            <h2 className="text-3xl font-bold text-stone-900">{recipe.name}</h2>
+            <p className="text-stone-700">{recipe.description}</p>
+            {recipe.whyThisFits && (
+              <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                <p className="text-xs font-semibold uppercase tracking-wide">
+                  Why this fits your request
+                </p>
+                <p className="mt-1">{recipe.whyThisFits}</p>
+              </div>
+            )}
+            <div className="flex flex-wrap gap-2 pt-1">
+              <Button
+                onClick={() => toggleSaved(savedId)}
+                variant="outline"
+                size="sm"
+                leftIcon={
+                  isSaved(savedId) ? (
+                    <BookmarkCheck size={14} className="text-emerald-600" />
+                  ) : (
+                    <Bookmark size={14} />
+                  )
+                }
+              >
+                {isSaved(savedId) ? "Saved" : "Save recipe"}
+              </Button>
+              {(recipe.missingIngredients?.length ?? 0) > 0 && (
+                <Button
+                  onClick={addAllMissingToGrocery}
+                  size="sm"
+                  variant="secondary"
+                  leftIcon={<ShoppingBasket size={14} />}
+                >
+                  Add {recipe.missingIngredients!.length} missing to grocery list
+                </Button>
+              )}
+              <Link
+                href={`/recipes/custom?id=${savedId}`}
+                className="inline-flex items-center gap-1.5 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-800 hover:bg-stone-50"
+              >
+                Open full page <ArrowRight size={14} />
+              </Link>
+            </div>
+          </header>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card>
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-stone-700">
+                Ingredients
+              </h3>
+              <ul className="mt-3 divide-y divide-stone-100">
+                {recipe.ingredients.map((ing, i) => (
+                  <li
+                    key={i}
+                    className="flex items-center justify-between py-2 text-sm"
+                  >
+                    <div>
+                      <p
+                        className={
+                          ing.userAlreadyHas
+                            ? "font-medium text-emerald-700"
+                            : "font-medium text-stone-800"
+                        }
+                      >
+                        {ing.name} {ing.optional && (
+                          <span className="text-xs text-stone-500">(optional)</span>
+                        )}
+                      </p>
+                      <p className="text-xs text-stone-500">
+                        {ing.quantity} {ing.unit}
+                        {ing.userAlreadyHas && " · you have"}
+                      </p>
+                    </div>
+                    <p className="text-sm font-medium text-stone-900">
+                      ${ing.estimatedCost.toFixed(2)}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+            <Card>
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-stone-700">
+                Steps
+              </h3>
+              <ol className="mt-3 space-y-3">
+                {recipe.steps.map((s, i) => (
+                  <li key={i} className="flex gap-3 text-sm">
+                    <span className="mt-0.5 grid h-6 w-6 flex-none place-items-center rounded-full bg-emerald-600 text-xs font-bold text-white">
+                      {i + 1}
+                    </span>
+                    <p>{s}</p>
+                  </li>
+                ))}
+              </ol>
+            </Card>
+          </div>
+
+          {(recipe.missingIngredients?.length ?? 0) > 0 && (
+            <Card className="border-amber-200 bg-amber-50">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-amber-900">
+                Missing ingredients
+              </h3>
+              <ul className="mt-3 divide-y divide-amber-100">
+                {recipe.missingIngredients!.map((m, i) => (
+                  <li key={i} className="flex items-center justify-between py-2 text-sm">
+                    <div>
+                      <p className="font-medium text-stone-900">{m.name}</p>
+                      <p className="text-xs text-stone-600">
+                        {m.importance}
+                        {m.cheapSubstitute ? ` · or use ${m.cheapSubstitute}` : ""}
+                      </p>
+                    </div>
+                    <p className="font-medium text-stone-900">
+                      ${m.estimatedCost.toFixed(2)}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
+        </article>
+      )}
+    </div>
+  );
+}
+
+function Chip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={
+        active
+          ? "rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white"
+          : "rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-700 hover:border-emerald-300 hover:bg-emerald-50"
+      }
+    >
+      {children}
+    </button>
+  );
+}
+
+function ModeChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={
+        active
+          ? "rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
+          : "rounded-2xl border border-stone-200 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:border-emerald-300 hover:bg-emerald-50"
+      }
+    >
+      {children}
+    </button>
+  );
+}
