@@ -3,12 +3,27 @@ main = "src/index.ts"
 compatibility_date = "2025-05-01"
 compatibility_flags = ["nodejs_compat"]
 
-# OPENAI_API_KEY and ALLOWED_ORIGIN are stored as secrets:
+# OPENAI_API_KEY and ALLOWED_ORIGIN are stored as worker secrets:
 #   wrangler secret put OPENAI_API_KEY
 #   wrangler secret put ALLOWED_ORIGIN  (e.g. https://justinsuo.github.io)
 
+# Model overrides are plain [vars] — change in code or via:
+#   wrangler secret put RECIPE_MODEL
+# All overrides are optional. Defaults pick real, available OpenAI models.
+
 [vars]
+# Text models. Aliases (no dated snapshots) so OpenAI auto-resolves to the
+# latest version. Override per-task to use bigger / cheaper models without
+# changing code.
 DEFAULT_TEXT_MODEL = "gpt-4o-mini"
-# dall-e-3 works on all OpenAI orgs out of the box. Set to "gpt-image-1"
-# only on orgs that have completed identity verification.
+RECIPE_MODEL = "gpt-4o-mini"
+RECIPE_HIGH_QUALITY_MODEL = "gpt-4o"
+LIGHTWEIGHT_MODEL = "gpt-4o-mini"
+PRICING_MODEL = "gpt-4o-mini"
+INGREDIENT_MODEL = "gpt-4o-mini"
+WEB_RECIPE_MODEL = "gpt-4o-mini"
+
+# Image models. dall-e-3 is the safe default — works on every OpenAI org.
+# gpt-image-1 needs org verification but produces nicer images when available.
 DEFAULT_IMAGE_MODEL = "dall-e-3"
+IMAGE_MODEL_FALLBACK = "gpt-image-1"

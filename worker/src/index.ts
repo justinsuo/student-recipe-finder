@@ -16,12 +16,71 @@
 interface Env {
   OPENAI_API_KEY: string;
   ALLOWED_ORIGIN?: string;
+  // Per-task model overrides — each falls back to DEFAULT_TEXT_MODEL
+  // if not set. All env vars are optional.
   DEFAULT_TEXT_MODEL?: string;
   DEFAULT_IMAGE_MODEL?: string;
+  IMAGE_MODEL_FALLBACK?: string;
+  RECIPE_MODEL?: string;
+  RECIPE_HIGH_QUALITY_MODEL?: string;
+  LIGHTWEIGHT_MODEL?: string;
+  PRICING_MODEL?: string;
+  INGREDIENT_MODEL?: string;
+  WEB_RECIPE_MODEL?: string;
 }
 
+// Real, currently-available OpenAI models (June 2026 lineup).
 const TEXT_MODEL_DEFAULT = "gpt-4o-mini";
+const TEXT_HIGH_QUALITY_DEFAULT = "gpt-4o";
 const IMAGE_MODEL_DEFAULT = "dall-e-3";
+const IMAGE_MODEL_FALLBACK_DEFAULT = "gpt-image-1";
+
+/**
+ * Centralized model selection. Every handler asks this helper for the model
+ * for its task. Overrides come from worker env vars; defaults are kept
+ * current with what OpenAI actually offers.
+ */
+type ModelTask =
+  | "recipe"
+  | "recipeHighQuality"
+  | "lightweight"
+  | "pricing"
+  | "ingredient"
+  | "webRecipe";
+
+function modelFor(env: Env, task: ModelTask): string {
+  switch (task) {
+    case "recipe":
+      return env.RECIPE_MODEL || env.DEFAULT_TEXT_MODEL || TEXT_MODEL_DEFAULT;
+    case "recipeHighQuality":
+      return (
+        env.RECIPE_HIGH_QUALITY_MODEL ||
+        env.DEFAULT_TEXT_MODEL ||
+        TEXT_HIGH_QUALITY_DEFAULT
+      );
+    case "lightweight":
+      return (
+        env.LIGHTWEIGHT_MODEL || env.DEFAULT_TEXT_MODEL || TEXT_MODEL_DEFAULT
+      );
+    case "pricing":
+      return env.PRICING_MODEL || env.DEFAULT_TEXT_MODEL || TEXT_MODEL_DEFAULT;
+    case "ingredient":
+      return (
+        env.INGREDIENT_MODEL || env.DEFAULT_TEXT_MODEL || TEXT_MODEL_DEFAULT
+      );
+    case "webRecipe":
+      return (
+        env.WEB_RECIPE_MODEL || env.DEFAULT_TEXT_MODEL || TEXT_MODEL_DEFAULT
+      );
+  }
+}
+
+function imageModelFor(env: Env): { primary: string; fallback: string } {
+  return {
+    primary: env.DEFAULT_IMAGE_MODEL || IMAGE_MODEL_DEFAULT,
+    fallback: env.IMAGE_MODEL_FALLBACK || IMAGE_MODEL_FALLBACK_DEFAULT,
+  };
+}
 
 // ---------- CORS ----------
 
@@ -62,8 +121,15 @@ async function openaiChatJson(opts: {
   schema?: Record<string, unknown>;
   maxTokens?: number;
   temperature?: number;
+  /** Optional explicit model override; otherwise uses the per-task default. */
+  model?: string;
+  /** Per-task model selection (for logging + default lookup). */
+  task?: ModelTask;
 }): Promise<unknown> {
-  const model = opts.env.DEFAULT_TEXT_MODEL || TEXT_MODEL_DEFAULT;
+  const model = opts.model || modelFor(opts.env, opts.task || "recipe");
+  console.log(
+    `[ai] chat task=${opts.task ?? "recipe"} model=${model} max_tokens=${opts.maxTokens ?? 1200}`,
+  );
   const body: Record<string, unknown> = {
     model,
     messages: [
@@ -115,10 +181,10 @@ async function openaiImage(
   prompt: string,
   size: "1024x1024" | "1024x1536" | "1536x1024" = "1024x1024",
 ): Promise<ImageResult> {
-  const primary = env.DEFAULT_IMAGE_MODEL || IMAGE_MODEL_DEFAULT;
-  const fallback = "dall-e-3";
+  const { primary, fallback } = imageModelFor(env);
 
   async function attempt(model: string): Promise<ImageResult> {
+    console.log(`[ai] image model=${model} size=${size}`);
     const body: Record<string, unknown> = { model, prompt, n: 1, size };
     // gpt-image-1 always returns b64; dall-e-3 returns a URL by default.
     const res = await fetch(
@@ -237,6 +303,7 @@ async function handleResolve(req: Request, env: Env): Promise<Response> {
   try {
     const result = await openaiChatJson({
       env,
+      task: "ingredient" as const,
       system: RESOLVER_SYSTEM,
       user: `User input (source: ${(body as { inputSource?: string }).inputSource || "typed"}):\n"${raw}"\n\nReturn JSON per the schema.`,
       maxTokens: 1500,
@@ -290,6 +357,7 @@ async function handleEnrich(req: Request, env: Env): Promise<Response> {
   try {
     const result = await openaiChatJson({
       env,
+      task: "ingredient" as const,
       system: ENRICH_SYSTEM,
       user: `Ingredient: "${name}"`,
       maxTokens: 600,
@@ -340,6 +408,7 @@ async function handleMatch(req: Request, env: Env): Promise<Response> {
   try {
     const result = await openaiChatJson({
       env,
+      task: "ingredient" as const,
       system: MATCH_SYSTEM,
       user: `Pantry item: "${pantry}"\nRecipe needs: "${required}"`,
       maxTokens: 200,
@@ -439,6 +508,7 @@ async function handleGenerateRecipe(req: Request, env: Env): Promise<Response> {
   try {
     const result = await openaiChatJson({
       env,
+      task: "recipe" as const,
       system: RECIPE_SYSTEM,
       user: userPrompt,
       maxTokens: 3000,
@@ -535,6 +605,7 @@ async function handleGenerateRecipeOptions(
   try {
     const result = await openaiChatJson({
       env,
+      task: "recipeHighQuality" as const,
       system: OPTIONS_SYSTEM,
       user: userPrompt,
       maxTokens: 6000,
@@ -785,6 +856,7 @@ async function handleImportUrl(req: Request, env: Env): Promise<Response> {
       const prompt = `Source URL: ${targetUrl}\nPage title: ${title}\nPage excerpt (may contain ads / non-recipe text):\n${cleanText}\n\nThe page has no structured recipe data. Extract whatever recipe you can find from the excerpt, then adapt it to the user's pantry (${(body.ingredients || []).join(", ") || "any"}), budget $${body.budgetPerServing ?? 3}/serving, equipment ${(body.equipment || []).join(", ") || "any"}, diet ${(body.dietTags || []).join(", ") || "none"}, servings ${body.servings ?? 2}. Return ONLY valid JSON in the recipe schema.`;
       const result = await openaiChatJson({
         env,
+      task: "recipe" as const,
         system: RECIPE_SYSTEM,
         user: prompt,
         maxTokens: 3000,
@@ -826,6 +898,7 @@ async function handleImportUrl(req: Request, env: Env): Promise<Response> {
     const adaptPrompt = `Source structured recipe (paraphrase, do not copy verbatim):\n${JSON.stringify(summary, null, 2)}\n\nUser constraints:\n- Ingredients on hand: ${(body.ingredients || []).join(", ") || "any"}\n- Budget per serving: $${body.budgetPerServing ?? 3}\n- Equipment: ${(body.equipment || []).join(", ") || "any"}\n- Diet: ${(body.dietTags || []).join(", ") || "none"}\n- Target servings: ${body.servings ?? summary.yield ?? 2}\n\nRewrite as JSON per the schema. Keep the dish name; adapt steps to user equipment.`;
     const result = await openaiChatJson({
       env,
+      task: "recipe" as const,
       system: IMPORT_ADAPT_SYSTEM + "\n\n" + RECIPE_SYSTEM,
       user: adaptPrompt,
       maxTokens: 3000,
@@ -914,6 +987,7 @@ Return ONLY valid JSON per the recipe schema. Paraphrase steps; do not copy long
   try {
     const result = await openaiChatJson({
       env,
+      task: "recipe" as const,
       system: IMPORT_ADAPT_SYSTEM + "\n\n" + RECIPE_SYSTEM,
       user: userPrompt,
       maxTokens: 3000,
@@ -1012,6 +1086,7 @@ async function handleWebSearch(req: Request, env: Env): Promise<Response> {
   try {
     const result = await openaiResponsesWithWebSearch({
       env,
+      task: "webRecipe" as const,
       system: DISCOVER_SYSTEM,
       user: userPrompt,
       maxTokens: 2000,
@@ -1049,8 +1124,12 @@ async function openaiResponsesWithWebSearch(opts: {
   system: string;
   user: string;
   maxTokens?: number;
+  task?: ModelTask;
 }): Promise<unknown> {
-  const model = opts.env.DEFAULT_TEXT_MODEL || TEXT_MODEL_DEFAULT;
+  const model = modelFor(opts.env, opts.task || "webRecipe");
+  console.log(
+    `[ai] responses+websearch task=${opts.task ?? "webRecipe"} model=${model}`,
+  );
   const res = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
     headers: {
@@ -1214,6 +1293,7 @@ Use web search of public grocery product examples. Return JSON per the schema. I
   try {
     const result = (await openaiResponsesWithWebSearch({
       env,
+      task: "pricing" as const,
       system: PRICING_SYSTEM,
       user: userPrompt,
       maxTokens: 1800,
@@ -1292,6 +1372,7 @@ async function handleRemix(req: Request, env: Env): Promise<Response> {
   try {
     const result = await openaiChatJson({
       env,
+      task: "recipe" as const,
       system: RECIPE_SYSTEM,
       user: prompt,
       maxTokens: 3000,
@@ -1333,6 +1414,41 @@ export default {
 
     if (req.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: corsHeaders(env, origin) });
+    }
+
+    if (req.method === "GET" && url.pathname === "/diagnostics") {
+      const img = imageModelFor(env);
+      return jsonResponse(
+        {
+          hasApiKey: !!env.OPENAI_API_KEY,
+          models: {
+            recipe: modelFor(env, "recipe"),
+            recipeHighQuality: modelFor(env, "recipeHighQuality"),
+            lightweight: modelFor(env, "lightweight"),
+            pricing: modelFor(env, "pricing"),
+            ingredient: modelFor(env, "ingredient"),
+            webRecipe: modelFor(env, "webRecipe"),
+            image: img.primary,
+            imageFallback: img.fallback,
+          },
+          envOverrides: {
+            DEFAULT_TEXT_MODEL: !!env.DEFAULT_TEXT_MODEL,
+            DEFAULT_IMAGE_MODEL: !!env.DEFAULT_IMAGE_MODEL,
+            IMAGE_MODEL_FALLBACK: !!env.IMAGE_MODEL_FALLBACK,
+            RECIPE_MODEL: !!env.RECIPE_MODEL,
+            RECIPE_HIGH_QUALITY_MODEL: !!env.RECIPE_HIGH_QUALITY_MODEL,
+            LIGHTWEIGHT_MODEL: !!env.LIGHTWEIGHT_MODEL,
+            PRICING_MODEL: !!env.PRICING_MODEL,
+            INGREDIENT_MODEL: !!env.INGREDIENT_MODEL,
+            WEB_RECIPE_MODEL: !!env.WEB_RECIPE_MODEL,
+          },
+          warnings: [],
+          note: "All model defaults are current OpenAI model aliases (June 2026). OpenAI resolves aliases like 'gpt-4o-mini' to the latest dated snapshot — that's why the dashboard shows a dated form. The worker is not pinned to any snapshot.",
+        },
+        200,
+        env,
+        origin,
+      );
     }
 
     if (req.method === "GET" && url.pathname === "/health") {
