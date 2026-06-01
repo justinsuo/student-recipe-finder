@@ -23,7 +23,7 @@ import { clsx } from "clsx";
 // Mobile drawer uses the same `label` (short) plus the icon — no need for
 // long labels there either.
 const links = [
-  { href: "/", label: "Home", icon: Home, desktop: false },
+  { href: "/", label: "Home", icon: Home, desktop: true },
   { href: "/ai-chef", label: "AI Chef", icon: ChefHat, desktop: true, emphasis: true },
   { href: "/recipe-studio", label: "Studio", icon: Wand2, desktop: true },
   { href: "/pantry", label: "Pantry", icon: Refrigerator, desktop: true },
@@ -76,9 +76,10 @@ export function Navbar() {
           </div>
         </Link>
 
-        {/* Desktop nav — only the marked links show here so the row never
-            wraps. Home + About live in the mobile drawer only. */}
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
+        {/* Desktop nav — collapses to the hamburger below xl (1280px) so
+            8 pills + brand never feel cramped. About lives in the mobile
+            drawer only. */}
+        <nav className="hidden items-center gap-1 xl:flex" aria-label="Main navigation">
           {links.filter((l) => l.desktop).map((link) => {
             const Icon = link.icon;
             const active = isActive(pathname, link.href);
@@ -110,7 +111,7 @@ export function Navbar() {
           aria-expanded={open}
           aria-controls="mobile-nav-drawer"
           aria-label={open ? "Close menu" : "Open menu"}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-stone-700 hover:bg-stone-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 lg:hidden"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-stone-700 hover:bg-stone-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 xl:hidden"
         >
           {open ? <X size={20} /> : <Menu size={20} />}
         </button>
@@ -124,12 +125,12 @@ export function Navbar() {
             type="button"
             aria-label="Close menu"
             onClick={() => setOpen(false)}
-            className="fixed inset-0 top-16 z-30 bg-black/30 backdrop-blur-sm lg:hidden"
+            className="fixed inset-0 top-16 z-30 bg-black/30 backdrop-blur-sm xl:hidden"
           />
           <nav
             id="mobile-nav-drawer"
             aria-label="Main navigation"
-            className="absolute inset-x-0 top-full z-40 border-b border-stone-200 bg-white shadow-lg lg:hidden"
+            className="absolute inset-x-0 top-full z-40 border-b border-stone-200 bg-white shadow-lg xl:hidden"
           >
             <ul className="mx-auto max-w-6xl px-4 py-3 sm:px-6">
               {links.map((link) => {

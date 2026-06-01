@@ -56,29 +56,29 @@ export default function HomePage() {
             {RECIPES.length}+ student-friendly recipes
           </span>
           <h1 className="text-4xl font-bold leading-[1.05] tracking-tight text-stone-900 sm:text-5xl md:text-6xl">
-            Eat well without{" "}
-            <span className="text-emerald-600">overspending.</span>
+            Eat well on a{" "}
+            <span className="text-emerald-600">student budget.</span>
           </h1>
           <p className="max-w-lg text-base leading-relaxed text-stone-600 sm:text-lg">
-            Use your pantry, budget, and cooking tools to find cheap recipes —
-            or let AI Chef create something new from what you already have.
+            Use what you have, set a budget, and get recipes that fit your
+            pantry, time, and cooking tools.
           </p>
-          <div className="flex flex-wrap gap-2.5 pt-1">
+          <div className="flex flex-col gap-2.5 pt-1 sm:flex-row sm:flex-wrap sm:items-center">
             <Link
               href="/ai-chef"
-              className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all motion-safe:hover:-translate-y-0.5 hover:bg-emerald-700"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all motion-safe:hover:-translate-y-0.5 hover:bg-emerald-700 sm:w-auto"
             >
-              <Sparkles size={16} /> Try AI Chef
+              <Sparkles size={16} /> Start with AI Chef
             </Link>
             <Link
               href="/pantry"
-              className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white px-5 py-3 text-sm font-semibold text-stone-800 transition-colors hover:bg-stone-50"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-stone-300 bg-white px-5 py-3 text-sm font-semibold text-stone-800 transition-colors hover:bg-stone-50 sm:w-auto"
             >
-              <Refrigerator size={16} /> Build my pantry
+              <Refrigerator size={16} /> Open pantry
             </Link>
             <Link
               href="/cheap-recipes"
-              className="inline-flex items-center gap-1.5 self-center text-sm font-semibold text-emerald-700 hover:underline"
+              className="inline-flex items-center justify-center gap-1.5 text-sm font-semibold text-emerald-700 hover:underline sm:self-center"
             >
               Browse cheap recipes <ArrowRight size={14} />
             </Link>
