@@ -206,6 +206,113 @@ export const INGREDIENTS: Ingredient[] = [
   { id: "turmeric", name: "Turmeric", category: "spice", estimatedUnitCost: 0.07, unit: "tsp", commonPackageSize: "2 oz (~$3)", shelfLifeDays: 730 },
   { id: "hot-sauce", name: "Hot sauce", category: "condiment", estimatedUnitCost: 0.05, unit: "tsp", commonPackageSize: "5 oz (~$3)", shelfLifeDays: 730 },
   { id: "gravy-mix", name: "Gravy mix packet", category: "condiment", estimatedUnitCost: 0.80, unit: "packet", commonPackageSize: "0.87 oz packet (~$0.80)", shelfLifeDays: 730 },
+
+  // ===== Comprehensive flavor expansion: spices, sauces, condiments, oils, herbs =====
+
+  // Spices & seasoning blends
+  { id: "white-pepper", name: "White pepper", category: "spice", estimatedUnitCost: 0.08, unit: "tsp", commonPackageSize: "1.7 oz (~$4)", shelfLifeDays: 730 },
+  { id: "smoked-paprika", name: "Smoked paprika", category: "spice", estimatedUnitCost: 0.08, unit: "tsp", commonPackageSize: "2 oz (~$4)", shelfLifeDays: 730 },
+  { id: "cayenne", name: "Cayenne pepper", category: "spice", estimatedUnitCost: 0.06, unit: "tsp", commonPackageSize: "2 oz (~$3)", shelfLifeDays: 730 },
+  { id: "coriander-seed", name: "Ground coriander", category: "spice", estimatedUnitCost: 0.07, unit: "tsp", commonPackageSize: "1.5 oz (~$3)", shelfLifeDays: 730 },
+  { id: "garam-masala", name: "Garam masala", category: "spice", estimatedUnitCost: 0.10, unit: "tsp", commonPackageSize: "2.2 oz (~$5)", shelfLifeDays: 730 },
+  { id: "nutmeg", name: "Nutmeg", category: "spice", estimatedUnitCost: 0.10, unit: "tsp", commonPackageSize: "1.1 oz (~$4)", shelfLifeDays: 1095 },
+  { id: "cloves-ground", name: "Ground cloves", category: "spice", estimatedUnitCost: 0.10, unit: "tsp", commonPackageSize: "0.9 oz (~$4)", shelfLifeDays: 730 },
+  { id: "allspice", name: "Allspice", category: "spice", estimatedUnitCost: 0.10, unit: "tsp", commonPackageSize: "1 oz (~$3.50)", shelfLifeDays: 730 },
+  { id: "ginger-ground", name: "Ground ginger", category: "spice", estimatedUnitCost: 0.07, unit: "tsp", commonPackageSize: "1.5 oz (~$3)", shelfLifeDays: 730 },
+  { id: "mustard-powder", name: "Mustard powder", category: "spice", estimatedUnitCost: 0.06, unit: "tsp", commonPackageSize: "2 oz (~$3)", shelfLifeDays: 730 },
+  { id: "sage-dried", name: "Dried sage", category: "spice", estimatedUnitCost: 0.07, unit: "tsp", commonPackageSize: "0.4 oz (~$3)", shelfLifeDays: 730 },
+  { id: "parsley-dried", name: "Dried parsley", category: "spice", estimatedUnitCost: 0.05, unit: "tsp", commonPackageSize: "0.5 oz (~$3)", shelfLifeDays: 730 },
+  { id: "dill-dried", name: "Dried dill", category: "spice", estimatedUnitCost: 0.06, unit: "tsp", commonPackageSize: "0.4 oz (~$3)", shelfLifeDays: 730 },
+  { id: "tarragon-dried", name: "Dried tarragon", category: "spice", estimatedUnitCost: 0.08, unit: "tsp", commonPackageSize: "0.4 oz (~$4)", shelfLifeDays: 730 },
+  { id: "herbes-provence", name: "Herbes de Provence", category: "spice", estimatedUnitCost: 0.08, unit: "tsp", commonPackageSize: "0.7 oz (~$4)", shelfLifeDays: 730 },
+  { id: "poultry-seasoning", name: "Poultry seasoning", category: "spice", estimatedUnitCost: 0.06, unit: "tsp", commonPackageSize: "1 oz (~$3)", shelfLifeDays: 730 },
+  { id: "lemon-pepper", name: "Lemon pepper seasoning", category: "spice", estimatedUnitCost: 0.06, unit: "tsp", commonPackageSize: "2.5 oz (~$4)", shelfLifeDays: 730 },
+  { id: "seasoned-salt", name: "Seasoned salt", category: "spice", estimatedUnitCost: 0.04, unit: "tsp", commonPackageSize: "8 oz (~$3)", shelfLifeDays: 1095 },
+  { id: "old-bay", name: "Old Bay seasoning", category: "spice", estimatedUnitCost: 0.07, unit: "tsp", commonPackageSize: "2.6 oz (~$4)", shelfLifeDays: 730 },
+  { id: "cajun-seasoning", name: "Cajun seasoning", category: "spice", estimatedUnitCost: 0.07, unit: "tsp", commonPackageSize: "1.7 oz (~$4)", shelfLifeDays: 730 },
+  { id: "creole-seasoning", name: "Creole seasoning", category: "spice", estimatedUnitCost: 0.07, unit: "tsp", commonPackageSize: "1.7 oz (~$4)", shelfLifeDays: 730 },
+  { id: "ranch-seasoning", name: "Ranch seasoning", category: "spice", estimatedUnitCost: 0.10, unit: "tsp", commonPackageSize: "1 oz packet (~$1.50)", shelfLifeDays: 730 },
+  { id: "everything-bagel", name: "Everything bagel seasoning", category: "spice", estimatedUnitCost: 0.10, unit: "tsp", commonPackageSize: "3.7 oz (~$5)", shelfLifeDays: 730 },
+  { id: "chinese-5-spice", name: "Chinese five spice", category: "spice", estimatedUnitCost: 0.08, unit: "tsp", commonPackageSize: "1.8 oz (~$4)", shelfLifeDays: 730 },
+  { id: "zaatar", name: "Za'atar", category: "spice", estimatedUnitCost: 0.10, unit: "tsp", commonPackageSize: "2 oz (~$5)", shelfLifeDays: 730 },
+  { id: "sumac", name: "Sumac", category: "spice", estimatedUnitCost: 0.10, unit: "tsp", commonPackageSize: "1.6 oz (~$4.50)", shelfLifeDays: 730 },
+  { id: "furikake", name: "Furikake", category: "spice", estimatedUnitCost: 0.10, unit: "tsp", commonPackageSize: "1.7 oz (~$5)", shelfLifeDays: 365, tags: ["umami"] },
+  { id: "shichimi", name: "Shichimi togarashi", category: "spice", estimatedUnitCost: 0.10, unit: "tsp", commonPackageSize: "0.5 oz (~$4)", shelfLifeDays: 365 },
+  { id: "gochugaru", name: "Gochugaru (Korean chili flakes)", category: "spice", estimatedUnitCost: 0.10, unit: "tsp", commonPackageSize: "8 oz (~$8)", shelfLifeDays: 365 },
+  { id: "sesame-seeds", name: "Sesame seeds", category: "spice", estimatedUnitCost: 0.10, unit: "tsp", commonPackageSize: "3 oz (~$3.50)", shelfLifeDays: 365 },
+  { id: "black-sesame", name: "Black sesame seeds", category: "spice", estimatedUnitCost: 0.12, unit: "tsp", commonPackageSize: "3 oz (~$4)", shelfLifeDays: 365 },
+  { id: "taco-seasoning-2", name: "Taco seasoning (homemade-style)", category: "spice", estimatedUnitCost: 0.06, unit: "tsp", commonPackageSize: "1 oz packet (~$0.80)", shelfLifeDays: 730 },
+
+  // Fresh aromatics & herbs
+  { id: "shallot", name: "Shallot", category: "vegetable", estimatedUnitCost: 0.60, unit: "shallot", commonPackageSize: "single (~$0.60)", shelfLifeDays: 30 },
+  { id: "cilantro-fresh", name: "Fresh cilantro", category: "vegetable", estimatedUnitCost: 0.10, unit: "tbsp", commonPackageSize: "bunch (~$1)", shelfLifeDays: 7 },
+  { id: "parsley-fresh", name: "Fresh parsley", category: "vegetable", estimatedUnitCost: 0.10, unit: "tbsp", commonPackageSize: "bunch (~$1.50)", shelfLifeDays: 7 },
+  { id: "basil-fresh", name: "Fresh basil", category: "vegetable", estimatedUnitCost: 0.20, unit: "tbsp", commonPackageSize: "0.75 oz (~$3)", shelfLifeDays: 5 },
+  { id: "mint-fresh", name: "Fresh mint", category: "vegetable", estimatedUnitCost: 0.20, unit: "tbsp", commonPackageSize: "0.75 oz (~$3)", shelfLifeDays: 5 },
+  { id: "dill-fresh", name: "Fresh dill", category: "vegetable", estimatedUnitCost: 0.20, unit: "tbsp", commonPackageSize: "0.5 oz (~$3)", shelfLifeDays: 5 },
+  { id: "rosemary-fresh", name: "Fresh rosemary", category: "vegetable", estimatedUnitCost: 0.20, unit: "sprig", commonPackageSize: "0.5 oz (~$3)", shelfLifeDays: 14 },
+  { id: "thyme-fresh", name: "Fresh thyme", category: "vegetable", estimatedUnitCost: 0.20, unit: "sprig", commonPackageSize: "0.5 oz (~$3)", shelfLifeDays: 14 },
+  { id: "serrano", name: "Serrano pepper", category: "vegetable", estimatedUnitCost: 0.20, unit: "pepper", commonPackageSize: "single (~$0.20)", shelfLifeDays: 14 },
+  { id: "habanero", name: "Habanero", category: "vegetable", estimatedUnitCost: 0.30, unit: "pepper", commonPackageSize: "single (~$0.30)", shelfLifeDays: 14 },
+  { id: "thai-chili", name: "Thai chili", category: "vegetable", estimatedUnitCost: 0.10, unit: "pepper", commonPackageSize: "single (~$0.10)", shelfLifeDays: 14 },
+  { id: "lemon-zest", name: "Lemon zest", category: "fruit", estimatedUnitCost: 0.15, unit: "tsp", commonPackageSize: "from 1 lemon", shelfLifeDays: 7 },
+  { id: "lime", name: "Lime", category: "fruit", estimatedUnitCost: 0.40, unit: "lime", commonPackageSize: "single (~$0.40)", shelfLifeDays: 14 },
+  { id: "lime-zest", name: "Lime zest", category: "fruit", estimatedUnitCost: 0.10, unit: "tsp", commonPackageSize: "from 1 lime", shelfLifeDays: 7 },
+
+  // Sauces & condiments — Asian / fermented
+  { id: "low-sodium-soy", name: "Low-sodium soy sauce", category: "condiment", estimatedUnitCost: 0.10, unit: "tbsp", commonPackageSize: "10 oz (~$3.50)", shelfLifeDays: 365 },
+  { id: "dark-soy", name: "Dark soy sauce", category: "condiment", estimatedUnitCost: 0.12, unit: "tbsp", commonPackageSize: "16 oz (~$5)", shelfLifeDays: 365 },
+  { id: "tamari", name: "Tamari", category: "condiment", estimatedUnitCost: 0.12, unit: "tbsp", commonPackageSize: "10 oz (~$5)", shelfLifeDays: 365, tags: ["gluten-free"] },
+  { id: "oyster-sauce", name: "Oyster sauce", category: "condiment", estimatedUnitCost: 0.10, unit: "tbsp", commonPackageSize: "18 oz (~$4)", shelfLifeDays: 365 },
+  { id: "ponzu", name: "Ponzu", category: "condiment", estimatedUnitCost: 0.10, unit: "tbsp", commonPackageSize: "10 oz (~$4)", shelfLifeDays: 365 },
+  { id: "mirin", name: "Mirin", category: "condiment", estimatedUnitCost: 0.10, unit: "tbsp", commonPackageSize: "10 oz (~$5)", shelfLifeDays: 365 },
+  { id: "chili-garlic-sauce", name: "Chili garlic sauce", category: "condiment", estimatedUnitCost: 0.08, unit: "tsp", commonPackageSize: "8 oz (~$4)", shelfLifeDays: 365 },
+  { id: "chili-crisp", name: "Chili crisp", category: "condiment", estimatedUnitCost: 0.15, unit: "tsp", commonPackageSize: "7.4 oz (~$5)", shelfLifeDays: 365 },
+  { id: "laoganma", name: "Lao Gan Ma chili crisp", category: "condiment", estimatedUnitCost: 0.15, unit: "tsp", commonPackageSize: "7.4 oz (~$5)", shelfLifeDays: 365 },
+  { id: "gochujang", name: "Gochujang", category: "condiment", estimatedUnitCost: 0.10, unit: "tbsp", commonPackageSize: "17.6 oz (~$7)", shelfLifeDays: 365 },
+  { id: "doenjang", name: "Doenjang", category: "condiment", estimatedUnitCost: 0.10, unit: "tbsp", commonPackageSize: "16 oz tub (~$6)", shelfLifeDays: 365 },
+  { id: "kewpie-mayo", name: "Kewpie mayo", category: "condiment", estimatedUnitCost: 0.12, unit: "tbsp", commonPackageSize: "17.6 oz (~$5)", shelfLifeDays: 365 },
+  { id: "red-curry-paste", name: "Red curry paste", category: "condiment", estimatedUnitCost: 0.30, unit: "tbsp", commonPackageSize: "4 oz (~$3.50)", shelfLifeDays: 365 },
+  { id: "green-curry-paste", name: "Green curry paste", category: "condiment", estimatedUnitCost: 0.30, unit: "tbsp", commonPackageSize: "4 oz (~$3.50)", shelfLifeDays: 365 },
+  { id: "yellow-curry-paste", name: "Yellow curry paste", category: "condiment", estimatedUnitCost: 0.30, unit: "tbsp", commonPackageSize: "4 oz (~$3.50)", shelfLifeDays: 365 },
+
+  // Sauces & condiments — other
+  { id: "dijon", name: "Dijon mustard", category: "condiment", estimatedUnitCost: 0.10, unit: "tsp", commonPackageSize: "8 oz (~$4)", shelfLifeDays: 365 },
+  { id: "yellow-mustard", name: "Yellow mustard", category: "condiment", estimatedUnitCost: 0.05, unit: "tsp", commonPackageSize: "14 oz (~$2.50)", shelfLifeDays: 365 },
+  { id: "harissa", name: "Harissa", category: "condiment", estimatedUnitCost: 0.20, unit: "tbsp", commonPackageSize: "6 oz (~$4)", shelfLifeDays: 365 },
+  { id: "buffalo-sauce", name: "Buffalo sauce", category: "condiment", estimatedUnitCost: 0.06, unit: "tbsp", commonPackageSize: "12 oz (~$3.50)", shelfLifeDays: 180 },
+  { id: "worcestershire", name: "Worcestershire sauce", category: "condiment", estimatedUnitCost: 0.08, unit: "tsp", commonPackageSize: "10 oz (~$4)", shelfLifeDays: 730 },
+  { id: "steak-sauce", name: "Steak sauce", category: "condiment", estimatedUnitCost: 0.10, unit: "tbsp", commonPackageSize: "10 oz (~$4)", shelfLifeDays: 365 },
+  { id: "agave", name: "Agave nectar", category: "condiment", estimatedUnitCost: 0.20, unit: "tbsp", commonPackageSize: "17 oz (~$5)", shelfLifeDays: 730 },
+  { id: "pico", name: "Pico de gallo", category: "vegetable", estimatedUnitCost: 0.50, unit: "1/4 cup", commonPackageSize: "12 oz tub (~$4)", shelfLifeDays: 7 },
+  { id: "marinara", name: "Marinara sauce", category: "canned", estimatedUnitCost: 1.10, unit: "cup", commonPackageSize: "24 oz jar (~$3)", shelfLifeDays: 730 },
+  { id: "tomato-paste", name: "Tomato paste", category: "canned", estimatedUnitCost: 0.10, unit: "tbsp", commonPackageSize: "6 oz can (~$1)", shelfLifeDays: 730, tags: ["umami"] },
+
+  // Oils & fats
+  { id: "evoo", name: "Extra virgin olive oil", category: "condiment", estimatedUnitCost: 0.25, unit: "tbsp", commonPackageSize: "17 oz (~$10)", shelfLifeDays: 365 },
+  { id: "canola-oil", name: "Canola oil", category: "condiment", estimatedUnitCost: 0.06, unit: "tbsp", commonPackageSize: "48 oz (~$4)", shelfLifeDays: 365 },
+  { id: "toasted-sesame-oil", name: "Toasted sesame oil", category: "condiment", estimatedUnitCost: 0.25, unit: "tsp", commonPackageSize: "10 oz (~$8)", shelfLifeDays: 365 },
+  { id: "ghee", name: "Ghee", category: "condiment", estimatedUnitCost: 0.30, unit: "tbsp", commonPackageSize: "13 oz (~$8)", shelfLifeDays: 365 },
+  { id: "coconut-oil", name: "Coconut oil", category: "condiment", estimatedUnitCost: 0.15, unit: "tbsp", commonPackageSize: "14 oz (~$5)", shelfLifeDays: 730 },
+  { id: "avocado-oil", name: "Avocado oil", category: "condiment", estimatedUnitCost: 0.30, unit: "tbsp", commonPackageSize: "17 oz (~$10)", shelfLifeDays: 365 },
+  { id: "cooking-spray", name: "Cooking spray", category: "condiment", estimatedUnitCost: 0.02, unit: "spray", commonPackageSize: "6 oz (~$4)", shelfLifeDays: 730 },
+
+  // Vinegars
+  { id: "balsamic", name: "Balsamic vinegar", category: "condiment", estimatedUnitCost: 0.20, unit: "tbsp", commonPackageSize: "16 oz (~$5)", shelfLifeDays: 1095 },
+  { id: "red-wine-vinegar", name: "Red wine vinegar", category: "condiment", estimatedUnitCost: 0.08, unit: "tbsp", commonPackageSize: "16 oz (~$3)", shelfLifeDays: 1095 },
+  { id: "apple-cider-vinegar", name: "Apple cider vinegar", category: "condiment", estimatedUnitCost: 0.08, unit: "tbsp", commonPackageSize: "16 oz (~$3)", shelfLifeDays: 1095, tags: ["acidic"] },
+
+  // Umami / broths / pastes
+  { id: "msg", name: "MSG", category: "spice", estimatedUnitCost: 0.04, unit: "tsp", commonPackageSize: "16 oz (~$5)", shelfLifeDays: 1825, tags: ["umami"] },
+  { id: "nutritional-yeast", name: "Nutritional yeast", category: "condiment", estimatedUnitCost: 0.20, unit: "tbsp", commonPackageSize: "4.5 oz (~$5)", shelfLifeDays: 730, tags: ["vegan", "umami"] },
+  { id: "bouillon-cube", name: "Bouillon cube", category: "canned", estimatedUnitCost: 0.20, unit: "cube", commonPackageSize: "12 cubes (~$2.50)", shelfLifeDays: 730 },
+  { id: "chicken-bouillon", name: "Chicken bouillon", category: "canned", estimatedUnitCost: 0.15, unit: "tsp", commonPackageSize: "8 oz jar (~$5)", shelfLifeDays: 1095 },
+  { id: "beef-broth", name: "Beef broth", category: "canned", estimatedUnitCost: 0.40, unit: "cup", commonPackageSize: "32 oz (~$3)", shelfLifeDays: 365 },
+  { id: "mushroom-powder", name: "Dried mushroom powder", category: "spice", estimatedUnitCost: 0.30, unit: "tsp", commonPackageSize: "2 oz (~$8)", shelfLifeDays: 365, tags: ["umami", "vegan"] },
+  { id: "anchovy-paste", name: "Anchovy paste", category: "condiment", estimatedUnitCost: 0.20, unit: "tsp", commonPackageSize: "2 oz (~$4)", shelfLifeDays: 365, tags: ["umami"] },
+
+  // Sweeteners
+  { id: "white-sugar", name: "White sugar", category: "spice", estimatedUnitCost: 0.05, unit: "tbsp", commonPackageSize: "4 lb (~$3)", shelfLifeDays: 3650 },
 ];
 
 export const INGREDIENT_MAP = new Map(INGREDIENTS.map((i) => [i.id, i]));

@@ -9,4 +9,6 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 DEFAULT_TEXT_MODEL = "gpt-4o-mini"
-DEFAULT_IMAGE_MODEL = "gpt-image-1"
+# dall-e-3 works on all OpenAI orgs out of the box. Set to "gpt-image-1"
+# only on orgs that have completed identity verification.
+DEFAULT_IMAGE_MODEL = "dall-e-3"

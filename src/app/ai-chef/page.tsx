@@ -62,7 +62,6 @@ const EQUIPMENT_OPTS = [
   "oven",
   "rice-cooker",
   "air-fryer",
-  "no-kitchen",
 ];
 
 const DIET_OPTS = ["vegetarian", "vegan", "high-protein", "gluten-free", "dairy-free"];

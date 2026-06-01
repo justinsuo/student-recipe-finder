@@ -25,6 +25,7 @@ import { Card } from "@/components/ui/Card";
 import { RecipeImage } from "@/components/recipe/RecipeImage";
 import { CookingMethodCard } from "@/components/recipe/CookingMethodCard";
 import { EquipmentBadges } from "@/components/recipe/EquipmentBadge";
+import { DetailedSteps } from "@/components/recipe/DetailedSteps";
 import { IngredientPriceRow } from "@/components/pricing/IngredientPriceRow";
 import { RecipeAIRepriceButton } from "@/components/pricing/RecipeAIRepriceButton";
 import { quoteRecipe } from "@/lib/pricing/pricingEngine";
@@ -222,6 +223,45 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
           </ol>
         </Card>
       </div>
+
+      {recipe.detailedSteps && recipe.detailedSteps.length > 0 && (
+        <DetailedSteps steps={recipe.detailedSteps} />
+      )}
+
+      {recipe.flavorExplanation && (
+        <Card>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-stone-700">
+            Why this tastes good
+          </h2>
+          <p className="mt-2 text-sm text-stone-700">{recipe.flavorExplanation}</p>
+        </Card>
+      )}
+
+      {(recipe.seasoningUpgrades?.length ?? 0) > 0 && (
+        <Card>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-amber-700">
+            Seasoning upgrades
+          </h2>
+          <ul className="mt-2 space-y-1 text-sm text-stone-700">
+            {recipe.seasoningUpgrades!.map((s, i) => (
+              <li key={i}>• {s}</li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
+      {(recipe.tasteTroubleshooting?.length ?? 0) > 0 && (
+        <Card>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-stone-700">
+            If it tastes flat
+          </h2>
+          <ul className="mt-2 space-y-1 text-sm text-stone-700">
+            {recipe.tasteTroubleshooting!.map((s, i) => (
+              <li key={i}>• {s}</li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       <CookingMethodCard recipe={recipe} />
 

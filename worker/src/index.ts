@@ -21,7 +21,7 @@ interface Env {
 }
 
 const TEXT_MODEL_DEFAULT = "gpt-4o-mini";
-const IMAGE_MODEL_DEFAULT = "gpt-image-1";
+const IMAGE_MODEL_DEFAULT = "dall-e-3";
 
 // ---------- CORS ----------
 
@@ -392,6 +392,22 @@ Always respond with ONLY valid JSON matching this schema (no markdown):
     {"name": "string", "estimatedCost": <number>, "importance": "required|recommended|optional", "cheapSubstitute": "string or null"}
   ],
   "steps": ["string", ...],
+  "detailedSteps": [
+    {
+      "shortStep": "string (same as the matching entry in steps[])",
+      "detailedExplanation": "string — WHY, HOW HOT, WHAT IT LOOKS LIKE, HOW IT SHOULD TASTE. Aimed at a beginner.",
+      "timerMinutes": <number or null>,
+      "heatLevel": "low|medium-low|medium|medium-high|high|none",
+      "textureCue": "string or null (e.g. 'rice should crackle and look dry, not wet')",
+      "tasteCue": "string or null (e.g. 'taste — add a pinch of salt if it feels flat')",
+      "beginnerTip": "string or null",
+      "safetyNote": "string or null"
+    }
+  ],
+  "flavorExplanation": "1–2 sentences on why this combination tastes good (role of each seasoning/sauce/aromatic)",
+  "seasoningUpgrades": ["string — small flavor boosts: 'splash of rice vinegar to brighten', 'sesame oil at the end for aroma'"],
+  "tasteTroubleshooting": ["string — 'if flat: add lemon juice or salt', 'if dry: oil/yogurt/sauce'"],
+  "flavorBadges": ["spicy|tangy|umami|garlicky|smoky|savory|creamy|crispy"],
   "guidedCookingSteps": [
     {"title": "string", "instruction": "string", "timerMinutes": <number or null>, "safetyNote": "string or null"}
   ],
@@ -493,7 +509,7 @@ Always respond with ONLY valid JSON in this exact schema (no markdown):
       "pantryMatchScore": <0..1>,
       "selectedByDefault": true,
       "notesInfluenceSummary": "1 sentence — how the user's aiNotes shaped this recipe (empty string if no notes)",
-      "recipe": <full GeneratedRecipe object matching the single-recipe schema, including: name, description, userRequestSummary, whyThisFits, mealType, cuisineStyle, servings, prepTimeMinutes, cookTimeMinutes, totalTimeMinutes, difficulty, equipment, primaryCookingMethod, noStovetopRequired, estimatedTotalCost, estimatedCostPerServing, estimatedMissingIngredientCost, ingredients[], missingIngredients[], steps[], guidedCookingSteps[], cheapTips[], substitutions[], makeItCheaper[], makeItHealthier[], makeItHigherProtein[], pantryStaplesUsed[], optionalAddIns[], studentTips[], storageInstructions, reheatingInstructions, safetyNotes[], estimatedNutrition {calories,protein,carbs,fat,fiber}, tags[], imagePromptHint>
+      "recipe": <full GeneratedRecipe object matching the single-recipe schema, including: name, description, userRequestSummary, whyThisFits, mealType, cuisineStyle, servings, prepTimeMinutes, cookTimeMinutes, totalTimeMinutes, difficulty, equipment, primaryCookingMethod, noStovetopRequired, estimatedTotalCost, estimatedCostPerServing, estimatedMissingIngredientCost, ingredients[], missingIngredients[], steps[], detailedSteps[ {shortStep, detailedExplanation, timerMinutes?, heatLevel?: "low|medium-low|medium|medium-high|high|none", textureCue?, tasteCue?, beginnerTip?, safetyNote?} for EVERY step in steps[] — beginners need to know WHY ("use leftover rice because it fries better and doesn't go mushy"), HOW HOT ("medium-high heat so the rice gets crisp"), WHAT IT LOOKS LIKE ("oil should shimmer; rice should crackle"), and HOW IT SHOULD TASTE ("taste and add salt if it tastes flat")], flavorExplanation: "1–2 sentences on WHY this combination tastes good — the role of each seasoning/sauce/aromatic", seasoningUpgrades[ "use what you have OR optional upgrade" suggestions ], tasteTroubleshooting[ "if flat: add lemon juice or salt", "if dry: add a drizzle of oil or yogurt", etc.], guidedCookingSteps[], cheapTips[], substitutions[], makeItCheaper[], makeItHealthier[], makeItHigherProtein[], pantryStaplesUsed[], optionalAddIns[], studentTips[], storageInstructions, reheatingInstructions, safetyNotes[], estimatedNutrition {calories,protein,carbs,fat,fiber}, tags[], flavorBadges[ "spicy|tangy|umami|garlicky|smoky|savory|creamy|crispy" subset that applies ], imagePromptHint: "1 sentence including key visible ingredients, cooking method, plating style — no people, no text, no logos">
     },
     {"id": "opt-2", ...},
     {"id": "opt-3", ...},
