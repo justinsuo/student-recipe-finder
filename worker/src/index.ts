@@ -129,8 +129,10 @@ async function openaiChatJson(opts: {
   task?: ModelTask;
 }): Promise<unknown> {
   const model = opts.model || modelFor(opts.env, opts.task || "recipe");
+  const maxTokens = opts.maxTokens ?? 1200;
+  const isGpt5 = /^gpt-5/.test(model);
   console.log(
-    `[ai] chat task=${opts.task ?? "recipe"} model=${model} max_tokens=${opts.maxTokens ?? 1200}`,
+    `[ai] chat task=${opts.task ?? "recipe"} model=${model} max_tokens=${maxTokens}`,
   );
   const body: Record<string, unknown> = {
     model,
@@ -138,10 +140,15 @@ async function openaiChatJson(opts: {
       { role: "system", content: opts.system },
       { role: "user", content: opts.user },
     ],
-    max_tokens: opts.maxTokens ?? 1200,
-    temperature: opts.temperature ?? 0.4,
     response_format: { type: "json_object" },
   };
+  // GPT-5 family: renamed param, and only supports default temperature (1).
+  if (isGpt5) {
+    body.max_completion_tokens = maxTokens;
+  } else {
+    body.max_tokens = maxTokens;
+    body.temperature = opts.temperature ?? 0.4;
+  }
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
