@@ -1,6 +1,8 @@
 import type { Recipe } from "@/lib/types";
+import { AIR_FRYER_RECIPES } from "./airFryerRecipes";
+import { MICROWAVE_RECIPES } from "./microwaveRecipes";
 
-export const RECIPES: Recipe[] = [
+const BASE_RECIPES: Recipe[] = [
   {
     id: "egg-fried-rice",
     name: "Egg Fried Rice",
@@ -4543,6 +4545,12 @@ export const RECIPES: Recipe[] = [
     reheatingInstructions: "Microwave 90s.",
     youtubeId: "u8Tk-h34hOg",
   },
+];
+
+export const RECIPES: Recipe[] = [
+  ...BASE_RECIPES,
+  ...AIR_FRYER_RECIPES,
+  ...MICROWAVE_RECIPES,
 ];
 
 export const RECIPE_MAP = new Map(RECIPES.map((r) => [r.id, r]));

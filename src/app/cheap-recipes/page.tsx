@@ -6,6 +6,12 @@ import { Button } from "@/components/ui/Button";
 import { RecipeGrid } from "@/components/recipe/RecipeGrid";
 import { rankCheapRecipes } from "@/lib/recipeScoring";
 import { INGREDIENT_MAP } from "@/data/ingredients";
+import {
+  isAirFryerRecipe,
+  isMicrowaveRecipe,
+  isNoStoveRecipe,
+} from "@/lib/equipmentFilters";
+import { Microwave, Wind, Home } from "lucide-react";
 import type {
   CheapFilters,
   DietTag,
@@ -65,9 +71,19 @@ export default function CheapRecipesPage() {
   const [query, setQuery] = useState("");
   const [dormOnly, setDormOnly] = useState(false);
   const [mealPrepOnly, setMealPrepOnly] = useState(false);
+  const [methodOnly, setMethodOnly] = useState<
+    "any" | "air-fryer" | "microwave" | "no-stove" | "under-2"
+  >("any");
 
   const results = useMemo(() => {
     let r = rankCheapRecipes(filters);
+    if (methodOnly === "air-fryer") r = r.filter((x) => isAirFryerRecipe(x.recipe));
+    else if (methodOnly === "microwave")
+      r = r.filter((x) => isMicrowaveRecipe(x.recipe));
+    else if (methodOnly === "no-stove")
+      r = r.filter((x) => isNoStoveRecipe(x.recipe));
+    else if (methodOnly === "under-2")
+      r = r.filter((x) => x.costPerServing < 2);
     if (dormOnly) {
       r = r.filter(
         (x) =>
@@ -104,7 +120,7 @@ export default function CheapRecipesPage() {
         (a, b) => b.recipe.estimatedNutrition.protein - a.recipe.estimatedNutrition.protein,
       );
     return sorted;
-  }, [filters, sort, query, dormOnly, mealPrepOnly]);
+  }, [filters, sort, query, dormOnly, mealPrepOnly, methodOnly]);
 
   function toggleEquipment(eq: Equipment) {
     setFilters((f) =>
@@ -166,6 +182,44 @@ export default function CheapRecipesPage() {
             className="w-full rounded-full border border-stone-200 bg-stone-50 py-2.5 pl-10 pr-4 text-sm focus:border-emerald-400 focus:bg-white focus:outline-none"
             aria-label="Search recipes"
           />
+        </div>
+
+        <div className="mb-3">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-stone-500">
+            What do you have to cook with?
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Chip
+              active={methodOnly === "any"}
+              onClick={() => setMethodOnly("any")}
+            >
+              Anything goes
+            </Chip>
+            <Chip
+              active={methodOnly === "microwave"}
+              onClick={() => setMethodOnly("microwave")}
+            >
+              <Microwave size={11} /> I only have a microwave
+            </Chip>
+            <Chip
+              active={methodOnly === "air-fryer"}
+              onClick={() => setMethodOnly("air-fryer")}
+            >
+              <Wind size={11} /> I have an air fryer
+            </Chip>
+            <Chip
+              active={methodOnly === "no-stove"}
+              onClick={() => setMethodOnly("no-stove")}
+            >
+              <Home size={11} /> No stovetop
+            </Chip>
+            <Chip
+              active={methodOnly === "under-2"}
+              onClick={() => setMethodOnly("under-2")}
+            >
+              💰 Under $2/serving
+            </Chip>
+          </div>
         </div>
 
         <div className="mb-5 flex flex-wrap gap-2">

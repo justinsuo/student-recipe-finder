@@ -115,6 +115,21 @@ export interface Recipe {
   guidedCookingSteps?: GuidedCookingStep[];
   optionalAddIns?: string[];
   youtubeId?: string;
+
+  // Air-fryer + microwave method fields
+  primaryCookingMethod?:
+    | "stovetop"
+    | "oven"
+    | "rice-cooker"
+    | "air-fryer"
+    | "microwave"
+    | "air-fryer-and-microwave"
+    | "no-cook";
+  noStovetopRequired?: boolean;
+  crispinessLevel?: "soft" | "lightly crispy" | "crispy" | "extra crispy";
+  microwaveTimeMinutes?: number;
+  airFryerTimeMinutes?: number;
+  airFryerTemperatureF?: number;
 }
 
 export interface CheapFilters {

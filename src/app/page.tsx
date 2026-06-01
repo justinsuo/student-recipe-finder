@@ -9,10 +9,16 @@ import {
   Leaf,
   Wallet,
 } from "lucide-react";
+import { Wind, Microwave, Home as HomeIcon } from "lucide-react";
 import { RecipeCard } from "@/components/recipe/RecipeCard";
 import { RECIPES } from "@/data/recipes";
 import { RECIPE_IMAGES } from "@/data/recipeImages";
 import { calculateCostPerServing } from "@/lib/recipeScoring";
+import {
+  isAirFryerRecipe,
+  isMicrowaveRecipe,
+  isNoStoveRecipe,
+} from "@/lib/equipmentFilters";
 
 export default function HomePage() {
   // Prefer recipes that have curated photos for the hero collage
@@ -24,63 +30,92 @@ export default function HomePage() {
     .sort((a, b) => calculateCostPerServing(a) - calculateCostPerServing(b))
     .slice(0, 6);
 
+  const airFryerCount = RECIPES.filter(isAirFryerRecipe).length;
+  const microwaveCount = RECIPES.filter(isMicrowaveRecipe).length;
+  const noStoveCount = RECIPES.filter(isNoStoveRecipe).length;
+
   return (
-    <div className="space-y-16">
-      <section className="grid gap-10 md:grid-cols-2 md:items-center">
-        <div className="space-y-6">
+    <div className="space-y-14">
+      <section className="grid gap-8 md:grid-cols-[1.05fr_1fr] md:items-center md:gap-12">
+        <div className="space-y-5">
           <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
             <Sparkles size={14} />
-            Built for students on a budget
+            {RECIPES.length}+ student-friendly recipes
           </span>
-          <h1 className="text-4xl font-bold leading-tight tracking-tight text-stone-900 sm:text-5xl md:text-6xl">
+          <h1 className="text-4xl font-bold leading-[1.05] tracking-tight text-stone-900 sm:text-5xl md:text-6xl">
             Eat well without
             <br />
             <span className="text-emerald-600">overspending.</span>
           </h1>
-          <p className="max-w-lg text-base text-stone-600 sm:text-lg">
-            Find cheap, practical recipes built around the money you have, the
-            equipment you own, and the food already in your kitchen. Cost
+          <p className="max-w-lg text-base leading-relaxed text-stone-600 sm:text-lg">
+            Cheap, practical recipes built around the money you have, the
+            equipment you own, and the food already in your kitchen. Real cost
             estimates included.
           </p>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 pt-1">
             <Link
               href="/cheap-recipes"
-              className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
+              className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-emerald-700"
             >
               Find cheap meals
               <ArrowRight size={16} />
             </Link>
             <Link
               href="/pantry"
-              className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white px-5 py-3 text-sm font-semibold text-stone-800 hover:bg-stone-50"
+              className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white px-5 py-3 text-sm font-semibold text-stone-800 transition-colors hover:bg-stone-50"
             >
               Cook with what you have
             </Link>
           </div>
         </div>
+
         <div className="relative">
-          <div className="grid grid-cols-2 gap-4">
-            {collage.map((r, i) => {
+          <div className="grid grid-cols-2 grid-rows-[1fr_1fr] gap-3 sm:gap-4">
+            {collage.slice(0, 1).map((r) => {
               const photo = RECIPE_IMAGES[r.id];
               return (
                 <Link
                   key={r.id}
                   href={`/recipes/${r.id}`}
-                  className={`group relative flex aspect-square flex-col justify-between overflow-hidden rounded-3xl shadow-sm ${
-                    i === 1 || i === 2 ? "translate-y-6" : ""
-                  }`}
+                  className="group relative col-span-2 overflow-hidden rounded-3xl shadow-sm"
+                  style={{ aspectRatio: "16 / 10" }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={photo.src}
+                    alt={photo.alt || r.name}
+                    loading="eager"
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-4 text-white sm:p-5">
+                    <p className="text-base font-semibold sm:text-lg">{r.name}</p>
+                    <p className="mt-1 text-xs sm:text-sm">
+                      ${calculateCostPerServing(r).toFixed(2)}/serving · {r.totalTimeMinutes} min
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
+            {collage.slice(1, 3).map((r) => {
+              const photo = RECIPE_IMAGES[r.id];
+              return (
+                <Link
+                  key={r.id}
+                  href={`/recipes/${r.id}`}
+                  className="group relative aspect-square overflow-hidden rounded-3xl shadow-sm"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={photo.src}
                     alt={photo.alt || r.name}
                     loading="lazy"
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent" />
-                  <div className="relative mt-auto p-4 text-white">
-                    <p className="text-sm font-semibold">{r.name}</p>
-                    <p className="mt-1 text-xs">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
+                    <p className="text-sm font-semibold leading-tight">{r.name}</p>
+                    <p className="mt-0.5 text-[11px] opacity-90">
                       ${calculateCostPerServing(r).toFixed(2)}/serving
                     </p>
                   </div>
@@ -128,6 +163,48 @@ export default function HomePage() {
             Build your pantry <ArrowRight size={14} />
           </span>
         </Link>
+      </section>
+
+      <section>
+        <div className="mb-5 flex items-end justify-between gap-3">
+          <div>
+            <h2 className="text-2xl font-semibold text-stone-900">
+              Dorm-friendly cooking tools
+            </h2>
+            <p className="mt-1 text-sm text-stone-600">
+              Filter by what you actually have access to.
+            </p>
+          </div>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <ToolCard
+            href="/cheap-recipes"
+            tone="sky"
+            icon={<Microwave size={20} />}
+            title="Microwave meals"
+            description="No stove? No problem. Rice bowls, oats, mug omelets, baked potatoes."
+            count={microwaveCount}
+            bgImage="https://images.unsplash.com/photo-1642522685167-cf414ea225be?w=600&auto=format&fit=crop&q=70"
+          />
+          <ToolCard
+            href="/cheap-recipes"
+            tone="violet"
+            icon={<Wind size={20} />}
+            title="Air fryer meals"
+            description="Crispy quesadillas, tofu nuggets, potato wedges, chickpeas."
+            count={airFryerCount}
+            bgImage="https://images.unsplash.com/photo-1623238913973-21e45cced554?w=600&auto=format&fit=crop&q=70"
+          />
+          <ToolCard
+            href="/cheap-recipes"
+            tone="emerald"
+            icon={<HomeIcon size={20} />}
+            title="No-stove recipes"
+            description="Microwave, air fryer, or no-cook. Built for dorms and shared kitchens."
+            count={noStoveCount}
+            bgImage="https://images.unsplash.com/photo-1636401870585-a8852371e84a?w=600&auto=format&fit=crop&q=70"
+          />
+        </div>
       </section>
 
       <section className="rounded-3xl border border-stone-200 bg-white p-6 sm:p-8">
@@ -203,6 +280,62 @@ export default function HomePage() {
         </div>
       </section>
     </div>
+  );
+}
+
+function ToolCard({
+  href,
+  tone,
+  icon,
+  title,
+  description,
+  count,
+  bgImage,
+}: {
+  href: string;
+  tone: "sky" | "violet" | "emerald";
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  count: number;
+  bgImage?: string;
+}) {
+  const tones: Record<string, string> = {
+    sky: "bg-sky-100 text-sky-700",
+    violet: "bg-violet-100 text-violet-700",
+    emerald: "bg-emerald-100 text-emerald-700",
+  };
+  return (
+    <Link
+      href={href}
+      className="group relative flex aspect-[4/3] flex-col overflow-hidden rounded-3xl shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
+    >
+      {bgImage && (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={bgImage}
+            alt=""
+            aria-hidden
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/20" />
+        </>
+      )}
+      <div className="relative flex h-full flex-col p-5 text-white">
+        <div className={`mb-auto grid h-11 w-11 place-items-center rounded-xl ${tones[tone]}`}>
+          {icon}
+        </div>
+        <div>
+          <h3 className="text-xl font-semibold leading-tight">{title}</h3>
+          <p className="mt-1 text-sm text-white/85">{description}</p>
+          <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-white/90">
+            {count} recipes →
+          </p>
+        </div>
+      </div>
+    </Link>
   );
 }
 

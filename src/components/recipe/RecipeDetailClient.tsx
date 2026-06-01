@@ -9,7 +9,6 @@ import {
   Clock,
   Coins,
   Flame,
-  Soup,
   ShoppingBasket,
   ChefHat,
   Sparkles,
@@ -24,6 +23,8 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { RecipeImage } from "@/components/recipe/RecipeImage";
+import { CookingMethodCard } from "@/components/recipe/CookingMethodCard";
+import { EquipmentBadges } from "@/components/recipe/EquipmentBadge";
 import { useAppStore } from "@/lib/AppStore";
 import {
   calculateCostPerServing,
@@ -33,15 +34,6 @@ import {
   calculateMissingIngredients,
 } from "@/lib/recipeScoring";
 import type { Recipe } from "@/lib/types";
-
-const equipmentLabel: Record<string, string> = {
-  microwave: "Microwave",
-  stovetop: "Stovetop",
-  oven: "Oven",
-  "rice-cooker": "Rice cooker",
-  "air-fryer": "Air fryer",
-  "no-kitchen": "No kitchen",
-};
 
 export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
   const { isSaved, toggleSaved, pantry, addGroceryItems } = useAppStore();
@@ -100,15 +92,13 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
             <Badge tone="stone" icon={<Flame size={12} />}>
               {recipe.difficulty}
             </Badge>
-            <Badge tone="violet" icon={<Soup size={12} />}>
-              {equipmentLabel[recipe.equipment[0]] ?? recipe.equipment[0]}
-            </Badge>
             {recipe.dietTags.map((d) => (
               <Badge key={d} tone="emerald">
                 {d}
               </Badge>
             ))}
           </div>
+          <EquipmentBadges recipe={recipe} />
           <h1 className="text-3xl font-bold text-stone-900 sm:text-4xl">
             {recipe.name}
           </h1>
@@ -210,6 +200,8 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
           </ol>
         </Card>
       </div>
+
+      <CookingMethodCard recipe={recipe} />
 
       <div className="grid gap-6 md:grid-cols-2">
         {recipe.cheapTips.length > 0 && (
