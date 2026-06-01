@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import {
   Refrigerator,
   Plus,
@@ -109,10 +110,18 @@ export default function PantryPage() {
           </h1>
           <p className="mt-2 max-w-xl text-sm text-stone-600">
             Add what&apos;s in your kitchen. We&apos;ll surface recipes you can
-            make, ones you can make with 1–2 cheap items, and meals to use up
-            anything expiring.
+            make, and AI Chef can generate brand-new recipes from these same
+            ingredients without making you retype them.
           </p>
         </div>
+        {pantry.length > 0 && (
+          <Link
+            href="/ai-chef?usePantry=true"
+            className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-emerald-700"
+          >
+            ✨ Use these in AI Chef
+          </Link>
+        )}
       </header>
 
       <LocationSetup />

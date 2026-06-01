@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   Sparkles,
   ChefHat,
@@ -40,7 +41,9 @@ import {
 import type { AIGeneratedRecipe } from "@/lib/customRecipeTypes";
 import { useAppStore } from "@/lib/AppStore";
 import { INGREDIENTS } from "@/data/ingredients";
-import { resolvedToCustom, saveCustomIngredient, findExistingByName } from "@/lib/customIngredientStorage";
+import { resolvedToCustom, saveCustomIngredient, findExistingByName, getCustomIngredients } from "@/lib/customIngredientStorage";
+import { AIChefPantrySelector } from "@/components/ai/AIChefPantrySelector";
+import { Refrigerator } from "lucide-react";
 
 const STARTER_PROMPTS = [
   "I have rice, eggs, and frozen peas — make a cheap dinner.",
@@ -60,10 +63,41 @@ const EQUIPMENT_OPTS = [
 
 const DIET_OPTS = ["vegetarian", "vegan", "high-protein", "gluten-free", "dairy-free"];
 
-export default function AIChefPage() {
+export default function AIChefPageWrapper() {
+  return (
+    <Suspense fallback={<div className="text-stone-500">Loading…</div>}>
+      <AIChefPage />
+    </Suspense>
+  );
+}
+
+function AIChefPage() {
+  const searchParams = useSearchParams();
   const { addGroceryItems, toggleSaved, isSaved, pantry } = useAppStore();
 
-  const [mode, setMode] = useState<"have" | "imagine" | "web" | "url" | "paste">("have");
+  const [mode, setMode] = useState<"pantry" | "have" | "imagine" | "web" | "url" | "paste">(
+    () => (searchParams.get("usePantry") === "true" ? "pantry" : "have"),
+  );
+  const [selectedPantryIds, setSelectedPantryIds] = useState<Set<string>>(
+    () => new Set(pantry.map((p) => p.ingredientId)),
+  );
+  // Keep selection in sync when pantry changes (e.g. user adds a new item
+  // on the Pantry tab open in another window). New items default to selected.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSelectedPantryIds((prev) => {
+      const next = new Set(prev);
+      for (const p of pantry) {
+        if (!next.has(p.ingredientId)) next.add(p.ingredientId);
+      }
+      // Drop ids that aren't in the pantry anymore
+      const pantryIds = new Set(pantry.map((p) => p.ingredientId));
+      for (const id of next) {
+        if (!pantryIds.has(id)) next.delete(id);
+      }
+      return next;
+    });
+  }, [pantry]);
   const [ingredients, setIngredients] = useState("");
   const [cravings, setCravings] = useState("");
   const [importUrl, setImportUrl] = useState("");
@@ -90,6 +124,22 @@ export default function AIChefPage() {
   const [savedId, setSavedId] = useState<string | null>(null);
   const [savedImageDataUrl, setSavedImageDataUrl] = useState<string | null>(null);
 
+  // Resolve a pantry ingredient ID to a human-readable name (built-in OR custom)
+  const pantryNamesById = useMemo(() => {
+    const out = new Map<string, string>();
+    for (const p of pantry) {
+      const builtin = INGREDIENTS.find((i) => i.id === p.ingredientId);
+      if (builtin) {
+        out.set(p.ingredientId, builtin.name);
+        continue;
+      }
+      const customs = typeof window === "undefined" ? [] : getCustomIngredients();
+      const c = customs.find((x) => x.id === p.ingredientId);
+      if (c) out.set(p.ingredientId, c.displayName || c.canonicalName);
+    }
+    return out;
+  }, [pantry]);
+
   function toggleSet(set: string[], v: string): string[] {
     return set.includes(v) ? set.filter((x) => x !== v) : [...set, v];
   }
@@ -104,8 +154,15 @@ export default function AIChefPage() {
       setSourceMeta(null);
     }
     try {
+      // In "pantry" mode, send the names of the selected pantry items
+      // straight from the live AppStore (single source of truth). In all
+      // other modes, parse the typed textarea.
       const fromPantry =
-        ingredients.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);
+        mode === "pantry"
+          ? Array.from(selectedPantryIds)
+              .map((id) => pantryNamesById.get(id))
+              .filter((n): n is string => !!n)
+          : ingredients.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);
       // Dispatch by mode — every branch ends with a GeneratedRecipe assigned to `r`
       let r: GeneratedRecipe;
       let importedSource: RecipeSourceMetadata | null = null;
@@ -156,7 +213,10 @@ export default function AIChefPage() {
           equipment,
           timeLimit,
           dietTags: diet,
-          cravings: mode === "imagine" ? cravings : undefined,
+          cravings:
+            mode === "imagine" || (mode === "pantry" && cravings.trim())
+              ? cravings
+              : undefined,
           creativity,
           refinement,
         });
@@ -371,8 +431,20 @@ export default function AIChefPage() {
 
       <section className="rounded-3xl border border-stone-200 bg-white p-5 sm:p-6">
         <div className="mb-5 flex flex-wrap gap-2">
+          <ModeChip
+            active={mode === "pantry"}
+            onClick={() => setMode("pantry")}
+          >
+            <Refrigerator size={12} className="mr-1 inline" />
+            Use my pantry
+            {pantry.length > 0 && (
+              <span className="ml-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-white/30 px-1 text-[10px] font-semibold">
+                {pantry.length}
+              </span>
+            )}
+          </ModeChip>
           <ModeChip active={mode === "have"} onClick={() => setMode("have")}>
-            From what I have
+            Type ingredients
           </ModeChip>
           <ModeChip
             active={mode === "imagine"}
@@ -394,7 +466,35 @@ export default function AIChefPage() {
           </ModeChip>
         </div>
 
-        {mode === "url" ? (
+        {mode === "pantry" ? (
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-medium text-stone-800">
+                Pantry ingredients AI Chef can use
+              </label>
+              <p className="mt-1 text-xs text-stone-500">
+                Tap a chip to include or exclude it from this recipe. The X
+                removes the item from your pantry entirely.
+              </p>
+            </div>
+            <AIChefPantrySelector
+              selectedIds={selectedPantryIds}
+              onChange={setSelectedPantryIds}
+            />
+            <div>
+              <label className="text-sm font-medium text-stone-800">
+                Optional craving (what kind of dish?)
+              </label>
+              <textarea
+                value={cravings}
+                onChange={(e) => setCravings(e.target.value)}
+                rows={2}
+                placeholder="something Asian, quick microwave dinner, high protein…"
+                className="mt-1 w-full rounded-2xl border border-stone-200 bg-stone-50 p-3 text-sm focus:border-emerald-400 focus:bg-white focus:outline-none"
+              />
+            </div>
+          </div>
+        ) : mode === "url" ? (
           <div className="space-y-3">
             <label className="text-sm font-medium text-stone-800">
               Recipe URL (food blog, recipe site, etc.)
@@ -638,7 +738,11 @@ export default function AIChefPage() {
         <div className="mt-5 flex flex-wrap gap-2">
           <Button
             onClick={() => run()}
-            disabled={loading || !isWorkerConfigured()}
+            disabled={
+              loading ||
+              !isWorkerConfigured() ||
+              (mode === "pantry" && selectedPantryIds.size === 0)
+            }
             leftIcon={
               loading ? (
                 <Loader2 size={16} className="animate-spin" />
@@ -647,7 +751,11 @@ export default function AIChefPage() {
               )
             }
           >
-            {loading ? "Thinking…" : "Generate my recipe"}
+            {loading
+              ? "Thinking…"
+              : mode === "pantry"
+                ? `Generate from my pantry (${selectedPantryIds.size})`
+                : "Generate my recipe"}
           </Button>
           {recipe && (
             <>
