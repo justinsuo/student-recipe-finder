@@ -93,7 +93,7 @@ function ExploreCard({
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-500">
           <span className="flex items-center gap-1">
             <Clock size={11} />
-            {time ? `${time} min` : "Time not listed"}
+            {time ? `${time} min` : "Time varies"}
           </span>
           {difficulty ? (
             <span
@@ -108,24 +108,19 @@ function ExploreCard({
               {difficulty}
             </span>
           ) : (
-            <span className="text-stone-400">Difficulty —</span>
+            <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-medium text-stone-500">
+              Any level
+            </span>
           )}
         </div>
-        <div className="flex items-center gap-1 text-xs">
-          {recipe.rating ? (
-            <>
-              <Star size={11} className="fill-amber-400 text-amber-400" />
-              <span className="font-semibold text-stone-800">
-                {recipe.rating.toFixed(1)}
-              </span>
-            </>
-          ) : (
-            <>
-              <Star size={11} className="text-stone-300" />
-              <span className="text-stone-400">Not rated</span>
-            </>
-          )}
-        </div>
+        {recipe.rating && (
+          <div className="flex items-center gap-1 text-xs">
+            <Star size={11} className="fill-amber-400 text-amber-400" />
+            <span className="font-semibold text-stone-800">
+              {recipe.rating.toFixed(1)}
+            </span>
+          </div>
+        )}
         <div className="mt-auto flex flex-wrap gap-1 pt-1">
           {recipe.diets.length > 0 ? (
             recipe.diets.slice(0, 2).map((d) => (
@@ -137,7 +132,9 @@ function ExploreCard({
               </span>
             ))
           ) : (
-            <span className="text-[11px] text-stone-400">No diet tags</span>
+            <span className="rounded-full bg-stone-50 px-2 py-0.5 text-[11px] font-medium text-stone-500">
+              Flexible diet
+            </span>
           )}
         </div>
       </div>

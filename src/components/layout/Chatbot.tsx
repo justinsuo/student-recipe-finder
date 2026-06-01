@@ -37,12 +37,35 @@ export function Chatbot() {
   ]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef(0);
+  // Hide the floating button while the user is typing in a form field
+  // so it doesn't overlap inputs / the mobile keyboard.
+  const [hiddenByInput, setHiddenByInput] = useState(false);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, open]);
+
+  useEffect(() => {
+    function isEditable(t: EventTarget | null): boolean {
+      if (!(t instanceof HTMLElement)) return false;
+      const tag = t.tagName;
+      return tag === "INPUT" || tag === "TEXTAREA" || t.isContentEditable;
+    }
+    function onFocus(e: FocusEvent) {
+      if (isEditable(e.target)) setHiddenByInput(true);
+    }
+    function onBlur(e: FocusEvent) {
+      if (isEditable(e.target)) setHiddenByInput(false);
+    }
+    document.addEventListener("focusin", onFocus);
+    document.addEventListener("focusout", onBlur);
+    return () => {
+      document.removeEventListener("focusin", onFocus);
+      document.removeEventListener("focusout", onBlur);
+    };
+  }, []);
 
   function send(text: string) {
     const trimmed = text.trim();
@@ -66,7 +89,17 @@ export function Chatbot() {
 
   return (
     <>
-      <div className="group fixed bottom-5 right-4 z-50 flex items-center gap-2 sm:bottom-6 sm:right-6">
+      <div
+        className={clsx(
+          "group fixed bottom-5 right-4 z-50 flex items-center gap-2 transition-opacity sm:bottom-6 sm:right-6",
+          // Safe area: extra room on iOS so the button doesn't sit on the
+          // home indicator.
+          "pb-[env(safe-area-inset-bottom)]",
+          // Don't obscure inputs while typing — but keep it interactive
+          // when the panel is open.
+          hiddenByInput && !open && "pointer-events-none opacity-0",
+        )}
+      >
         {/* Tooltip — visible on hover/focus */}
         <span
           role="tooltip"

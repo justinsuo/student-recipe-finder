@@ -236,15 +236,16 @@ export default function CheapRecipesPage() {
           </p>
         </div>
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           leftIcon={<RefreshCcw size={14} />}
           onClick={() => {
             setFilters(DEFAULTS);
             setSort("best");
           }}
+          title="Restore default budget, equipment, diet, time, and sort"
         >
-          Reset
+          Reset filters
         </Button>
       </header>
 

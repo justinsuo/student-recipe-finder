@@ -19,16 +19,19 @@ import {
 } from "lucide-react";
 import { clsx } from "clsx";
 
+// Short labels are used in the desktop bar so the header never wraps.
+// Mobile drawer uses the same `label` (short) plus the icon — no need for
+// long labels there either.
 const links = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/ai-chef", label: "AI Chef", icon: ChefHat, emphasis: true },
-  { href: "/explore", label: "Explore World", icon: Globe },
-  { href: "/recipe-studio", label: "Recipe Studio", icon: Wand2 },
-  { href: "/pantry", label: "Pantry", icon: Refrigerator },
-  { href: "/cheap-recipes", label: "Cheap Recipes", icon: Coins },
-  { href: "/grocery-list", label: "Grocery", icon: ShoppingBasket },
-  { href: "/saved", label: "Saved", icon: Bookmark },
-  { href: "/about", label: "About", icon: Info },
+  { href: "/", label: "Home", icon: Home, desktop: false },
+  { href: "/ai-chef", label: "AI Chef", icon: ChefHat, desktop: true, emphasis: true },
+  { href: "/recipe-studio", label: "Studio", icon: Wand2, desktop: true },
+  { href: "/pantry", label: "Pantry", icon: Refrigerator, desktop: true },
+  { href: "/cheap-recipes", label: "Cheap", icon: Coins, desktop: true },
+  { href: "/explore", label: "Explore", icon: Globe, desktop: true },
+  { href: "/grocery-list", label: "Grocery", icon: ShoppingBasket, desktop: true },
+  { href: "/saved", label: "Saved", icon: Bookmark, desktop: true },
+  { href: "/about", label: "About", icon: Info, desktop: false },
 ];
 
 function isActive(pathname: string, href: string): boolean {
@@ -66,13 +69,17 @@ export function Navbar() {
             <span className="text-sm font-bold text-stone-900">
               Student Recipe Finder
             </span>
-            <span className="text-xs text-stone-500">Eat well, spend less</span>
+            {/* Tagline only on larger screens so it never crowds the nav. */}
+            <span className="hidden text-xs text-stone-500 md:inline">
+              Eat well, spend less
+            </span>
           </div>
         </Link>
 
-        {/* Desktop nav */}
+        {/* Desktop nav — only the marked links show here so the row never
+            wraps. Home + About live in the mobile drawer only. */}
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
-          {links.map((link) => {
+          {links.filter((l) => l.desktop).map((link) => {
             const Icon = link.icon;
             const active = isActive(pathname, link.href);
             return (

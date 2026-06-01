@@ -103,35 +103,40 @@ export function AIChefPantrySelector({ selectedIds, onChange }: Props) {
 
   return (
     <div className="rounded-2xl border border-stone-200 bg-white p-4">
+      <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-emerald-700">
+        Step 1 · Pick ingredients AI Chef can use
+      </p>
+      <p className="mb-3 text-xs text-stone-500">
+        Everything in your pantry is selected by default. Uncheck anything
+        you don&apos;t want in this recipe — items stay in your pantry either way.
+      </p>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-stone-700">
-          <span className="font-semibold text-stone-900">{items.length}</span>{" "}
-          {items.length === 1 ? "ingredient" : "ingredients"} in your pantry ·{" "}
           <span className="font-semibold text-emerald-700">
-            {selectedIds.size} selected
-          </span>
+            {selectedIds.size} of {items.length}
+          </span>{" "}
+          pantry {items.length === 1 ? "item" : "items"} selected
         </p>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={selectAll}
-            className="text-xs font-medium text-emerald-700 hover:underline"
+            className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800 transition-colors hover:bg-emerald-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
           >
             Select all
           </button>
-          <span className="text-stone-300">·</span>
           <button
             type="button"
             onClick={selectNone}
-            className="text-xs font-medium text-stone-600 hover:underline"
+            className="inline-flex items-center gap-1 rounded-full border border-stone-300 bg-white px-3 py-1 text-xs font-semibold text-stone-700 transition-colors hover:bg-stone-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400"
           >
-            None
+            Select none
           </button>
           <Link
             href="/pantry"
-            className="ml-2 inline-flex items-center gap-1 rounded-full border border-stone-300 bg-white px-2.5 py-1 text-xs font-medium text-stone-700 hover:bg-stone-50"
+            className="inline-flex items-center gap-1 rounded-full border border-stone-300 bg-white px-3 py-1 text-xs font-medium text-stone-700 transition-colors hover:bg-stone-50"
           >
-            <Refrigerator size={11} /> Edit full pantry
+            <Refrigerator size={11} /> Edit pantry
           </Link>
         </div>
       </div>
