@@ -129,8 +129,13 @@ async function openaiChatJson(opts: {
   task?: ModelTask;
 }): Promise<unknown> {
   const model = opts.model || modelFor(opts.env, opts.task || "recipe");
-  const maxTokens = opts.maxTokens ?? 1200;
+  const requestedTokens = opts.maxTokens ?? 1200;
   const isGpt5 = /^gpt-5/.test(model);
+  // GPT-5 reasoning models consume tokens internally before emitting output.
+  // If the cap is too low, reasoning eats it all and content comes back empty
+  // (finish_reason="length"). Give a generous headroom so the visible output
+  // still fits.
+  const maxTokens = isGpt5 ? Math.max(requestedTokens * 3, 4000) : requestedTokens;
   console.log(
     `[ai] chat task=${opts.task ?? "recipe"} model=${model} max_tokens=${maxTokens}`,
   );
@@ -142,9 +147,12 @@ async function openaiChatJson(opts: {
     ],
     response_format: { type: "json_object" },
   };
-  // GPT-5 family: renamed param, and only supports default temperature (1).
+  // GPT-5 family: renamed param, only supports default temperature (1),
+  // and accepts a reasoning_effort knob — "minimal" keeps reasoning-token
+  // overhead small for routine JSON generation.
   if (isGpt5) {
     body.max_completion_tokens = maxTokens;
+    body.reasoning_effort = "minimal";
   } else {
     body.max_tokens = maxTokens;
     body.temperature = opts.temperature ?? 0.4;
@@ -162,10 +170,29 @@ async function openaiChatJson(opts: {
     throw new Error(`OpenAI ${res.status}: ${text.slice(0, 300)}`);
   }
   const json = (await res.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
+    choices?: Array<{
+      message?: { content?: string; refusal?: string };
+      finish_reason?: string;
+    }>;
+    usage?: {
+      completion_tokens?: number;
+      completion_tokens_details?: { reasoning_tokens?: number };
+    };
   };
-  const content = json.choices?.[0]?.message?.content;
-  if (!content) throw new Error("OpenAI returned no content");
+  const choice = json.choices?.[0];
+  const content = choice?.message?.content;
+  if (!content) {
+    const finish = choice?.finish_reason ?? "unknown";
+    const refusal = choice?.message?.refusal;
+    const reasoningTokens = json.usage?.completion_tokens_details?.reasoning_tokens;
+    const completionTokens = json.usage?.completion_tokens;
+    console.log(
+      `[ai] empty content: finish=${finish} completion=${completionTokens} reasoning=${reasoningTokens} refusal=${refusal ?? "-"}`,
+    );
+    throw new Error(
+      `OpenAI returned no content (finish_reason=${finish}, reasoning_tokens=${reasoningTokens ?? "?"})${refusal ? ` refusal=${refusal}` : ""}`,
+    );
+  }
   try {
     return JSON.parse(content);
   } catch {
