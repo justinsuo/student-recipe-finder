@@ -10,6 +10,12 @@ The frontend is a static export hosted on GitHub Pages. All AI calls go through 
 
 ## What's in it
 
+### Explore World Recipes (`/explore`)
+- Browse recipes from 60+ global cuisines (Chinese, Italian, Indian, Mexican, Thai, Ethiopian, and more).
+- Search, filter by cuisine / diet / max time, sort by popularity or speed.
+- Click any recipe card for a full detail panel: ingredients, step-by-step instructions, nutrition, and a link back to the original source.
+- Powered by Spoonacular or Edamam APIs when keys are set; falls back to built-in sample recipes in demo mode.
+
 ### Core recipe browsing
 - **235 seed recipes** with real food photos: 100 stovetop/oven classics + 60 air fryer + 60 microwave + 15 air-fryer-and-microwave combo. Every recipe has prep/cook time, equipment, diet tags, cheap-tips, substitutions, nutrition estimate.
 - **Cheap Recipe Coach** (`/cheap-recipes`) — filter by budget per serving, equipment, diet, time bucket, cuisine, meal type. Sort by cheapest / fastest / highest-protein / best overall. Equipment-first quick filters: "I only have a microwave", "I have an air fryer", "No stovetop", "Under $2/serving". Recipe-name + ingredient search.
