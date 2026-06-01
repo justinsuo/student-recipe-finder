@@ -9,7 +9,6 @@ import {
   ArrowRight,
   Trash2,
 } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 import {
   deleteCustomRecipe,
   getCustomRecipes,
@@ -27,6 +26,9 @@ export default function RecipeStudioPage() {
   }, []);
 
   function remove(id: string) {
+    const target = recipes.find((r) => r.id === id);
+    const name = target?.name ?? "this recipe";
+    if (!window.confirm(`Delete "${name}"? This can't be undone.`)) return;
     deleteCustomRecipe(id);
     setRecipes(getCustomRecipes());
   }
@@ -172,14 +174,15 @@ function RecipeMiniCard({
           {recipe.totalTimeMinutes} min
         </p>
         <div className="flex justify-end pt-1">
-          <Button
-            size="sm"
-            variant="ghost"
+          <button
+            type="button"
             onClick={() => onRemove(recipe.id)}
-            leftIcon={<Trash2 size={12} />}
+            className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold text-stone-500 transition-colors hover:bg-red-50 hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300"
+            aria-label={`Delete ${recipe.name}`}
+            title="Delete this recipe — can't be undone"
           >
-            Delete
-          </Button>
+            <Trash2 size={12} /> Delete
+          </button>
         </div>
       </div>
     </div>

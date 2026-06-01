@@ -1423,6 +1423,13 @@ function AIChefPage() {
                 <p className="mt-1">{recipe.whyThisFits}</p>
               </div>
             )}
+            <Link
+              href="/recipe-studio"
+              className="inline-flex w-fit items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800 hover:bg-emerald-100"
+              title="This recipe is stored in your Recipe Studio until you delete it"
+            >
+              <BookmarkCheck size={12} /> Saved to Recipe Studio
+            </Link>
             <div className="flex flex-wrap gap-2 pt-1">
               <Button
                 onClick={() => toggleSaved(savedId)}
