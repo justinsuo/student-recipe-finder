@@ -109,7 +109,9 @@ function Fallback({
   recipe: Recipe;
   variant: "card" | "hero";
 }) {
-  // Build a gradient that matches the recipe's accent color
+  // Defensive fallback only — every recipe ships with a curated photo, so
+  // this should only render if the network blocks Wikimedia or the image is
+  // missing for some reason.
   const accentGradient = recipe.accentColor.replace("bg-", "from-");
   return (
     <div
@@ -124,11 +126,6 @@ function Fallback({
       >
         {recipe.emoji}
       </span>
-      {variant === "hero" && (
-        <p className="mt-2 text-xs font-medium uppercase tracking-wider text-stone-500">
-          Photo coming soon
-        </p>
-      )}
     </div>
   );
 }

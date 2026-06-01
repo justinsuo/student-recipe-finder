@@ -14,17 +14,13 @@ import {
 import { Button } from "@/components/ui/Button";
 import { useAppStore } from "@/lib/AppStore";
 import {
-  getApiKey,
+  isAiEnabled,
   recognizeIngredientsFromImage,
   type VisionResult,
 } from "@/lib/anthropic";
 import { INGREDIENT_MAP } from "@/data/ingredients";
 
-interface Props {
-  onRequestApiKey: () => void;
-}
-
-const MAX_DIMENSION = 1280; // resize before sending to keep payload small
+const MAX_DIMENSION = 1280;
 
 async function fileToBase64Resized(
   file: File,
@@ -71,7 +67,7 @@ async function fileToBase64Resized(
   }
 }
 
-export function PantryPhotoUpload({ onRequestApiKey }: Props) {
+export function PantryPhotoUpload() {
   const { addPantryItem, pantry } = useAppStore();
   const inputRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
@@ -81,23 +77,19 @@ export function PantryPhotoUpload({ onRequestApiKey }: Props) {
   const [result, setResult] = useState<VisionResult | null>(null);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
 
+  // Don't render if AI isn't configured for this deployment.
+  if (!isAiEnabled()) return null;
+
   async function handleFile(file: File) {
     setError(null);
     setResult(null);
     setAddedIds(new Set());
 
-    const key = getApiKey();
-    if (!key) {
-      onRequestApiKey();
-      return;
-    }
-
     setPreviewUrl(URL.createObjectURL(file));
     setLoading(true);
     try {
       const { base64, mediaType } = await fileToBase64Resized(file);
-      const res = await recognizeIngredientsFromImage(key, base64, mediaType);
-      // Filter recognized items to those that match a known ingredient
+      const res = await recognizeIngredientsFromImage(base64, mediaType);
       const validRecognized = res.recognized.filter((r) =>
         INGREDIENT_MAP.has(r.id),
       );
@@ -142,22 +134,14 @@ export function PantryPhotoUpload({ onRequestApiKey }: Props) {
 
   return (
     <section className="rounded-3xl border border-violet-200 bg-violet-50/50 p-5 sm:p-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-violet-800">
-            <Sparkles size={16} /> AI photo upload
-          </h2>
-          <p className="mt-1 text-sm text-violet-900">
-            Snap or upload a photo of your fridge or pantry — Claude Haiku will
-            spot ingredients and add them. You can fill in anything it missed.
-          </p>
-        </div>
-        <button
-          onClick={onRequestApiKey}
-          className="text-xs font-medium text-violet-700 hover:underline"
-        >
-          API key settings
-        </button>
+      <div>
+        <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-violet-800">
+          <Sparkles size={16} /> Scan your fridge
+        </h2>
+        <p className="mt-1 text-sm text-violet-900">
+          Snap or upload a photo of your fridge or pantry — we&apos;ll spot the
+          ingredients and add them. You can fill in anything we missed.
+        </p>
       </div>
 
       {!previewUrl && (
@@ -177,7 +161,6 @@ export function PantryPhotoUpload({ onRequestApiKey }: Props) {
         </div>
       )}
 
-      {/* hidden inputs */}
       <input
         ref={cameraRef}
         type="file"
@@ -220,8 +203,8 @@ export function PantryPhotoUpload({ onRequestApiKey }: Props) {
 
           {loading && (
             <div className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm text-violet-800">
-              <Loader2 size={16} className="animate-spin" /> Asking Haiku to
-              identify ingredients…
+              <Loader2 size={16} className="animate-spin" /> Scanning your
+              photo for ingredients…
             </div>
           )}
 
@@ -254,8 +237,8 @@ export function PantryPhotoUpload({ onRequestApiKey }: Props) {
                 </div>
                 {result.recognized.length === 0 ? (
                   <p className="mt-2 text-sm text-stone-600">
-                    Haiku didn&apos;t spot anything from the catalog. Try a
-                    clearer photo or add items manually below.
+                    Didn&apos;t spot anything from the catalog. Try a clearer
+                    photo or add items manually below.
                   </p>
                 ) : (
                   <div className="mt-3 flex flex-wrap gap-2">
@@ -300,7 +283,7 @@ export function PantryPhotoUpload({ onRequestApiKey }: Props) {
                     Not in our catalog ({result.unrecognized.length})
                   </h3>
                   <p className="mt-1 text-xs text-amber-800">
-                    Haiku saw these but they aren&apos;t in our ingredient list.
+                    We saw these but they aren&apos;t in our ingredient list.
                     Add them manually below if you want.
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2">

@@ -26,8 +26,8 @@ import {
 import { RecipeCard } from "@/components/recipe/RecipeCard";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { ApiKeyDialog } from "@/components/pantry/ApiKeyDialog";
 import { PantryPhotoUpload } from "@/components/pantry/PantryPhotoUpload";
+import { PantryVoiceInput } from "@/components/pantry/PantryVoiceInput";
 import { PantryAIChat } from "@/components/pantry/PantryAIChat";
 import type { Ingredient, IngredientCategory } from "@/lib/types";
 
@@ -42,7 +42,6 @@ export default function PantryPage() {
   } = useAppStore();
 
   const [search, setSearch] = useState("");
-  const [apiKeyOpen, setApiKeyOpen] = useState(false);
 
   function loadPreset(ingredientIds: string[]) {
     for (const id of ingredientIds) {
@@ -124,11 +123,11 @@ export default function PantryPage() {
         </div>
       </section>
 
-      <PantryPhotoUpload onRequestApiKey={() => setApiKeyOpen(true)} />
+      <PantryVoiceInput />
 
-      <PantryAIChat onRequestApiKey={() => setApiKeyOpen(true)} />
+      <PantryPhotoUpload />
 
-      <ApiKeyDialog open={apiKeyOpen} onClose={() => setApiKeyOpen(false)} />
+      <PantryAIChat />
 
       <section className="rounded-3xl border border-stone-200 bg-white p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
