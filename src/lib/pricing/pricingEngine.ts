@@ -8,6 +8,7 @@ import type {
 } from "./locationTypes";
 import { getRegion } from "./regions";
 import { getLocation, getOverride } from "./locationStorage";
+import { applyEstimateToUnit, getAIPrice } from "./aiPriceBook";
 
 /**
  * Quote a single ingredient at the user's region. Uses (in priority order):
@@ -25,7 +26,7 @@ export function quoteIngredient(
   const override = getOverride(ingredientId);
   const builtIn = INGREDIENT_MAP.get(ingredientId);
 
-  // Built-in only — also gives us name + unit
+  // Priority: user override > cached AI estimate > catalog × regional multiplier
   if (override && builtIn) {
     const applied = override.unitCost;
     return {
@@ -44,6 +45,29 @@ export function quoteIngredient(
     };
   }
   if (builtIn) {
+    // Try AI cache for this ingredient + region
+    const cached = getAIPrice(ingredientId, loc.regionId);
+    if (cached) {
+      const ppu =
+        cached.appliedUnitCost ??
+        applyEstimateToUnit(cached.estimate, builtIn.unit);
+      if (typeof ppu === "number" && Number.isFinite(ppu) && ppu > 0) {
+        return {
+          ingredientId,
+          ingredientName: builtIn.name,
+          baseUnitCost: builtIn.estimatedUnitCost,
+          appliedUnitCost: ppu,
+          quantity,
+          unit: builtIn.unit,
+          totalCost: ppu * quantity,
+          regionLabel: region.shortLabel ?? region.label,
+          multiplier: region.multiplier,
+          source: "ai-estimate",
+          confidence: cached.estimate.confidence,
+          note: cached.estimate.selectedBudgetEstimate.reasoning,
+        };
+      }
+    }
     const applied = builtIn.estimatedUnitCost * region.multiplier;
     return {
       ingredientId,
@@ -56,10 +80,9 @@ export function quoteIngredient(
       regionLabel: region.shortLabel ?? region.label,
       multiplier: region.multiplier,
       source: "catalog",
-      confidence: region.id === "national" ? "medium" : "medium",
+      confidence: "medium",
     };
   }
-  // No built-in match — caller (e.g. for custom ingredients) should resolve
   return null;
 }
 

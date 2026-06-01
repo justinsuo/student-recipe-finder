@@ -343,6 +343,84 @@ export async function webSearchRecipes(opts: {
   return postJson<{ candidates: WebRecipeCandidate[] }>("/recipes/web-search", opts);
 }
 
+// ============== AI Grocery Pricing ==============
+
+export interface GroceryPriceSource {
+  storeName?: string;
+  productName?: string;
+  brand?: string | null;
+  packagePrice: number;
+  packageSize: number;
+  packageUnit: string;
+  sourceUrl?: string | null;
+  priceType:
+    | "local-store"
+    | "online-store"
+    | "regional-average"
+    | "national-average"
+    | "historical-average"
+    | "ai-estimated"
+    | "user-entered";
+  sourceQuality?: "direct-product" | "search-result" | "average-data" | "estimated";
+  confidence: "high" | "medium" | "low";
+  notes?: string | null;
+}
+
+export interface AIGroceryPriceEstimate {
+  ingredientName: string;
+  canonicalIngredientName: string;
+  locationLabel?: string | null;
+  typicalPackage: {
+    packageSize: number;
+    packageUnit: string;
+    lowPrice: number;
+    averagePrice: number;
+    highPrice: number;
+  };
+  selectedBudgetEstimate: {
+    packagePrice: number;
+    packageSize: number;
+    packageUnit: string;
+    reasoning: string;
+  };
+  normalizedPrices: {
+    pricePerOz?: number | null;
+    pricePerLb?: number | null;
+    pricePerGram?: number | null;
+    pricePerEach?: number | null;
+    pricePerTbsp?: number | null;
+    pricePerTsp?: number | null;
+    pricePerCup?: number | null;
+  };
+  sources: GroceryPriceSource[];
+  confidence: "high" | "medium" | "low";
+  explanation: string;
+  warnings: string[];
+}
+
+export interface EstimateIngredientResult {
+  estimate: AIGroceryPriceEstimate;
+  recipeAmountCost?: number;
+}
+
+export async function estimateIngredientPrice(opts: {
+  ingredientName: string;
+  recipeQuantity?: number;
+  recipeUnit?: string;
+  location?: {
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    label?: string;
+  };
+  preferBudgetStores?: boolean;
+}): Promise<EstimateIngredientResult> {
+  return postJson<EstimateIngredientResult>(
+    "/pricing/estimate-ingredient",
+    opts,
+  );
+}
+
 export async function remixRecipe(opts: {
   baseRecipe: unknown;
   userRequest: string;

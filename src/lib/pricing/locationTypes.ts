@@ -44,7 +44,7 @@ export interface PriceQuote {
   ingredientId: string;
   ingredientName: string;
   baseUnitCost: number; // national US base
-  appliedUnitCost: number; // base * multiplier (or override)
+  appliedUnitCost: number; // base * multiplier (or override / AI estimate)
   quantity: number;
   unit: string;
   totalCost: number; // applied * quantity

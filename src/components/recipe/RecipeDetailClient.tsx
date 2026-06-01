@@ -26,6 +26,7 @@ import { RecipeImage } from "@/components/recipe/RecipeImage";
 import { CookingMethodCard } from "@/components/recipe/CookingMethodCard";
 import { EquipmentBadges } from "@/components/recipe/EquipmentBadge";
 import { IngredientPriceRow } from "@/components/pricing/IngredientPriceRow";
+import { RecipeAIRepriceButton } from "@/components/pricing/RecipeAIRepriceButton";
 import { quoteRecipe } from "@/lib/pricing/pricingEngine";
 import { useAppStore } from "@/lib/AppStore";
 import {
@@ -155,8 +156,14 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
             <Coins size={16} /> Cost breakdown
           </h2>
           <p className="mt-1 text-xs text-stone-500">
-            Prices applied at <span className="font-semibold text-stone-700">{localQuote.regionLabel}</span> (×{localQuote.multiplier.toFixed(2)}). Tap ✎ to override any price for your local store.
+            Prices applied at <span className="font-semibold text-stone-700">{localQuote.regionLabel}</span> (×{localQuote.multiplier.toFixed(2)}). Tap ✨ to estimate any single price with AI, or ✎ to set your own.
           </p>
+          <div className="mt-3">
+            <RecipeAIRepriceButton
+              recipe={recipe}
+              onComplete={() => setPriceRev((n) => n + 1)}
+            />
+          </div>
           <ul className="mt-3 divide-y divide-stone-100">
             {breakdown.map((b, idx) => {
               if (!b.ingredient) {

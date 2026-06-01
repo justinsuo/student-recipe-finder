@@ -944,6 +944,167 @@ async function openaiResponsesWithWebSearch(opts: {
   }
 }
 
+// ---------- Route: /pricing/estimate-ingredient ----------
+//
+// AI-backed grocery price estimate for a single ingredient at a given region.
+// Uses the OpenAI Responses API with the built-in web_search tool to ground
+// the answer in current product/store examples. Returns a structured estimate
+// (typical package + low/avg/high range + sources + confidence + reasoning).
+//
+// We do NOT scrape grocery sites or invent store-specific prices. The model
+// is instructed to label fallbacks clearly.
+
+const PRICING_SYSTEM = `You are a grocery price estimation agent for a US student budget recipe app.
+
+You estimate the current realistic grocery cost of ONE ingredient using web search of public grocery product examples, package-size normalization, and regional context.
+
+Process:
+1. Identify what the ingredient is.
+2. Search the web for typical retail product examples (Walmart, Target, Safeway/Kroger, Whole Foods, Aldi, Trader Joe's online listings, USDA average data when relevant). Prefer realistic student budget options, not luxury organic unless asked.
+3. Compare 2–4 representative product examples.
+4. Pick the most common budget package size as the "typical package".
+5. Compute low / average / high package prices.
+6. Compute normalized prices (per oz, per lb, per each, per tbsp, per cup) where they make sense for that ingredient.
+7. If local prices for the requested region aren't reliably available, use national/regional averages and clearly label confidence: "low" or "medium".
+8. Never invent a store-specific price. If a product example doesn't come from a real search result, don't claim a store name.
+
+Return ONLY valid JSON in this exact schema (no markdown):
+{
+  "ingredientName": "string",
+  "canonicalIngredientName": "string",
+  "locationLabel": "string or null",
+  "typicalPackage": {
+    "packageSize": <number>,
+    "packageUnit": "string",
+    "lowPrice": <number>,
+    "averagePrice": <number>,
+    "highPrice": <number>
+  },
+  "selectedBudgetEstimate": {
+    "packagePrice": <number>,
+    "packageSize": <number>,
+    "packageUnit": "string",
+    "reasoning": "1–2 sentences"
+  },
+  "normalizedPrices": {
+    "pricePerOz": <number or null>,
+    "pricePerLb": <number or null>,
+    "pricePerGram": <number or null>,
+    "pricePerEach": <number or null>,
+    "pricePerTbsp": <number or null>,
+    "pricePerTsp": <number or null>,
+    "pricePerCup": <number or null>
+  },
+  "sources": [
+    {
+      "storeName": "string",
+      "productName": "string",
+      "brand": "string or null",
+      "packagePrice": <number>,
+      "packageSize": <number>,
+      "packageUnit": "string",
+      "sourceUrl": "string or null",
+      "priceType": "local-store|online-store|regional-average|national-average|historical-average|ai-estimated",
+      "sourceQuality": "direct-product|search-result|average-data|estimated",
+      "confidence": "high|medium|low",
+      "notes": "string or null"
+    }
+  ],
+  "confidence": "high|medium|low",
+  "explanation": "2–3 sentence plain-English summary of how you arrived at the estimate",
+  "warnings": ["any caveats — e.g. 'prices may vary seasonally', 'no local store data found, used national average'"]
+}`;
+
+async function handlePricingEstimateIngredient(
+  req: Request,
+  env: Env,
+): Promise<Response> {
+  const origin = req.headers.get("Origin");
+  let body: {
+    ingredientName?: string;
+    recipeQuantity?: number;
+    recipeUnit?: string;
+    location?: {
+      city?: string;
+      state?: string;
+      zipCode?: string;
+      label?: string;
+    };
+    preferBudgetStores?: boolean;
+  };
+  try {
+    body = await req.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400, env, origin);
+  }
+  const name = (body.ingredientName || "").toString().trim();
+  if (!name) return jsonResponse({ error: "Missing ingredientName" }, 400, env, origin);
+  const loc = body.location;
+  const locationLabel =
+    loc?.label ||
+    [loc?.city, loc?.state].filter(Boolean).join(", ") ||
+    loc?.zipCode ||
+    "US national";
+  const userPrompt = `Estimate the current grocery price of:
+Ingredient: ${name}
+Location: ${locationLabel}
+${body.recipeQuantity ? `Recipe uses ${body.recipeQuantity} ${body.recipeUnit ?? "unit"}` : ""}
+${body.preferBudgetStores ? "Prefer realistic student-budget store-brand options." : ""}
+
+Use web search of public grocery product examples. Return JSON per the schema. If you must use a fallback, label confidence "low" and explain in warnings.`;
+  try {
+    const result = (await openaiResponsesWithWebSearch({
+      env,
+      system: PRICING_SYSTEM,
+      user: userPrompt,
+      maxTokens: 1800,
+    })) as Record<string, unknown>;
+
+    // Optionally compute amount-cost server-side
+    let recipeAmountCost: number | undefined;
+    if (body.recipeQuantity && body.recipeUnit) {
+      const np = result?.normalizedPrices as
+        | Record<string, number | null | undefined>
+        | undefined;
+      if (np) {
+        const unit = body.recipeUnit.toLowerCase();
+        const lookup: Record<string, number | null | undefined> = {
+          oz: np.pricePerOz,
+          lb: np.pricePerLb,
+          g: np.pricePerGram,
+          each: np.pricePerEach,
+          tbsp: np.pricePerTbsp,
+          tsp: np.pricePerTsp,
+          cup: np.pricePerCup,
+        };
+        const ppu = lookup[unit];
+        if (typeof ppu === "number" && Number.isFinite(ppu)) {
+          recipeAmountCost = +(ppu * body.recipeQuantity).toFixed(2);
+        }
+      }
+    }
+
+    return jsonResponse(
+      {
+        estimate: result,
+        recipeAmountCost,
+      },
+      200,
+      env,
+      origin,
+    );
+  } catch (e) {
+    return jsonResponse(
+      {
+        error: e instanceof Error ? e.message : "pricing estimate failed",
+      },
+      500,
+      env,
+      origin,
+    );
+  }
+}
+
 // ---------- Route: /recipes/remix ----------
 //
 // Refine an existing recipe (database, AI, imported, or user-created) per a
@@ -1040,6 +1201,8 @@ export default {
         return handleImportText(req, env);
       case "/recipes/web-search":
         return handleWebSearch(req, env);
+      case "/pricing/estimate-ingredient":
+        return handlePricingEstimateIngredient(req, env);
       case "/recipes/remix":
         return handleRemix(req, env);
       default:
