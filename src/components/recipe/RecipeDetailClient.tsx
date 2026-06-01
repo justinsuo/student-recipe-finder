@@ -25,6 +25,8 @@ import { Card } from "@/components/ui/Card";
 import { RecipeImage } from "@/components/recipe/RecipeImage";
 import { CookingMethodCard } from "@/components/recipe/CookingMethodCard";
 import { EquipmentBadges } from "@/components/recipe/EquipmentBadge";
+import { IngredientPriceRow } from "@/components/pricing/IngredientPriceRow";
+import { quoteRecipe } from "@/lib/pricing/pricingEngine";
 import { useAppStore } from "@/lib/AppStore";
 import {
   calculateCostPerServing,
@@ -38,9 +40,14 @@ import type { Recipe } from "@/lib/types";
 export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
   const { isSaved, toggleSaved, pantry, addGroceryItems } = useAppStore();
   const saved = isSaved(recipe.id);
+  // bump when the user edits a price so the breakdown re-quotes
+  const [priceRev, setPriceRev] = useState(0);
   const totalCost = calculateRecipeCost(recipe);
   const cps = calculateCostPerServing(recipe);
   const breakdown = ingredientCostBreakdown(recipe);
+  const localQuote = quoteRecipe(recipe);
+  // silence "unused" warning when priceRev only triggers re-render
+  void priceRev;
 
   const pantrySet = pantrySetFromItems(pantry);
   const missing = calculateMissingIngredients(recipe, pantrySet);
@@ -145,26 +152,32 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
           <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-stone-700">
             <Coins size={16} /> Cost breakdown
           </h2>
+          <p className="mt-1 text-xs text-stone-500">
+            Prices applied at <span className="font-semibold text-stone-700">{localQuote.regionLabel}</span> (×{localQuote.multiplier.toFixed(2)}). Tap ✎ to override any price for your local store.
+          </p>
           <ul className="mt-3 divide-y divide-stone-100">
-            {breakdown.map((b, idx) => (
-              <li
-                key={`${b.ingredient?.id ?? "x"}-${idx}`}
-                className="flex items-center justify-between py-2 text-sm"
-              >
-                <div>
-                  <p className="font-medium text-stone-800">
-                    {b.ingredient?.name}{" "}
-                    {b.optional && (
-                      <span className="text-xs text-stone-500">(optional)</span>
-                    )}
-                  </p>
-                  <p className="text-xs text-stone-500">
-                    {b.quantity} {b.ingredient?.unit}
-                  </p>
-                </div>
-                <p className="font-medium text-stone-900">${b.cost.toFixed(2)}</p>
-              </li>
-            ))}
+            {breakdown.map((b, idx) => {
+              if (!b.ingredient) {
+                return (
+                  <li
+                    key={`x-${idx}`}
+                    className="flex items-center justify-between py-2 text-sm"
+                  >
+                    <span className="text-stone-500">Unknown ingredient</span>
+                    <span className="font-medium text-stone-900">${b.cost.toFixed(2)}</span>
+                  </li>
+                );
+              }
+              return (
+                <IngredientPriceRow
+                  key={`${b.ingredient.id}-${idx}`}
+                  ingredient={b.ingredient}
+                  quantity={b.quantity}
+                  optional={b.optional}
+                  onChange={() => setPriceRev((n) => n + 1)}
+                />
+              );
+            })}
           </ul>
           <div className="mt-3 flex items-center justify-between rounded-2xl bg-emerald-50 px-4 py-3">
             <div>

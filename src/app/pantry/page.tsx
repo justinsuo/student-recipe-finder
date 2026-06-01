@@ -30,6 +30,7 @@ import { PantryPhotoUpload } from "@/components/pantry/PantryPhotoUpload";
 import { PantryVoiceInput } from "@/components/pantry/PantryVoiceInput";
 import { PantrySmartAdd } from "@/components/pantry/PantrySmartAdd";
 import { PantryAIChat } from "@/components/pantry/PantryAIChat";
+import { LocationSetup } from "@/components/pricing/LocationSetup";
 import { getCustomIngredients } from "@/lib/customIngredientStorage";
 import type { Ingredient, IngredientCategory } from "@/lib/types";
 
@@ -113,6 +114,8 @@ export default function PantryPage() {
           </p>
         </div>
       </header>
+
+      <LocationSetup />
 
       <section className="rounded-3xl border border-stone-200 bg-white p-5 sm:p-6">
         <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-stone-700">

@@ -12,6 +12,7 @@ import {
   isNoStoveRecipe,
 } from "@/lib/equipmentFilters";
 import { Microwave, Wind, Home } from "lucide-react";
+import { LocationSetup } from "@/components/pricing/LocationSetup";
 import type {
   CheapFilters,
   DietTag,
@@ -163,6 +164,8 @@ export default function CheapRecipesPage() {
           Reset
         </Button>
       </header>
+
+      <LocationSetup variant="compact" />
 
       <section className="rounded-3xl border border-stone-200 bg-white p-5 sm:p-6">
         <div className="mb-5 flex items-center gap-2 text-stone-700">
