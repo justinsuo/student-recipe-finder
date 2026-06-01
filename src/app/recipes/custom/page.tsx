@@ -12,6 +12,8 @@ import {
   Flame,
   Sparkles,
   ChefHat,
+  Loader2,
+  ImagePlus,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -20,7 +22,13 @@ import {
   getCustomRecipe,
   getStoredRecipeImage,
   imageDataUrl,
+  saveCustomRecipe,
+  storeRecipeImage,
 } from "@/lib/customRecipeStorage";
+import {
+  generateRecipeImage,
+  isWorkerConfigured,
+} from "@/lib/workerClient";
 import { useAppStore } from "@/lib/AppStore";
 import type { CustomRecipe } from "@/lib/customRecipeTypes";
 
@@ -44,6 +52,56 @@ function CustomRecipePage() {
   const { isSaved, toggleSaved } = useAppStore();
   const [recipe, setRecipe] = useState<CustomRecipe | null>(null);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [imageLoading, setImageLoading] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
+
+  async function handleGenerateImage() {
+    if (!recipe) return;
+    setImageError(null);
+    setImageLoading(true);
+    try {
+      const img = await generateRecipeImage({
+        recipeName: recipe.name,
+        ingredients: recipe.ingredients.map((i) => i.name).slice(0, 8),
+        method: recipe.primaryCookingMethod,
+      });
+      let src: string | undefined;
+      if (img.b64_json) {
+        const stored = storeRecipeImage(id, img.b64_json, {
+          prompt: img.prompt,
+          model: img.model,
+        });
+        if (stored.ok) src = imageDataUrl(img.b64_json);
+      } else if (img.url) {
+        src = img.url;
+      }
+      if (!src) throw new Error("No image returned");
+      setImageSrc(src);
+      saveCustomRecipe({
+        ...recipe,
+        image: {
+          src,
+          alt: recipe.name,
+          sourceName: "AI generated",
+          license: "Generated image",
+          isAIGenerated: true,
+          isFallback: false,
+          generatedPrompt: img.prompt,
+          generatedAt: new Date().toISOString(),
+          model: img.model,
+        },
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Image generation failed";
+      setImageError(
+        /verified|verification|organization|403|401/i.test(msg)
+          ? "Image generation needs OpenAI organization verification. Add a phone number at platform.openai.com/settings/organization/general."
+          : msg,
+      );
+    } finally {
+      setImageLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (!id) {
@@ -105,11 +163,35 @@ function CustomRecipePage() {
               className="absolute inset-0 h-full w-full object-cover"
             />
           ) : (
-            <div className="flex h-full flex-col items-center justify-center bg-gradient-to-br from-emerald-100 to-amber-50 text-stone-500">
-              <ChefHat size={48} />
-              <p className="mt-2 text-xs uppercase tracking-wide">
-                No image yet
-              </p>
+            <div className="flex h-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-emerald-100 to-amber-50 px-6 text-stone-500">
+              {imageLoading ? (
+                <>
+                  <Loader2 size={32} className="animate-spin text-emerald-600" />
+                  <p className="text-xs uppercase tracking-wide">
+                    Generating image…
+                  </p>
+                </>
+              ) : (
+                <>
+                  <ChefHat size={48} />
+                  <p className="text-xs uppercase tracking-wide">
+                    No image yet
+                  </p>
+                  <Button
+                    onClick={handleGenerateImage}
+                    disabled={!isWorkerConfigured()}
+                    size="sm"
+                    leftIcon={<ImagePlus size={14} />}
+                  >
+                    Generate image
+                  </Button>
+                  {imageError && (
+                    <p className="max-w-xs text-center text-xs text-red-700">
+                      {imageError}
+                    </p>
+                  )}
+                </>
+              )}
             </div>
           )}
           <div className="absolute right-3 top-3">
