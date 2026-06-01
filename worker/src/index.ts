@@ -30,8 +30,10 @@ interface Env {
 }
 
 // Real, currently-available OpenAI models (June 2026 lineup).
-const TEXT_MODEL_DEFAULT = "gpt-4o-mini";
-const TEXT_HIGH_QUALITY_DEFAULT = "gpt-4o";
+// gpt-5-nano is the cheapest GPT-5 family member; flip to gpt-5-mini or
+// gpt-5 in wrangler.toml [vars] to upgrade per-task.
+const TEXT_MODEL_DEFAULT = "gpt-5-nano";
+const TEXT_HIGH_QUALITY_DEFAULT = "gpt-5-nano";
 const IMAGE_MODEL_DEFAULT = "dall-e-3";
 const IMAGE_MODEL_FALLBACK_DEFAULT = "gpt-image-1";
 

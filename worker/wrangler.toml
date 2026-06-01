@@ -15,13 +15,17 @@ compatibility_flags = ["nodejs_compat"]
 # Text models. Aliases (no dated snapshots) so OpenAI auto-resolves to the
 # latest version. Override per-task to use bigger / cheaper models without
 # changing code.
-DEFAULT_TEXT_MODEL = "gpt-4o-mini"
-RECIPE_MODEL = "gpt-4o-mini"
-RECIPE_HIGH_QUALITY_MODEL = "gpt-4o"
-LIGHTWEIGHT_MODEL = "gpt-4o-mini"
-PRICING_MODEL = "gpt-4o-mini"
-INGREDIENT_MODEL = "gpt-4o-mini"
-WEB_RECIPE_MODEL = "gpt-4o-mini"
+#
+# Defaults are pinned to gpt-5-nano — the cheapest member of the GPT-5
+# family (released 2025-08, ~$0.05/1M input tokens). Use gpt-5-mini for
+# more headroom or gpt-5 for the flagship.
+DEFAULT_TEXT_MODEL = "gpt-5-nano"
+RECIPE_MODEL = "gpt-5-nano"
+RECIPE_HIGH_QUALITY_MODEL = "gpt-5-nano"
+LIGHTWEIGHT_MODEL = "gpt-5-nano"
+PRICING_MODEL = "gpt-5-nano"
+INGREDIENT_MODEL = "gpt-5-nano"
+WEB_RECIPE_MODEL = "gpt-5-nano"
 
 # Image models. dall-e-3 is the safe default — works on every OpenAI org.
 # gpt-image-1 needs org verification but produces nicer images when available.
