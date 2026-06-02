@@ -7,14 +7,13 @@ import {
   ChefHat,
   Loader2,
   RefreshCw,
-  Coins,
-  Clock,
   Flame,
   ShoppingBasket,
   Bookmark,
   BookmarkCheck,
   AlertCircle,
   ArrowRight,
+  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -50,6 +49,9 @@ import { Refrigerator } from "lucide-react";
 import { calculateNutritionForFreeForm } from "@/lib/nutritionEngine";
 import { generateRecipeQuick, generateRecipeQuickOptions, isAiEnabled } from "@/lib/anthropic";
 import { useToast } from "@/components/ui/Toast";
+import { AIChefSteppedLoader } from "@/components/ai/AIChefSteppedLoader";
+import { RecipeStatsRow } from "@/components/recipe/RecipeStatsRow";
+import { SectionHeading } from "@/components/ui/SectionHeading";
 
 // If the AI's ingredient list maps cleanly to our catalog, replace its
 // guessed macros with the deterministic engine result. Falls back to the
@@ -725,7 +727,23 @@ function AIChefPage() {
         </Card>
       )}
 
-      <section className="rounded-3xl border border-stone-200 bg-white p-5 sm:p-6">
+      <section className="relative overflow-hidden rounded-3xl border border-violet-200/60 bg-gradient-to-br from-white via-violet-50/30 to-white p-5 shadow-sm sm:p-7">
+        <div
+          aria-hidden
+          className="dot-grid pointer-events-none absolute inset-0 opacity-30 [mask-image:radial-gradient(circle_at_90%_10%,black,transparent_55%)]"
+        />
+        <div className="relative">
+        <SectionHeading
+          eyebrow={
+            <span className="inline-flex items-center gap-1.5">
+              <Sparkles size={11} /> Choose your starting point
+            </span>
+          }
+          title="What should we cook?"
+          description="Pick a mode, give AI Chef context, then hit Generate. You'll get four options to compare."
+          tone="violet"
+          className="mb-5"
+        />
         <div className="mb-5 flex flex-wrap gap-2">
           <ModeChip
             active={mode === "pantry"}
@@ -1051,28 +1069,40 @@ function AIChefPage() {
           </div>
         </div>
 
-        <div className="mt-5 flex flex-wrap gap-2">
-          <Button
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <button
+            type="button"
             onClick={() => (mode === "pantry" || mode === "imagine" || mode === "have" ? runOptions(false) : run())}
             disabled={
               loading ||
               !isWorkerConfigured() ||
               (mode === "pantry" && selectedPantryIds.size === 0)
             }
-            leftIcon={
-              loading ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (
-                <Sparkles size={16} />
-              )
-            }
+            className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-700 px-6 py-3.5 text-sm font-semibold text-white shadow-md shadow-emerald-300/50 transition-all motion-safe:hover:-translate-y-0.5 hover:from-emerald-600 hover:to-emerald-800 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:from-stone-300 disabled:via-stone-300 disabled:to-stone-300 disabled:text-stone-100 disabled:shadow-none disabled:hover:translate-y-0 sm:w-auto"
           >
+            {loading ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <Sparkles
+                size={16}
+                className="transition-transform motion-safe:group-hover:rotate-12"
+              />
+            )}
             {loading
               ? "Thinking…"
               : mode === "pantry"
                 ? `Generate from my pantry (${selectedPantryIds.size})`
                 : "Generate my recipe"}
-          </Button>
+            {!loading && (
+              <ArrowRight
+                size={14}
+                className="transition-transform motion-safe:group-hover:translate-x-0.5"
+              />
+            )}
+          </button>
+          <p className="text-[11px] text-stone-500 sm:ml-2">
+            <span className="font-semibold text-stone-700">4 options</span> · re-priced from your region · macros + grocery list built in
+          </p>
           {recipe && (
             <>
               <Button
@@ -1113,7 +1143,22 @@ function AIChefPage() {
             </>
           )}
         </div>
+        </div>
       </section>
+
+      {loading && !recipe && options.length === 0 && (
+        <AIChefSteppedLoader
+          label={
+            mode === "url"
+              ? "Reading the recipe URL"
+              : mode === "paste"
+                ? "Parsing the recipe text"
+                : mode === "web"
+                  ? "Searching the web"
+                  : "Cooking up your four options"
+          }
+        />
+      )}
 
       {error && (
         <Card className="border-red-200 bg-red-50">
@@ -1181,13 +1226,22 @@ function AIChefPage() {
       )}
 
       {selectedOption && selectedOptionId && (
-        <article className="space-y-4">
+        <article className="space-y-5">
           {/* Option bubbles strip */}
-          <div className="rounded-3xl border border-stone-200 bg-white p-4">
-            <div className="mb-2 flex flex-wrap items-end justify-between gap-2">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-stone-700">
-                Your options ({options.length})
-              </h2>
+          <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm">
+            <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+              <SectionHeading
+                eyebrow={
+                  <span className="inline-flex items-center gap-1.5">
+                    <Sparkles size={11} /> {options.length}{" "}
+                    {options.length === 1 ? "option" : "options"}
+                  </span>
+                }
+                title="Pick your favorite."
+                description="Switch between options to compare cost, time, and approach."
+                tone="violet"
+                className="flex-1"
+              />
               <div className="flex flex-wrap gap-2">
                 <Button
                   size="sm"
@@ -1236,51 +1290,71 @@ function AIChefPage() {
             </Card>
           )}
 
-          {/* Main recipe panel */}
-          <div className="overflow-hidden rounded-3xl shadow-sm">
+          {/* Main recipe hero — image + overlay */}
+          <div className="group overflow-hidden rounded-3xl shadow-md">
             <div className="relative aspect-[16/9] bg-stone-100">
               {optionImages[selectedOptionId] ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img
                   src={optionImages[selectedOptionId]}
                   alt={selectedOption.recipe.name}
-                  className="absolute inset-0 h-full w-full object-cover"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.02]"
                 />
               ) : generatingImageIds.has(selectedOptionId) ? (
                 <div className="flex h-full items-center justify-center text-stone-600">
-                  <Loader2 size={20} className="mr-2 animate-spin" /> Generating
-                  recipe image…
+                  <Loader2 size={20} className="mr-2 animate-spin" />
+                  <span className="text-sm">Painting your dish…</span>
                 </div>
               ) : (
-                <div className="flex h-full flex-col items-center justify-center bg-gradient-to-br from-emerald-100 to-amber-50 text-stone-500">
+                <div className="flex h-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-violet-100 via-emerald-50 to-amber-50 text-stone-500">
                   <ChefHat size={48} />
                   <button
                     onClick={() => generateImageForOption(selectedOption)}
-                    className="mt-2 rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm shadow-emerald-200 hover:bg-emerald-700"
                   >
-                    Generate image
+                    <Sparkles size={11} /> Generate image
                   </button>
                 </div>
               )}
+              {/* Top-right overlay: AI badge + regenerate */}
               <div className="absolute right-3 top-3 flex gap-2">
-                <Badge tone="violet">
-                  <Sparkles size={11} className="mr-1" /> AI Generated
-                </Badge>
+                <span className="inline-flex items-center gap-1 rounded-full bg-violet-600/95 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm backdrop-blur">
+                  <Sparkles size={11} /> AI Generated
+                </span>
                 {optionImages[selectedOptionId] && (
                   <button
                     onClick={() => generateImageForOption(selectedOption)}
                     disabled={generatingImageIds.has(selectedOptionId)}
-                    className="rounded-full bg-stone-900/80 px-2 py-1 text-[10px] font-semibold text-white hover:bg-stone-900"
+                    className="inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold text-stone-800 shadow-sm backdrop-blur transition-colors hover:bg-white"
                     title="Regenerate image"
                   >
                     {generatingImageIds.has(selectedOptionId) ? (
                       <Loader2 size={10} className="animate-spin" />
                     ) : (
-                      "Regenerate"
+                      <>
+                        <RefreshCw size={10} /> Regenerate
+                      </>
                     )}
                   </button>
                 )}
               </div>
+              {/* Bottom gradient + title */}
+              {optionImages[selectedOptionId] && (
+                <>
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/75 via-black/15 to-transparent"
+                  />
+                  <div className="absolute inset-x-4 bottom-4 text-white">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/80">
+                      {selectedOption.optionLabel.replace(/-/g, " ")}
+                    </p>
+                    <h2 className="mt-1 text-2xl font-bold leading-tight sm:text-3xl">
+                      {selectedOption.recipe.name}
+                    </h2>
+                  </div>
+                </>
+              )}
             </div>
             {imageError && (
               <div className="border-t border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-900">
@@ -1289,22 +1363,37 @@ function AIChefPage() {
             )}
           </div>
 
+          {/* Stat strip (cost, time, calories, protein, servings) */}
+          <RecipeStatsRow
+            costPerServing={Number(selectedOption.recipe.estimatedCostPerServing)}
+            totalTimeMinutes={selectedOption.recipe.totalTimeMinutes}
+            calories={selectedOption.recipe.estimatedNutrition?.calories}
+            protein={selectedOption.recipe.estimatedNutrition?.protein}
+            carbs={selectedOption.recipe.estimatedNutrition?.carbs}
+            servings={selectedOption.recipe.servings}
+          />
+
           <header className="space-y-3">
+            {/* Title shows here only when there's no hero image — otherwise
+                it's overlaid on the image hero above. */}
+            {!optionImages[selectedOptionId] && (
+              <h2 className="text-3xl font-bold leading-tight text-stone-900 sm:text-4xl">
+                {selectedOption.recipe.name}
+              </h2>
+            )}
             <div className="flex flex-wrap gap-2">
-              <Badge tone="green" icon={<Coins size={12} />}>
-                ${money(selectedOption.recipe.estimatedCostPerServing)}/serving
-              </Badge>
-              <Badge tone="amber" icon={<Clock size={12} />}>
-                {selectedOption.recipe.totalTimeMinutes} min
-              </Badge>
               <Badge tone="stone" icon={<Flame size={12} />}>
                 {selectedOption.recipe.difficulty}
               </Badge>
+              {selectedOption.recipe.equipment?.slice(0, 3).map((eq) => (
+                <Badge key={eq} tone="sky">
+                  {eq}
+                </Badge>
+              ))}
             </div>
-            <h2 className="text-3xl font-bold text-stone-900">
-              {selectedOption.recipe.name}
-            </h2>
-            <p className="text-stone-700">{selectedOption.recipe.description}</p>
+            <p className="max-w-3xl text-base leading-relaxed text-stone-700">
+              {selectedOption.recipe.description}
+            </p>
             {selectedOption.recipe.whyThisFits && (
               <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
                 <p className="text-xs font-semibold uppercase tracking-wide">
@@ -1346,35 +1435,42 @@ function AIChefPage() {
           </header>
 
           <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-stone-700">
-                Ingredients
-              </h3>
+            <Card className="overflow-hidden">
+              <SectionHeading
+                eyebrow={
+                  <span className="inline-flex items-center gap-1.5">
+                    <ShoppingBasket size={11} /> Ingredients
+                  </span>
+                }
+                title={`${selectedOption.recipe.ingredients.length} items`}
+                tone="emerald"
+              />
               <ul className="mt-3 divide-y divide-stone-100">
                 {selectedOption.recipe.ingredients.map((ing, i) => (
                   <li
                     key={i}
-                    className="flex items-center justify-between py-2 text-sm"
+                    className="flex items-center justify-between gap-3 py-2.5 text-sm motion-safe:animate-[fadeUp_400ms_ease-out_both]"
+                    style={{ animationDelay: `${Math.min(i, 12) * 30}ms` }}
                   >
-                    <div>
-                      <p
-                        className={
-                          ing.userAlreadyHas
-                            ? "font-medium text-emerald-700"
-                            : "font-medium text-stone-800"
-                        }
-                      >
-                        {ing.name}{" "}
+                    <div className="min-w-0 flex-1">
+                      <p className="flex flex-wrap items-center gap-1.5 font-medium text-stone-900">
+                        {ing.name}
+                        {ing.userAlreadyHas && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
+                            <Check size={9} /> you have
+                          </span>
+                        )}
                         {ing.optional && (
-                          <span className="text-xs text-stone-500">(optional)</span>
+                          <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-medium text-stone-600">
+                            optional
+                          </span>
                         )}
                       </p>
-                      <p className="text-xs text-stone-500">
+                      <p className="mt-0.5 text-xs text-stone-500">
                         {ing.quantity} {ing.unit}
-                        {ing.userAlreadyHas && " · you have"}
                       </p>
                     </div>
-                    <p className="text-sm font-medium text-stone-900">
+                    <p className="text-sm font-semibold tabular-nums text-stone-900">
                       ${money(ing.estimatedCost)}
                     </p>
                   </li>
@@ -1382,16 +1478,26 @@ function AIChefPage() {
               </ul>
             </Card>
             <Card>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-stone-700">
-                Steps
-              </h3>
+              <SectionHeading
+                eyebrow={
+                  <span className="inline-flex items-center gap-1.5">
+                    <ChefHat size={11} /> Steps
+                  </span>
+                }
+                title={`${selectedOption.recipe.steps.length} steps`}
+                tone="amber"
+              />
               <ol className="mt-3 space-y-3">
                 {selectedOption.recipe.steps.map((s, i) => (
-                  <li key={i} className="flex gap-3 text-sm">
-                    <span className="mt-0.5 grid h-6 w-6 flex-none place-items-center rounded-full bg-emerald-600 text-xs font-bold text-white">
+                  <li
+                    key={i}
+                    className="flex gap-3 text-sm motion-safe:animate-[fadeUp_400ms_ease-out_both]"
+                    style={{ animationDelay: `${Math.min(i, 12) * 40}ms` }}
+                  >
+                    <span className="mt-0.5 grid h-7 w-7 flex-none place-items-center rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 text-xs font-bold text-white shadow-sm shadow-emerald-200">
                       {i + 1}
                     </span>
-                    <p>{s}</p>
+                    <p className="leading-relaxed text-stone-800">{s}</p>
                   </li>
                 ))}
               </ol>
@@ -1422,22 +1528,22 @@ function AIChefPage() {
               )}
             </Card>
           )}
-          <div className="overflow-hidden rounded-3xl shadow-sm">
+          <div className="group overflow-hidden rounded-3xl shadow-md">
             <div className="relative aspect-[16/9] bg-stone-100">
               {savedImageDataUrl ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img
                   src={savedImageDataUrl}
                   alt={recipe.name}
-                  className="absolute inset-0 h-full w-full object-cover"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.02]"
                 />
               ) : imageLoading ? (
                 <div className="flex h-full items-center justify-center text-stone-600">
-                  <Loader2 size={20} className="mr-2 animate-spin" /> Generating
-                  recipe image…
+                  <Loader2 size={20} className="mr-2 animate-spin" />
+                  <span className="text-sm">Painting your dish…</span>
                 </div>
               ) : (
-                <div className="flex h-full flex-col items-center justify-center bg-gradient-to-br from-emerald-100 to-amber-50 text-stone-500">
+                <div className="flex h-full flex-col items-center justify-center bg-gradient-to-br from-violet-100 via-emerald-50 to-amber-50 text-stone-500">
                   <ChefHat size={48} />
                   <p className="mt-2 text-xs uppercase tracking-wide">
                     Image not generated
@@ -1445,27 +1551,57 @@ function AIChefPage() {
                 </div>
               )}
               <div className="absolute right-3 top-3 flex gap-2">
-                <Badge tone="violet">
-                  <Sparkles size={11} className="mr-1" /> AI Generated
-                </Badge>
+                <span className="inline-flex items-center gap-1 rounded-full bg-violet-600/95 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm backdrop-blur">
+                  <Sparkles size={11} /> AI Generated
+                </span>
               </div>
+              {savedImageDataUrl && (
+                <>
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/75 via-black/15 to-transparent"
+                  />
+                  <div className="absolute inset-x-4 bottom-4 text-white">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/80">
+                      AI Chef
+                    </p>
+                    <h2 className="mt-1 text-2xl font-bold leading-tight sm:text-3xl">
+                      {recipe.name}
+                    </h2>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
+          <RecipeStatsRow
+            costPerServing={Number(recipe.estimatedCostPerServing)}
+            totalTimeMinutes={recipe.totalTimeMinutes}
+            calories={recipe.estimatedNutrition?.calories}
+            protein={recipe.estimatedNutrition?.protein}
+            carbs={recipe.estimatedNutrition?.carbs}
+            servings={recipe.servings}
+          />
+
           <header className="space-y-3">
+            {!savedImageDataUrl && (
+              <h2 className="text-3xl font-bold leading-tight text-stone-900 sm:text-4xl">
+                {recipe.name}
+              </h2>
+            )}
             <div className="flex flex-wrap gap-2">
-              <Badge tone="green" icon={<Coins size={12} />}>
-                ${money(recipe.estimatedCostPerServing)}/serving
-              </Badge>
-              <Badge tone="amber" icon={<Clock size={12} />}>
-                {recipe.totalTimeMinutes} min
-              </Badge>
               <Badge tone="stone" icon={<Flame size={12} />}>
                 {recipe.difficulty}
               </Badge>
+              {recipe.equipment?.slice(0, 3).map((eq) => (
+                <Badge key={eq} tone="sky">
+                  {eq}
+                </Badge>
+              ))}
             </div>
-            <h2 className="text-3xl font-bold text-stone-900">{recipe.name}</h2>
-            <p className="text-stone-700">{recipe.description}</p>
+            <p className="max-w-3xl text-base leading-relaxed text-stone-700">
+              {recipe.description}
+            </p>
             {recipe.whyThisFits && (
               <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
                 <p className="text-xs font-semibold uppercase tracking-wide">
