@@ -3,6 +3,15 @@
 :root {
   --background: #fafaf7;
   --foreground: #1c1917;
+
+  /* Motion tokens. Use these durations / easings so animations feel like one
+     designer made them. Consumers reference via inline style or arbitrary
+     class values, e.g. transition-[transform] duration-[var(--motion-fast)]. */
+  --motion-fast: 150ms;
+  --motion-base: 220ms;
+  --motion-slow: 360ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 @theme inline {
@@ -56,5 +65,26 @@ body {
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+/* Gentle float used by EmptyState emoji so empty surfaces feel less dead.
+   Motion-safe consumers only. */
+@keyframes emojiFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* Reduce-motion hardening. Tailwind's motion-safe: variants already gate
+   most of our animations, but this is a belt-and-braces guard against any
+   raw CSS animation we (or future contributors) miss. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }

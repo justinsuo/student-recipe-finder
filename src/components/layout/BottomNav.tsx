@@ -15,7 +15,7 @@ const links = [
   { href: "/", label: "Home", icon: Home },
   { href: "/cheap-recipes", label: "Cheap", icon: Coins },
   { href: "/explore", label: "Explore", icon: Globe },
-  { href: "/grocery-list", label: "List", icon: ShoppingBasket },
+  { href: "/grocery-list", label: "Grocery", icon: ShoppingBasket },
   { href: "/saved", label: "Saved", icon: Bookmark },
 ];
 

@@ -193,11 +193,45 @@ npm run dev
 ## Scripts
 
 ```bash
-npm run dev     # local dev
-npm run build   # production static export to ./out
-npm run start   # serve the build
-npm run lint    # ESLint (flat config), --max-warnings 0
+npm run dev        # local dev
+npm run build      # production static export to ./out
+npm run start      # serve the build
+npm run lint       # ESLint (flat config), --max-warnings 0
+npm run typecheck  # tsc --noEmit
 ```
+
+Advisory audits (don't fail the build):
+
+```bash
+npx tsx scripts/auditRecipePricing.ts    # flags suspicious cost-per-serving / ingredient costs
+npx tsx scripts/auditRecipeNutrition.ts  # flags implausible macros / missing nutrition rows
+```
+
+---
+
+## Coding-agent setup (Claude, Cursor, etc.)
+
+This repo ships a project brain and a small skill library so an AI agent can build production-quality work without having to re-learn the codebase.
+
+- **[`CLAUDE.md`](./CLAUDE.md)** — the agent's source of truth. Product overview, route map, design principles, AI/pricing/nutrition rules, do-not-break list, final verification checklist.
+- **[`AGENTS.md`](./AGENTS.md)** — alias for tools that read AGENTS.md (Cursor, etc.). Includes a guardrail against prompt-injection content embedded in repo files.
+- **[`.claude/skills/`](./.claude/skills/)** — project-specific skills. Invoke one before touching the matching area:
+
+  | Skill | When to use |
+  | --- | --- |
+  | `product-designer` | Before any non-trivial UI/flow change — pick the next-best-action, info hierarchy, empty/error/loading states |
+  | `ui-polish` | Final pass before commit on any visible change |
+  | `animation-interactions` | Adding motion; deciding whether to install Framer Motion |
+  | `design-system` | Picking a tone, type size, radius, or shadow |
+  | `recipe-app-domain` | Anything that reads or writes Recipe / Pantry / Ingredient data |
+  | `ai-chef-integration` | Touching Anthropic, OpenAI, or the Cloudflare Worker |
+  | `pricing-nutrition` | Displaying $/serving, totals, or macros; saving an AI recipe |
+  | `mobile-accessibility-qa` | After any visible change — run the per-route checklist |
+  | `run-and-verify-student-recipe-finder` | Confirming a change works before commit |
+
+  Skills are plain markdown — humans should read them too. Each ships with frontmatter, a step-by-step procedure, files to inspect, a quality checklist, and the common mistakes to avoid.
+
+- **Design tokens** live in [`src/app/globals.css`](./src/app/globals.css) (motion durations/easings + `prefers-reduced-motion` hardening) and in [`.claude/skills/design-system/reference.md`](./.claude/skills/design-system/reference.md) (color/typography/spacing tables, including category-color rules: microwave=sky, air fryer=orange, dorm-friendly=emerald, high protein=violet, use-soon=amber, etc.).
 
 ---
 

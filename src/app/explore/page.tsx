@@ -378,7 +378,10 @@ export default function ExplorePage() {
     [],
   );
 
-  // Initial + filter changes — always start from page 1.
+  // Initial + filter changes — always start from page 1. `load` itself sets
+  // state (intentional here), and we list granular filter fields so we don't
+  // re-fetch on `page` changes during pagination.
+  /* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
   useEffect(() => {
     load({ ...filters, page: 1 }, false);
   }, [
@@ -389,6 +392,7 @@ export default function ExplorePage() {
     filters.sort,
     load,
   ]);
+  /* eslint-enable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
 
   function handleQueryChange(v: string) {
     setInputValue(v);
