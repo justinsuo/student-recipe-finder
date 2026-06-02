@@ -642,17 +642,53 @@ function AIChefPage() {
 
   return (
     <div className="space-y-10">
-      <header>
-        <p className="flex items-center gap-1.5 text-sm font-medium text-emerald-700">
-          <ChefHat size={14} /> AI Chef
-        </p>
-        <h1 className="mt-1 text-3xl font-bold text-stone-900 sm:text-4xl">
-          Tell the AI what you have. Get a cheap recipe.
-        </h1>
-        <p className="mt-2 max-w-2xl text-sm text-stone-600">
-          Generates an original recipe based on your ingredients, budget, gear,
-          diet, and cravings — including an AI-generated photo.
-        </p>
+      <header className="relative -mt-2 overflow-hidden rounded-3xl border border-violet-200/70 bg-gradient-to-br from-violet-50 via-white to-emerald-50/50 px-6 py-8 sm:px-10 sm:py-10">
+        <div
+          aria-hidden
+          className="dot-grid pointer-events-none absolute inset-0 opacity-50 [mask-image:radial-gradient(circle_at_70%_30%,black,transparent_60%)]"
+        />
+        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="max-w-2xl space-y-3">
+            <p className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-violet-700 backdrop-blur motion-safe:animate-[fadeUp_500ms_ease-out_both]">
+              <Sparkles
+                size={12}
+                className="motion-safe:animate-[brandBob_2.6s_ease-in-out_infinite]"
+              />
+              AI Chef
+            </p>
+            <h1
+              className="text-3xl font-bold leading-[1.05] tracking-tight text-stone-900 motion-safe:animate-[fadeUp_580ms_ease-out_both] sm:text-[2.5rem]"
+              style={{ animationDelay: "60ms" }}
+            >
+              What should we cook tonight?
+            </h1>
+            <p
+              className="text-sm leading-relaxed text-stone-600 motion-safe:animate-[fadeUp_640ms_ease-out_both] sm:text-base"
+              style={{ animationDelay: "140ms" }}
+            >
+              Drop in pantry items, equipment, and a craving. AI Chef returns
+              an original recipe with cost per serving, macros, missing items,
+              and a step-by-step cooking guide.
+            </p>
+          </div>
+          <ul
+            className="flex flex-wrap gap-2 text-[11px] font-medium text-stone-600 motion-safe:animate-[fadeUp_700ms_ease-out_both] sm:flex-col sm:items-end sm:gap-1 sm:text-xs"
+            style={{ animationDelay: "220ms" }}
+          >
+            <li className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-2.5 py-1 backdrop-blur">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              4 options at once
+            </li>
+            <li className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-2.5 py-1 backdrop-blur">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+              Re-priced from your region
+            </li>
+            <li className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-2.5 py-1 backdrop-blur">
+              <span className="h-1.5 w-1.5 rounded-full bg-violet-500" />
+              Macros + grocery list built in
+            </li>
+          </ul>
+        </div>
       </header>
 
       {!isWorkerConfigured() && (

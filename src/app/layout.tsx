@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppStoreProvider } from "@/lib/AppStore";
 import { Navbar } from "@/components/layout/Navbar";
+import { BottomNav } from "@/components/layout/BottomNav";
 import { Chatbot } from "@/components/layout/Chatbot";
 import { ToastProvider } from "@/components/ui/Toast";
 
@@ -36,6 +37,7 @@ export default function RootLayout({
             <main className="app-main mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
               {children}
             </main>
+            <BottomNav />
             <Chatbot />
           </ToastProvider>
         </AppStoreProvider>

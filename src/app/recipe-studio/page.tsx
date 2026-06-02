@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  Wand2,
   ChefHat,
   Sparkles,
   ArrowRight,
@@ -16,6 +15,7 @@ import {
   imageDataUrl,
 } from "@/lib/customRecipeStorage";
 import { useToast } from "@/components/ui/Toast";
+import { PageHeader } from "@/components/ui/PageHeader";
 import type { CustomRecipe } from "@/lib/customRecipeTypes";
 
 export default function RecipeStudioPage() {
@@ -41,18 +41,12 @@ export default function RecipeStudioPage() {
 
   return (
     <div className="space-y-10">
-      <header>
-        <p className="flex items-center gap-1.5 text-sm font-medium text-emerald-700">
-          <Wand2 size={14} /> Recipe Studio
-        </p>
-        <h1 className="mt-1 text-3xl font-bold text-stone-900 sm:text-4xl">
-          Make your own recipes
-        </h1>
-        <p className="mt-2 max-w-2xl text-sm text-stone-600">
-          Generate with AI or build a recipe card from scratch. Both end up in
-          your saved collection.
-        </p>
-      </header>
+      <PageHeader
+        eyebrow="Recipe Studio"
+        title="Make your own recipes."
+        description="Generate with AI or build a recipe card from scratch. Both end up in your saved collection."
+        tone="indigo"
+      />
 
       <section className="grid gap-4 sm:grid-cols-2">
         <Link

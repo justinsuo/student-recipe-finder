@@ -12,6 +12,7 @@ import { recommendSmartBuys } from "@/lib/recipeScoring";
 import { quoteIngredient } from "@/lib/pricing/pricingEngine";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
 import type { IngredientCategory } from "@/lib/types";
 import { RECIPE_MAP } from "@/data/recipes";
 
@@ -57,28 +58,24 @@ export default function GroceryListPage() {
 
   return (
     <div className="space-y-8">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-sm font-medium text-emerald-700">Grocery List</p>
-          <h1 className="mt-1 text-3xl font-bold text-stone-900 sm:text-4xl">
-            Your shopping list
-          </h1>
-          <p className="mt-2 max-w-xl text-sm text-stone-600">
-            Items from recipes you&apos;ve added, plus smart suggestions. Check
-            things off as you shop.
-          </p>
-        </div>
-        {grocery.length > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            leftIcon={<Trash2 size={14} />}
-            onClick={clearGrocery}
-          >
-            Clear all
-          </Button>
-        )}
-      </header>
+      <PageHeader
+        eyebrow="Grocery List"
+        title="Your shopping list."
+        description="Items from recipes you've added, plus smart suggestions. Check things off as you shop."
+        tone="sky"
+        trailing={
+          grocery.length > 0 ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              leftIcon={<Trash2 size={14} />}
+              onClick={clearGrocery}
+            >
+              Clear all
+            </Button>
+          ) : undefined
+        }
+      />
 
       {grocery.length === 0 ? (
         <EmptyState

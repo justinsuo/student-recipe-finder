@@ -91,7 +91,9 @@ export function Chatbot() {
     <>
       <div
         className={clsx(
-          "group fixed bottom-5 right-4 z-50 flex items-center gap-2 transition-opacity sm:bottom-6 sm:right-6",
+          // On mobile we sit above the BottomNav (~76px). At md+ no bottom
+          // nav exists, so we drop back to the original position.
+          "group fixed bottom-24 right-4 z-50 flex items-center gap-2 transition-opacity md:bottom-6 md:right-6",
           // Safe area: extra room on iOS so the button doesn't sit on the
           // home indicator.
           "pb-[env(safe-area-inset-bottom)]",

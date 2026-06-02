@@ -59,19 +59,28 @@ export function Navbar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-stone-200 bg-stone-50/90 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-stone-200/80 bg-stone-50/85 backdrop-blur-md supports-[backdrop-filter]:bg-stone-50/70">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-600 text-white shadow-sm">
-            <Sparkles size={18} />
+        <Link
+          href="/"
+          className="group flex items-center gap-2.5 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+        >
+          <div className="relative grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-sm shadow-emerald-300/40 transition-transform motion-safe:group-hover:scale-105">
+            <ChefHat size={18} />
+            <span
+              aria-hidden
+              className="absolute -right-1 -top-1 grid h-4 w-4 place-items-center rounded-full bg-amber-400 text-[8px] text-amber-900 shadow"
+            >
+              <Sparkles size={9} />
+            </span>
           </div>
           <div className="flex flex-col leading-tight">
-            <span className="text-sm font-bold text-stone-900">
+            <span className="text-sm font-bold tracking-tight text-stone-900 transition-colors group-hover:text-emerald-700">
               Student Recipe Finder
             </span>
             {/* Tagline only on larger screens so it never crowds the nav. */}
-            <span className="hidden text-xs text-stone-500 md:inline">
-              Eat well, spend less
+            <span className="hidden text-[11px] text-stone-500 lg:inline">
+              Eat well, spend less.
             </span>
           </div>
         </Link>
@@ -79,29 +88,49 @@ export function Navbar() {
         {/* Desktop nav — collapses to the hamburger below xl (1280px) so
             8 pills + brand never feel cramped. About lives in the mobile
             drawer only. */}
-        <nav className="hidden items-center gap-1 xl:flex" aria-label="Main navigation">
-          {links.filter((l) => l.desktop).map((link) => {
-            const Icon = link.icon;
-            const active = isActive(pathname, link.href);
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                aria-current={active ? "page" : undefined}
-                className={clsx(
-                  "inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500",
-                  active
-                    ? "bg-stone-900 text-white shadow-sm"
-                    : link.emphasis
-                      ? "border border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
-                      : "text-stone-700 hover:bg-stone-100",
-                )}
-              >
-                <Icon size={15} />
-                {link.label}
-              </Link>
-            );
-          })}
+        <nav
+          className="hidden items-center gap-0.5 xl:flex"
+          aria-label="Main navigation"
+        >
+          {links
+            .filter((l) => l.desktop)
+            .map((link) => {
+              const Icon = link.icon;
+              const active = isActive(pathname, link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  aria-current={active ? "page" : undefined}
+                  className={clsx(
+                    "group relative inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500",
+                    active
+                      ? "text-stone-900"
+                      : link.emphasis
+                        ? "border border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
+                        : "text-stone-700 hover:bg-stone-100",
+                  )}
+                >
+                  <Icon
+                    size={15}
+                    className={clsx(
+                      "transition-colors",
+                      active && "text-emerald-600",
+                    )}
+                  />
+                  {link.label}
+                  {/* Active indicator — thin emerald underline that slides
+                      in. Replaces the old dark-pill active state which felt
+                      heavy. */}
+                  {active && (
+                    <span
+                      aria-hidden
+                      className="absolute inset-x-3 -bottom-[14px] h-[3px] rounded-full bg-emerald-600 motion-safe:animate-[navUnderlineSlide_280ms_ease-out]"
+                    />
+                  )}
+                </Link>
+              );
+            })}
         </nav>
 
         {/* Hamburger (mobile + tablet) */}
@@ -130,7 +159,7 @@ export function Navbar() {
           <nav
             id="mobile-nav-drawer"
             aria-label="Main navigation"
-            className="absolute inset-x-0 top-full z-40 border-b border-stone-200 bg-white shadow-lg xl:hidden"
+            className="absolute inset-x-0 top-full z-40 border-b border-stone-200 bg-white shadow-lg motion-safe:animate-[fadeUp_220ms_ease-out] xl:hidden"
           >
             <ul className="mx-auto max-w-6xl px-4 py-3 sm:px-6">
               {links.map((link) => {
@@ -144,18 +173,27 @@ export function Navbar() {
                       className={clsx(
                         "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500",
                         active
-                          ? "bg-stone-900 text-white"
+                          ? "bg-emerald-50 text-emerald-800"
                           : link.emphasis
                             ? "border border-emerald-300 bg-emerald-50 text-emerald-800"
                             : "text-stone-700 hover:bg-stone-100",
                       )}
                     >
-                      <Icon size={18} />
+                      <Icon
+                        size={18}
+                        className={active ? "text-emerald-600" : undefined}
+                      />
                       {link.label}
                       {link.emphasis && !active && (
                         <span className="ml-auto rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-semibold text-white">
                           AI
                         </span>
+                      )}
+                      {active && (
+                        <span
+                          aria-hidden
+                          className="ml-auto h-1.5 w-1.5 rounded-full bg-emerald-600"
+                        />
                       )}
                     </Link>
                   </li>

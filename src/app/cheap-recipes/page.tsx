@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Coins, Filter, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { RecipeGrid } from "@/components/recipe/RecipeGrid";
 import { rankCheapRecipes } from "@/lib/recipeScoring";
 import {
@@ -224,30 +225,26 @@ export default function CheapRecipesPage() {
 
   return (
     <div className="space-y-8">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-sm font-medium text-emerald-700">Cheap Recipe Coach</p>
-          <h1 className="mt-1 text-3xl font-bold text-stone-900 sm:text-4xl">
-            Find your cheapest dinner
-          </h1>
-          <p className="mt-2 max-w-xl text-sm text-stone-600">
-            Tell us what you can spend, what you&apos;ve got to cook with, and how you eat.
-            We&apos;ll rank recipes by cost, time, and practicality.
-          </p>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          leftIcon={<RefreshCcw size={14} />}
-          onClick={() => {
-            setFilters(DEFAULTS);
-            setSort("best");
-          }}
-          title="Restore default budget, equipment, diet, time, and sort"
-        >
-          Reset filters
-        </Button>
-      </header>
+      <PageHeader
+        eyebrow="Cheap Recipe Coach"
+        title="Find your cheapest dinner."
+        description="Tell us what you can spend, what you've got to cook with, and how you eat. We'll rank recipes by cost, time, and practicality."
+        tone="amber"
+        trailing={
+          <Button
+            variant="outline"
+            size="sm"
+            leftIcon={<RefreshCcw size={14} />}
+            onClick={() => {
+              setFilters(DEFAULTS);
+              setSort("best");
+            }}
+            title="Restore default budget, equipment, diet, time, and sort"
+          >
+            Reset filters
+          </Button>
+        }
+      />
 
       <LocationSetup variant="compact" />
 

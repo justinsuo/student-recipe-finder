@@ -27,6 +27,7 @@ import {
 import { RecipeCard } from "@/components/recipe/RecipeCard";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { PantryPhotoUpload } from "@/components/pantry/PantryPhotoUpload";
 import { PantryVoiceInput } from "@/components/pantry/PantryVoiceInput";
 import { PantrySmartAdd } from "@/components/pantry/PantrySmartAdd";
@@ -102,27 +103,22 @@ export default function PantryPage() {
 
   return (
     <div className="space-y-10">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-sm font-medium text-emerald-700">Pantry-to-Plate</p>
-          <h1 className="mt-1 text-3xl font-bold text-stone-900 sm:text-4xl">
-            What can you make right now?
-          </h1>
-          <p className="mt-2 max-w-xl text-sm text-stone-600">
-            Add what&apos;s in your kitchen. We&apos;ll surface recipes you can
-            make, and AI Chef can generate brand-new recipes from these same
-            ingredients without making you retype them.
-          </p>
-        </div>
-        {pantry.length > 0 && (
-          <Link
-            href="/ai-chef?usePantry=true"
-            className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-emerald-700"
-          >
-            ✨ Use these in AI Chef
-          </Link>
-        )}
-      </header>
+      <PageHeader
+        eyebrow="Pantry-to-Plate"
+        title="What can you make right now?"
+        description="Add what's in your kitchen. We'll surface recipes you can make, and AI Chef can generate brand-new ones from the same ingredients without making you retype them."
+        tone="emerald"
+        trailing={
+          pantry.length > 0 ? (
+            <Link
+              href="/ai-chef?usePantry=true"
+              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-emerald-200 transition-all motion-safe:hover:-translate-y-0.5 hover:bg-emerald-700"
+            >
+              <Sparkles size={14} /> Use these in AI Chef
+            </Link>
+          ) : undefined
+        }
+      />
 
       <LocationSetup />
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Bookmark, ChefHat, Sparkles } from "lucide-react";
+import { ChefHat, Sparkles } from "lucide-react";
 import { useAppStore } from "@/lib/AppStore";
 import { RECIPE_MAP } from "@/data/recipes";
 import { RecipeGrid } from "@/components/recipe/RecipeGrid";
@@ -13,6 +13,7 @@ import {
 } from "@/lib/customRecipeStorage";
 import type { CustomRecipe } from "@/lib/customRecipeTypes";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 export default function SavedPage() {
   const { saved, hydrated } = useAppStore();
@@ -41,18 +42,12 @@ export default function SavedPage() {
 
   return (
     <div className="space-y-8">
-      <header>
-        <p className="flex items-center gap-1.5 text-sm font-medium text-emerald-700">
-          <Bookmark size={14} /> Saved Recipes
-        </p>
-        <h1 className="mt-1 text-3xl font-bold text-stone-900 sm:text-4xl">
-          Your collection
-        </h1>
-        <p className="mt-2 max-w-xl text-sm text-stone-600">
-          Database recipes you bookmarked, plus your AI-generated and custom
-          recipes.
-        </p>
-      </header>
+      <PageHeader
+        eyebrow="Saved Recipes"
+        title="Your recipe box."
+        description="Database recipes you bookmarked, plus your AI-generated and custom recipes."
+        tone="rose"
+      />
 
       {hydrated && totalCount === 0 ? (
         <EmptyState
