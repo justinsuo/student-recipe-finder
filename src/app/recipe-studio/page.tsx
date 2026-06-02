@@ -16,6 +16,8 @@ import {
 } from "@/lib/customRecipeStorage";
 import { useToast } from "@/components/ui/Toast";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { SectionHeading } from "@/components/ui/SectionHeading";
+import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import type { CustomRecipe } from "@/lib/customRecipeTypes";
 
 export default function RecipeStudioPage() {
@@ -48,47 +50,65 @@ export default function RecipeStudioPage() {
         tone="indigo"
       />
 
-      <section className="grid gap-4 sm:grid-cols-2">
+      <ScrollReveal as="section" className="grid gap-4 sm:grid-cols-2">
         <Link
           href="/ai-chef"
-          className="group flex flex-col gap-3 rounded-3xl border border-stone-200 bg-white p-6 transition-all hover:-translate-y-0.5 hover:shadow-md"
+          className="group flex flex-col gap-3 rounded-3xl border border-stone-200 bg-white p-6 transition-all motion-safe:hover:-translate-y-1 hover:border-violet-300 hover:shadow-lg"
         >
-          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-violet-100 text-violet-700">
+          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-violet-100 text-violet-700 transition-colors group-hover:bg-violet-600 group-hover:text-white">
             <Sparkles size={22} />
           </div>
           <h2 className="text-xl font-semibold text-stone-900">
             Let AI make a recipe
           </h2>
-          <p className="text-sm text-stone-600">
+          <p className="text-sm leading-relaxed text-stone-600">
             AI Chef generates an original recipe from your ingredients, budget,
             and equipment — with an AI image attached.
           </p>
-          <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 group-hover:underline">
-            Generate with AI Chef <ArrowRight size={14} />
+          <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700">
+            Generate with AI Chef
+            <ArrowRight
+              size={14}
+              className="transition-transform motion-safe:group-hover:translate-x-1"
+            />
           </span>
         </Link>
         <Link
           href="/recipe-studio/new"
-          className="group flex flex-col gap-3 rounded-3xl border border-stone-200 bg-white p-6 transition-all hover:-translate-y-0.5 hover:shadow-md"
+          className="group flex flex-col gap-3 rounded-3xl border border-stone-200 bg-white p-6 transition-all motion-safe:hover:-translate-y-1 hover:border-emerald-300 hover:shadow-lg"
         >
-          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-emerald-100 text-emerald-700">
+          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-emerald-100 text-emerald-700 transition-colors group-hover:bg-emerald-600 group-hover:text-white">
             <ChefHat size={22} />
           </div>
           <h2 className="text-xl font-semibold text-stone-900">
             Create my own recipe card
           </h2>
-          <p className="text-sm text-stone-600">
+          <p className="text-sm leading-relaxed text-stone-600">
             Build a recipe by hand. We&apos;ll auto-generate an image for it by
             default.
           </p>
-          <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 group-hover:underline">
-            Build my recipe card <ArrowRight size={14} />
+          <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700">
+            Build my recipe card
+            <ArrowRight
+              size={14}
+              className="transition-transform motion-safe:group-hover:translate-x-1"
+            />
           </span>
         </Link>
-      </section>
+      </ScrollReveal>
 
-      <Section title="AI-generated recipes" recipes={aiOnes} onRemove={remove} />
-      <Section title="Created by you" recipes={userOnes} onRemove={remove} />
+      <Section
+        title="AI-generated recipes"
+        tone="violet"
+        recipes={aiOnes}
+        onRemove={remove}
+      />
+      <Section
+        title="Created by you"
+        tone="emerald"
+        recipes={userOnes}
+        onRemove={remove}
+      />
     </div>
   );
 }
@@ -97,26 +117,35 @@ function Section({
   title,
   recipes,
   onRemove,
+  tone = "emerald",
 }: {
   title: string;
   recipes: CustomRecipe[];
   onRemove: (id: string) => void;
+  tone?: "emerald" | "violet" | "amber" | "sky" | "indigo" | "rose";
 }) {
   return (
-    <section>
-      <h2 className="mb-3 text-lg font-semibold text-stone-900">{title}</h2>
+    <ScrollReveal as="section">
+      <SectionHeading
+        eyebrow={`${recipes.length} ${recipes.length === 1 ? "recipe" : "recipes"}`}
+        title={title}
+        tone={tone}
+      />
       {recipes.length === 0 ? (
-        <div className="rounded-2xl border-2 border-dashed border-stone-200 bg-white px-6 py-8 text-center text-sm text-stone-600">
+        <div className="mt-5 rounded-2xl border-2 border-dashed border-stone-200 bg-white px-6 py-10 text-center text-sm text-stone-600">
+          <span className="mb-2 block text-3xl" aria-hidden>
+            🍳
+          </span>
           Nothing here yet.
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {recipes.map((r) => (
             <RecipeMiniCard key={r.id} recipe={r} onRemove={onRemove} />
           ))}
         </div>
       )}
-    </section>
+    </ScrollReveal>
   );
 }
 

@@ -1609,10 +1609,11 @@ function Chip({
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={active}
       className={
         active
-          ? "rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white"
-          : "rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-700 hover:border-emerald-300 hover:bg-emerald-50"
+          ? "inline-flex items-center gap-1.5 rounded-full border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm shadow-emerald-200 transition-all motion-safe:scale-[1.02]"
+          : "inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-700 transition-all hover:-translate-y-px hover:border-emerald-300 hover:bg-emerald-50 active:translate-y-0"
       }
     >
       {children}
@@ -1633,10 +1634,11 @@ function ModeChip({
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={active}
       className={
         active
-          ? "rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
-          : "rounded-2xl border border-stone-200 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:border-emerald-300 hover:bg-emerald-50"
+          ? "inline-flex items-center gap-1.5 rounded-2xl border border-emerald-600 bg-gradient-to-br from-emerald-600 to-emerald-700 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-emerald-200 transition-all motion-safe:scale-[1.02]"
+          : "inline-flex items-center gap-1.5 rounded-2xl border border-stone-200 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition-all hover:-translate-y-px hover:border-emerald-300 hover:bg-emerald-50 active:translate-y-0"
       }
     >
       {children}

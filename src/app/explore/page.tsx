@@ -16,6 +16,8 @@ import {
 import type { ExploreFilters, ExternalRecipe } from "@/lib/externalTypes";
 import { searchExternalRecipes } from "@/lib/services/exploreService";
 import { SkeletonRecipeGrid } from "@/components/ui/SkeletonRecipeCard";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
 
 // ─── Filter option lists ──────────────────────────────────────────────────────
 
@@ -471,22 +473,19 @@ export default function ExplorePage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <div className="mb-1 flex items-center gap-2">
-          <Globe size={18} className="text-emerald-600" />
-          <p className="text-sm font-semibold text-emerald-700">World Recipes</p>
-        </div>
-        <h1 className="text-3xl font-bold text-stone-900 sm:text-4xl">
-          Explore Global Cuisine
-        </h1>
-        <p className="mt-2 max-w-xl text-sm text-stone-600">
-          Discover authentic recipes from cuisines around the world — search,
-          filter by cuisine, diet, or cooking time.
-        </p>
-      </header>
+      <PageHeader
+        eyebrow={
+          <span className="inline-flex items-center gap-1.5">
+            <Globe size={11} /> World Recipes
+          </span>
+        }
+        title="Explore global cuisine."
+        description="Discover authentic recipes from around the world. Search by cuisine, diet, or cooking time."
+        tone="sky"
+      />
 
       {isDemo && (
-        <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 shadow-sm">
           <Info size={16} className="mt-0.5 shrink-0" />
           <p>
             <span className="font-semibold">Demo mode</span> — showing a small
@@ -611,50 +610,77 @@ export default function ExplorePage() {
 
       {/* Active filter chips */}
       {activeChips.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-stone-200 bg-white p-3">
-          <span className="text-xs font-semibold uppercase tracking-wide text-stone-500">
-            Active filters
-          </span>
-          {activeChips.map((chip) => (
+        <div className="sticky top-16 z-20 -mx-2 px-2 py-1">
+          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-stone-200 bg-white/85 p-3 shadow-sm backdrop-blur-md">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-500">
+              Active filters
+            </span>
+            {activeChips.map((chip) => (
+              <button
+                key={chip.key}
+                onClick={chip.clear}
+                className="group inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-medium text-white shadow-sm shadow-emerald-200 transition-all motion-safe:animate-[popIn_240ms_ease-out] hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                aria-label={`Remove filter ${chip.label}`}
+              >
+                {chip.label}
+                <X
+                  size={11}
+                  aria-hidden
+                  className="transition-transform motion-safe:group-hover:rotate-90"
+                />
+              </button>
+            ))}
             <button
-              key={chip.key}
-              onClick={chip.clear}
-              className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
-              aria-label={`Remove filter ${chip.label}`}
+              onClick={clearAllFilters}
+              className="ml-auto text-xs font-semibold text-stone-600 transition hover:text-emerald-700 hover:underline"
             >
-              {chip.label}
-              <X size={11} aria-hidden />
+              Clear all
             </button>
-          ))}
-          <button
-            onClick={clearAllFilters}
-            className="ml-auto text-xs font-semibold text-stone-600 transition hover:text-emerald-700 hover:underline"
-          >
-            Clear all
-          </button>
+          </div>
         </div>
       )}
 
       {/* Results header — count */}
-      <p className="text-sm text-stone-600">{showingCopy}</p>
+      <p className="text-sm text-stone-600">
+        {loading || total === 0 ? (
+          showingCopy
+        ) : (
+          <>
+            Showing{" "}
+            <span className="font-semibold text-stone-900">
+              <AnimatedNumber value={visibleCount} duration={500} />
+            </span>{" "}
+            of{" "}
+            <span className="font-semibold text-stone-900">
+              <AnimatedNumber value={total} duration={500} />
+            </span>{" "}
+            recipes
+          </>
+        )}
+      </p>
 
       {/* Grid + states */}
       {loading ? (
         <SkeletonRecipeGrid count={8} />
       ) : recipes.length === 0 ? (
-        <div className="flex flex-col items-center rounded-3xl border-2 border-dashed border-stone-200 bg-white px-6 py-14 text-center">
-          <span className="mb-4 text-5xl">🍽️</span>
+        <div className="flex flex-col items-center rounded-3xl border-2 border-dashed border-stone-200 bg-white px-6 py-16 text-center">
+          <span
+            className="mb-4 text-6xl motion-safe:animate-[emojiFloat_3.2s_ease-in-out_infinite]"
+            aria-hidden
+          >
+            🍽️
+          </span>
           <h3 className="mb-1 text-lg font-semibold text-stone-800">
             No recipes match your filters
           </h3>
           <p className="max-w-md text-sm text-stone-500">
-            Try clearing filters, or have AI Chef invent a custom recipe for
+            Try clearing filters, or have AI Chef invent a custom recipe from
             what you have.
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-2">
             <button
               onClick={clearAllFilters}
-              className="rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
+              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-emerald-200 transition hover:bg-emerald-700"
             >
               Clear filters
             </button>
@@ -667,13 +693,18 @@ export default function ExplorePage() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-          {recipes.map((recipe) => (
-            <ExploreCard
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {recipes.map((recipe, i) => (
+            <div
               key={recipe.id}
-              recipe={recipe}
-              onClick={() => setSelected(recipe)}
-            />
+              className="motion-safe:animate-[fadeUp_520ms_ease-out_both]"
+              style={{ animationDelay: `${Math.min(i, 11) * 30}ms` }}
+            >
+              <ExploreCard
+                recipe={recipe}
+                onClick={() => setSelected(recipe)}
+              />
+            </div>
           ))}
         </div>
       )}

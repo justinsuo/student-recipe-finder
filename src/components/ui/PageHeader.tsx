@@ -41,7 +41,7 @@ export function PageHeader({
   tone = "emerald",
   className,
 }: {
-  eyebrow?: string;
+  eyebrow?: ReactNode;
   title: ReactNode;
   description?: ReactNode;
   trailing?: ReactNode;

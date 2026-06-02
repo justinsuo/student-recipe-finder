@@ -65,19 +65,43 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
     <div className="space-y-6">
       <Link
         href="/cheap-recipes"
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-stone-600 hover:text-emerald-700"
+        className="group inline-flex items-center gap-1.5 text-sm font-medium text-stone-600 hover:text-emerald-700"
       >
-        <ArrowLeft size={14} /> Back to recipes
+        <ArrowLeft
+          size={14}
+          className="transition-transform motion-safe:group-hover:-translate-x-0.5"
+        />{" "}
+        Back to recipes
       </Link>
 
       {/* Identity first: title, description, key facts, primary actions */}
       <header className="space-y-4">
-        <h1 className="text-3xl font-bold leading-tight text-stone-900 sm:text-4xl">
+        <p
+          className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-700 motion-safe:animate-[fadeUp_460ms_ease-out_both]"
+        >
+          <span
+            aria-hidden
+            className="h-[2px] w-5 rounded-full bg-emerald-500"
+          />
+          Recipe
+        </p>
+        <h1
+          className="text-3xl font-bold leading-[1.05] tracking-tight text-stone-900 motion-safe:animate-[fadeUp_540ms_ease-out_both] sm:text-[2.5rem]"
+          style={{ animationDelay: "60ms" }}
+        >
           {recipe.name}
         </h1>
-        <p className="max-w-3xl text-stone-600">{recipe.description}</p>
+        <p
+          className="max-w-3xl text-base leading-relaxed text-stone-600 motion-safe:animate-[fadeUp_620ms_ease-out_both]"
+          style={{ animationDelay: "140ms" }}
+        >
+          {recipe.description}
+        </p>
 
-        <div className="flex flex-wrap gap-2">
+        <div
+          className="flex flex-wrap gap-2 motion-safe:animate-[fadeUp_680ms_ease-out_both]"
+          style={{ animationDelay: "200ms" }}
+        >
           <Badge tone="green" icon={<Coins size={12} />}>
             ${cps.toFixed(2)}/serving
           </Badge>
@@ -96,7 +120,10 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
         </div>
         <EquipmentBadges recipe={recipe} />
 
-        <div className="flex flex-wrap gap-2 pt-1">
+        <div
+          className="flex flex-wrap gap-2 pt-1 motion-safe:animate-[fadeUp_720ms_ease-out_both]"
+          style={{ animationDelay: "260ms" }}
+        >
           <Button onClick={() => setCookingMode(true)} leftIcon={<Play size={16} />}>
             Start cooking
           </Button>
@@ -105,7 +132,10 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
             onClick={() => toggleSaved(recipe.id)}
             leftIcon={
               saved ? (
-                <BookmarkCheck size={16} className="text-emerald-600" />
+                <BookmarkCheck
+                  size={16}
+                  className="text-emerald-600 motion-safe:animate-[popIn_220ms_ease-out]"
+                />
               ) : (
                 <Bookmark size={16} />
               )
