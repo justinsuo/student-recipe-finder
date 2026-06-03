@@ -64,9 +64,27 @@ const REJECT_URL = [
   "logo", "_logo", "emblem", "wikidata", "fileicon", "blank_map", "portrait",
   ".pdf/page", ".pdf.jpg",
 ];
-const isGoodUrl = (url: string) =>
-  url.startsWith("http") &&
-  !REJECT_URL.some((p) => url.toLowerCase().includes(p));
+
+// Domains that block hotlinking or use expiring auth tokens
+const REJECT_DOMAINS = [
+  "redditmedia.com",   // Reddit thumbnails — block cross-domain
+  "redd.it",           // Reddit CDN — block cross-domain
+  "preview.redd.it",
+  "blogger.googleusercontent.com", // Blogger — auth tokens expire
+  "fbcdn.net",         // Facebook CDN — block cross-domain
+  "cdninstagram.com",  // Instagram — block cross-domain
+  "pinimg.com",        // Pinterest — block cross-domain
+  "twimg.com",         // Twitter/X media — block cross-domain
+  "pbs.twimg.com",
+];
+
+const isGoodUrl = (url: string) => {
+  if (!url.startsWith("http")) return false;
+  if (REJECT_URL.some((p) => url.toLowerCase().includes(p))) return false;
+  if (REJECT_DOMAINS.some((d) => url.includes(d))) return false;
+  if (url.includes("authuser=")) return false; // Blogger auth tokens
+  return true;
+};
 
 // ── Search query helpers ──────────────────────────────────────────────────────
 
