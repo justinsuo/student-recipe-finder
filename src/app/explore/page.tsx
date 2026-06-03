@@ -75,7 +75,7 @@ function ExploreCard({
   return (
     <button
       onClick={onClick}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white text-left shadow-sm transition-all duration-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+      className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white text-left shadow-sm transition-all duration-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-stone-100">
         {resolveRecipeImage(recipe) ? (
@@ -712,7 +712,7 @@ export default function ExplorePage() {
           {recipes.map((recipe, i) => (
             <div
               key={recipe.id}
-              className="motion-safe:animate-[fadeUp_520ms_ease-out_both]"
+              className="h-full motion-safe:animate-[fadeUp_520ms_ease-out_both]"
               style={{ animationDelay: `${Math.min(i, 11) * 30}ms` }}
             >
               <ExploreCard
