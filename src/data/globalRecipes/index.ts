@@ -18,6 +18,7 @@ import { CENTRAL_ASIA1_RECIPES } from "./centralAsia1";
 import { EAST_ASIA2_RECIPES } from "./eastAsia2";
 import { AMERICAS2_RECIPES } from "./americas2";
 import { AFRICAN2_RECIPES } from "./african2";
+import { PACIFIC_EUROPE_RECIPES } from "./pacificEurope";
 
 export const GLOBAL_RECIPES = [
   ...EAST_ASIA_RECIPES,
@@ -40,4 +41,5 @@ export const GLOBAL_RECIPES = [
   ...EAST_ASIA2_RECIPES,
   ...AMERICAS2_RECIPES,
   ...AFRICAN2_RECIPES,
+  ...PACIFIC_EUROPE_RECIPES,
 ];
