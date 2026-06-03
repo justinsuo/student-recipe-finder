@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import type { ExploreFilters, ExternalRecipe } from "@/lib/externalTypes";
 import { searchExternalRecipes } from "@/lib/services/exploreService";
-import { resolveRecipeImage } from "@/lib/foodPhotos";
+import { resolveRecipeImage, getCuisineGradient } from "@/lib/foodPhotos";
 import { SkeletonRecipeGrid } from "@/components/ui/SkeletonRecipeCard";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
@@ -78,16 +78,26 @@ function ExploreCard({
       className="group relative flex flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white text-left shadow-sm transition-all duration-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-stone-100">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={resolveRecipeImage(recipe)}
-          alt={recipe.title}
-          loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = `https://picsum.photos/seed/${recipe.id}/480/320`;
-          }}
-        />
+        {resolveRecipeImage(recipe) ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={resolveRecipeImage(recipe)!}
+            alt={recipe.title}
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+          />
+        ) : (
+          <div
+            className="flex h-full w-full flex-col items-center justify-center gap-2 p-4"
+            style={{ background: getCuisineGradient(recipe.cuisine ?? "") }}
+          >
+            <span className="text-3xl" aria-hidden>🍽️</span>
+            <span className="text-center text-xs font-semibold text-white/90 leading-snug line-clamp-2">
+              {recipe.title}
+            </span>
+          </div>
+        )}
         {recipe.cuisine && (
           <div className="absolute bottom-2 left-2">
             <span className="rounded-full bg-black/55 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
@@ -171,15 +181,20 @@ function DetailPanel({
       />
       <div className="relative z-10 max-h-[92dvh] w-full overflow-y-auto rounded-t-3xl bg-white shadow-2xl sm:max-w-2xl sm:rounded-3xl">
         <div className="relative aspect-[3/1] overflow-hidden rounded-t-3xl">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={resolveRecipeImage(recipe)}
-            alt={recipe.title}
-            className="h-full w-full object-cover"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = `https://picsum.photos/seed/${recipe.id}/700/250`;
-            }}
-          />
+          {resolveRecipeImage(recipe) ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={resolveRecipeImage(recipe)!}
+              alt={recipe.title}
+              className="h-full w-full object-cover"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+            />
+          ) : (
+            <div
+              className="flex h-full w-full items-center justify-center"
+              style={{ background: getCuisineGradient(recipe.cuisine ?? "") }}
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           <button
             onClick={onClose}

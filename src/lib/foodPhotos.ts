@@ -1,370 +1,168 @@
 /**
- * Resolves broken `source.unsplash.com` recipe images to stable food photos.
+ * Image resolution for the explore page.
  *
- * All photos are sourced from Wikimedia Commons and are already used (and
- * visually verified) in RECIPE_IMAGES. This guarantees every URL returns an
- * actual food photo — no oceans, cityscapes, or file-type icons.
+ * Priority:
+ *   1. RECIPE_PHOTO_MAP — dish-specific Wikimedia photo (exact match)
+ *   2. null — caller shows a cuisine-gradient fallback (no wrong/duplicate photos)
  *
- * resolveRecipeImage() fallback priority:
- *   1. RECIPE_PHOTO_MAP — dish-specific Wikimedia photo (highest quality)
- *   2. Cuisine pool → keyword pool → general pool (cuisine-relevant food photo)
+ * resolveRecipeImage() returns null when no dish-specific photo exists so that
+ * the explore page can render a clean gradient rather than a mismatched food photo.
+ *
+ * getCuisineGradient() provides the CSS gradient string for that fallback.
  */
 
 import type { ExternalRecipe } from "@/lib/externalTypes";
 import { RECIPE_PHOTO_MAP } from "@/data/recipePhotoMap";
 
-// Verified Wikimedia Commons food photo URLs.
-// Every URL in these pools has been visually confirmed in RECIPE_IMAGES.
-const W = {
-  chinese: [
-    "https://upload.wikimedia.org/wikipedia/commons/3/3c/Yangzhou_fried_rice_and_drinks_25-09-2019.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Chinese_rice_congee.jpg/960px-Chinese_rice_congee.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Chen_Mapo_Tofu.jpg/960px-Chen_Mapo_Tofu.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Fried_rice_with_chicken_and_egg.jpg/960px-Fried_rice_with_chicken_and_egg.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Hot_Dry_Noodles.jpg/960px-Hot_Dry_Noodles.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Dan-dan_noodles%2C_Shanghai.jpg/960px-Dan-dan_noodles%2C_Shanghai.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Napa_Cabbage_%26_Tofu_soup_%28%E7%99%BD%E8%8F%9C%E8%B1%86%E8%85%90%E6%B9%AF%29.jpg/960px-Napa_Cabbage_%26_Tofu_soup_%28%E7%99%BD%E8%8F%9C%E8%B1%86%E8%85%90%E6%B9%AF%29.jpg",
-  ],
-  japanese: [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Miso_Soup_001.jpg/960px-Miso_Soup_001.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/0/09/Tamago_kake_gohan.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Instant_chazuke_by_shibainu.jpg/960px-Instant_chazuke_by_shibainu.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Shoyu_ramen_-_Goemon_Ramen_Bar_2024-01-26.jpg/960px-Shoyu_ramen_-_Goemon_Ramen_Bar_2024-01-26.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Nagata_Honjoken_Bokkake_Yakisoba.jpg/960px-Nagata_Honjoken_Bokkake_Yakisoba.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/9/97/Kakeudon.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Pholiota_microspora_miso_soup_001.jpg/960px-Pholiota_microspora_miso_soup_001.jpg",
-  ],
-  korean: [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Kimchi-bokkeum-bap_%28Kimchi_fried_rice%29_-_Kogi_2023-09-11.jpg/960px-Kimchi-bokkeum-bap_%28Kimchi_fried_rice%29_-_Kogi_2023-09-11.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/3/3c/Yangzhou_fried_rice_and_drinks_25-09-2019.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Shoyu_ramen_-_Goemon_Ramen_Bar_2024-01-26.jpg/960px-Shoyu_ramen_-_Goemon_Ramen_Bar_2024-01-26.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Chen_Mapo_Tofu.jpg/960px-Chen_Mapo_Tofu.jpg",
-  ],
-  thai: [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Sweet_Potato_Curry.jpg/960px-Sweet_Potato_Curry.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Beef_curry_rice_003.jpg/960px-Beef_curry_rice_003.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Noodles_with_Peanut_Butter_Sauce.jpg/960px-Noodles_with_Peanut_Butter_Sauce.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Fried_rice_with_chicken_and_egg.jpg/960px-Fried_rice_with_chicken_and_egg.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Napa_Cabbage_%26_Tofu_soup_%28%E7%99%BD%E8%8F%9C%E8%B1%86%E8%85%90%E6%B9%AF%29.jpg/960px-Napa_Cabbage_%26_Tofu_soup_%28%E7%99%BD%E8%8F%9C%E8%B1%86%E8%85%90%E6%B9%AF%29.jpg",
-  ],
-  vietnamese: [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Noodles_with_Peanut_Butter_Sauce.jpg/960px-Noodles_with_Peanut_Butter_Sauce.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Shoyu_ramen_-_Goemon_Ramen_Bar_2024-01-26.jpg/960px-Shoyu_ramen_-_Goemon_Ramen_Bar_2024-01-26.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Homemade_Lentil_Soup_-_Lavash_2025-02-10.jpg/960px-Homemade_Lentil_Soup_-_Lavash_2025-02-10.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Chinese_rice_congee.jpg/960px-Chinese_rice_congee.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/1/19/Chicken_congee_at_Psar_Chaa_Market_in_Siem_Reap%2C_Cambodia.jpg",
-  ],
-  indian: [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Chana_Masala_in_Paul%C3%ADnia%2C_2023-10-16.jpg/960px-Chana_Masala_in_Paul%C3%ADnia%2C_2023-10-16.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Mixed_vegetable_curry_2.jpg/960px-Mixed_vegetable_curry_2.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Masala_Khichadi.jpg/960px-Masala_Khichadi.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Chole_Bhature%2C_a_popular_North_Indian_dish.jpg/960px-Chole_Bhature%2C_a_popular_North_Indian_dish.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/8/8c/Kadai_chicken_%28karahi%29.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Makka_Poha.jpg/960px-Makka_Poha.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/VEGETABLE_PULAO_~_An_Indian_cuisine_made_from_fried_rice_mixed_with_fried_vegetables.jpg/960px-VEGETABLE_PULAO_~_An_Indian_cuisine_made_from_fried_rice_mixed_with_fried_vegetables.jpg",
-  ],
-  curry: [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Sweet_Potato_Curry.jpg/960px-Sweet_Potato_Curry.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Beef_curry_rice_003.jpg/960px-Beef_curry_rice_003.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Chana_masala.jpg/960px-Chana_masala.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Chana_Masala_in_Paul%C3%ADnia%2C_2023-10-16.jpg/960px-Chana_Masala_in_Paul%C3%ADnia%2C_2023-10-16.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Mixed_vegetable_curry_2.jpg/960px-Mixed_vegetable_curry_2.jpg",
-  ],
-  middleEastern: [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Shakshuka_by_Calliopejen1.jpg/960px-Shakshuka_by_Calliopejen1.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Lebanese_style_hummus.jpg/960px-Lebanese_style_hummus.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Falafel_%26_Hummus_Wrap_-_Lavash_2024-08-19.jpg/960px-Falafel_%26_Hummus_Wrap_-_Lavash_2024-08-19.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Tabouleh_1.JPG/960px-Tabouleh_1.JPG",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Hummus_salad.jpg/960px-Hummus_salad.jpg",
-  ],
-  moroccan: [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Tabouleh_1.JPG/960px-Tabouleh_1.JPG",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Shakshuka_by_Calliopejen1.jpg/960px-Shakshuka_by_Calliopejen1.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Lebanese_style_hummus.jpg/960px-Lebanese_style_hummus.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Homemade_Lentil_Soup_-_Lavash_2025-02-10.jpg/960px-Homemade_Lentil_Soup_-_Lavash_2025-02-10.jpg",
-  ],
-  african: [
-    "https://upload.wikimedia.org/wikipedia/commons/1/1d/Nsima_Relishes.JPG",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Homemade_Lentil_Soup_-_Lavash_2025-02-10.jpg/960px-Homemade_Lentil_Soup_-_Lavash_2025-02-10.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Black_Bean_Soup_%28140491813%29.jpeg/960px-Black_Bean_Soup_%28140491813%29.jpeg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Mixed_vegetable_curry_2.jpg/960px-Mixed_vegetable_curry_2.jpg",
-  ],
-  mexican: [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/001_Tacos_de_carnitas%2C_carne_asada_y_al_pastor.jpg/960px-001_Tacos_de_carnitas%2C_carne_asada_y_al_pastor.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Burrito.JPG/960px-Burrito.JPG",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Enchiladas_rice_beans.jpg/960px-Enchiladas_rice_beans.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Steak_burrito_bowl_at_La_Casa_Restaurant_in_Sonoma%2C_California_-_Sarah_Stierch_03.jpg/960px-Steak_burrito_bowl_at_La_Casa_Restaurant_in_Sonoma%2C_California_-_Sarah_Stierch_03.jpg",
-  ],
-  latam: [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/001_Tacos_de_carnitas%2C_carne_asada_y_al_pastor.jpg/960px-001_Tacos_de_carnitas%2C_carne_asada_y_al_pastor.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Black_Bean_Soup_%28140491813%29.jpeg/960px-Black_Bean_Soup_%28140491813%29.jpeg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Burrito.JPG/960px-Burrito.JPG",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Steak_burrito_bowl_at_La_Casa_Restaurant_in_Sonoma%2C_California_-_Sarah_Stierch_03.jpg/960px-Steak_burrito_bowl_at_La_Casa_Restaurant_in_Sonoma%2C_California_-_Sarah_Stierch_03.jpg",
-  ],
-  european: [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Spaghetti_pomodoro%2C_Venice.jpg/960px-Spaghetti_pomodoro%2C_Venice.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Tagliatelle_al_rag%C3%B9_%28image_modified%29.jpg/960px-Tagliatelle_al_rag%C3%B9_%28image_modified%29.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Caldo_verde.jpg/960px-Caldo_verde.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Ribollita_Siena.jpg/960px-Ribollita_Siena.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Pasta_al_Forno_01.jpg/960px-Pasta_al_Forno_01.jpg",
-  ],
-  pasta: [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Spaghetti_pomodoro%2C_Venice.jpg/960px-Spaghetti_pomodoro%2C_Venice.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Tagliatelle_al_rag%C3%B9_%28image_modified%29.jpg/960px-Tagliatelle_al_rag%C3%B9_%28image_modified%29.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/5/5e/Shrimp_and_basil_pesto_pasta_2.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Pasta_con_le_sarde_%28Palermo%29.jpg/960px-Pasta_con_le_sarde_%28Palermo%29.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Tortiglioni_con_ceci.jpg/960px-Tortiglioni_con_ceci.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Original_Mac_n_Cheese_.jpg/960px-Original_Mac_n_Cheese_.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Tuna_pasta_salad.jpg/960px-Tuna_pasta_salad.jpg",
-  ],
-  noodles: [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Noodles_with_Peanut_Butter_Sauce.jpg/960px-Noodles_with_Peanut_Butter_Sauce.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Hot_Dry_Noodles.jpg/960px-Hot_Dry_Noodles.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Dan-dan_noodles%2C_Shanghai.jpg/960px-Dan-dan_noodles%2C_Shanghai.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/9/97/Kakeudon.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Nagata_Honjoken_Bokkake_Yakisoba.jpg/960px-Nagata_Honjoken_Bokkake_Yakisoba.jpg",
-    "https://upload.wikimedia.org/wikipedia/en/8/8b/Real_lo_mein.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Shoyu_ramen_-_Goemon_Ramen_Bar_2024-01-26.jpg/960px-Shoyu_ramen_-_Goemon_Ramen_Bar_2024-01-26.jpg",
-  ],
-  soup: [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Chicken_Noodle_Soup.jpg/960px-Chicken_Noodle_Soup.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Homemade_Lentil_Soup_-_Lavash_2025-02-10.jpg/960px-Homemade_Lentil_Soup_-_Lavash_2025-02-10.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Black_Bean_Soup_%28140491813%29.jpeg/960px-Black_Bean_Soup_%28140491813%29.jpeg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Spring_pea_soup_with_cr%C3%A8me_fra%C3%AEche_and_bread.jpg/960px-Spring_pea_soup_with_cr%C3%A8me_fra%C3%AEche_and_bread.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Vegan_Garden_Corn_Chowder_with_Chives_%28cropped%29.jpg/960px-Vegan_Garden_Corn_Chowder_with_Chives_%28cropped%29.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Miso_Soup_001.jpg/960px-Miso_Soup_001.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Ribollita_Siena.jpg/960px-Ribollita_Siena.jpg",
-  ],
-  rice: [
-    "https://upload.wikimedia.org/wikipedia/commons/3/3c/Yangzhou_fried_rice_and_drinks_25-09-2019.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Fried_rice_with_chicken_and_egg.jpg/960px-Fried_rice_with_chicken_and_egg.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Kimchi-bokkeum-bap_%28Kimchi_fried_rice%29_-_Kogi_2023-09-11.jpg/960px-Kimchi-bokkeum-bap_%28Kimchi_fried_rice%29_-_Kogi_2023-09-11.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/1/19/Chicken_congee_at_Psar_Chaa_Market_in_Siem_Reap%2C_Cambodia.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Bowl_of_Teriyaki_chicken_and_beef_YakinikuCNE.jpg/960px-Bowl_of_Teriyaki_chicken_and_beef_YakinikuCNE.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/VEGETABLE_PULAO_~_An_Indian_cuisine_made_from_fried_rice_mixed_with_fried_vegetables.jpg/960px-VEGETABLE_PULAO_~_An_Indian_cuisine_made_from_fried_rice_mixed_with_fried_vegetables.jpg",
-  ],
-  grilled: [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Bowl_of_Teriyaki_chicken_and_beef_YakinikuCNE.jpg/960px-Bowl_of_Teriyaki_chicken_and_beef_YakinikuCNE.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/8/8c/Kadai_chicken_%28karahi%29.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/001_Tacos_de_carnitas%2C_carne_asada_y_al_pastor.jpg/960px-001_Tacos_de_carnitas%2C_carne_asada_y_al_pastor.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Nagata_Honjoken_Bokkake_Yakisoba.jpg/960px-Nagata_Honjoken_Bokkake_Yakisoba.jpg",
-  ],
-  seafood: [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Rice_bowl_topped_with_salmon_and_salmon_egg_%2814904439935%29.jpg/960px-Rice_bowl_topped_with_salmon_and_salmon_egg_%2814904439935%29.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Tuna_pasta_salad.jpg/960px-Tuna_pasta_salad.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Pasta_con_le_sarde_%28Palermo%29.jpg/960px-Pasta_con_le_sarde_%28Palermo%29.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Nizza-Salat_an_der_F_Mittelmeerk%C3%BCste.JPG/960px-Nizza-Salat_an_der_F_Mittelmeerk%C3%BCste.JPG",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Chinese_rice_congee.jpg/960px-Chinese_rice_congee.jpg",
-  ],
-  bread: [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Breakfast_quesadilla_at_Found_Off_Chapel_in_South_Yarra.jpg/960px-Breakfast_quesadilla_at_Found_Off_Chapel_in_South_Yarra.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Burrito.JPG/960px-Burrito.JPG",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Falafel_%26_Hummus_Wrap_-_Lavash_2024-08-19.jpg/960px-Falafel_%26_Hummus_Wrap_-_Lavash_2024-08-19.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Smoked_chicken_and_avocado_wrap.jpg/960px-Smoked_chicken_and_avocado_wrap.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/8/89/Grilled_cheese_sandwich.jpg",
-  ],
-  dessert: [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Yogurt%2C_fruit%2C_granola_bowl_%2834999358091%29.jpg/960px-Yogurt%2C_fruit%2C_granola_bowl_%2834999358091%29.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Apple_cinnamon_oatmeal.jpg/960px-Apple_cinnamon_oatmeal.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Chinese_rice_congee.jpg/960px-Chinese_rice_congee.jpg",
-  ],
-  streetFood: [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/001_Tacos_de_carnitas%2C_carne_asada_y_al_pastor.jpg/960px-001_Tacos_de_carnitas%2C_carne_asada_y_al_pastor.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Pancit_Ilonggo_Style_-_12110089845.jpg/960px-Pancit_Ilonggo_Style_-_12110089845.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Bowl_of_Teriyaki_chicken_and_beef_YakinikuCNE.jpg/960px-Bowl_of_Teriyaki_chicken_and_beef_YakinikuCNE.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Breakfast_quesadilla_at_Found_Off_Chapel_in_South_Yarra.jpg/960px-Breakfast_quesadilla_at_Found_Off_Chapel_in_South_Yarra.jpg",
-  ],
-  general: [
-    "https://upload.wikimedia.org/wikipedia/commons/3/3c/Yangzhou_fried_rice_and_drinks_25-09-2019.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Chana_Masala_in_Paul%C3%ADnia%2C_2023-10-16.jpg/960px-Chana_Masala_in_Paul%C3%ADnia%2C_2023-10-16.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Chicken_Noodle_Soup.jpg/960px-Chicken_Noodle_Soup.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Bowl_of_Teriyaki_chicken_and_beef_YakinikuCNE.jpg/960px-Bowl_of_Teriyaki_chicken_and_beef_YakinikuCNE.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Spaghetti_pomodoro%2C_Venice.jpg/960px-Spaghetti_pomodoro%2C_Venice.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/001_Tacos_de_carnitas%2C_carne_asada_y_al_pastor.jpg/960px-001_Tacos_de_carnitas%2C_carne_asada_y_al_pastor.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Shakshuka_by_Calliopejen1.jpg/960px-Shakshuka_by_Calliopejen1.jpg",
-  ],
-} as const;
-
-type Category = keyof typeof W;
-
-// ── Cuisine name → photo category ─────────────────────────────────────────────
-
-const CUISINE_MAP: Record<string, Category> = {
-  // East Asian
-  chinese: "chinese", cantonese: "chinese", shanghainese: "chinese",
-  sichuan: "chinese", taiwanese: "chinese",
-  japanese: "japanese",
-  korean: "korean",
-  // Southeast Asian
-  thai: "thai",
-  vietnamese: "vietnamese",
-  filipino: "vietnamese",
-  indonesian: "thai",
-  malaysian: "thai",
-  singaporean: "chinese",
-  burmese: "thai",
-  cambodian: "vietnamese",
-  laotian: "vietnamese",
-  // South Asian
-  indian: "indian", "north indian": "indian", "south indian": "curry",
-  "sri lankan": "curry",
-  nepali: "indian",
-  bangladeshi: "indian",
-  pakistani: "curry",
-  // Middle East & Central Asia
-  persian: "middleEastern",
-  iranian: "middleEastern",
-  iraqi: "middleEastern",
-  emirati: "middleEastern",
-  saudi: "middleEastern",
-  yemeni: "middleEastern",
-  omani: "middleEastern",
-  kuwaiti: "middleEastern",
-  egyptian: "moroccan",
-  lebanese: "middleEastern",
-  syrian: "middleEastern",
-  turkish: "middleEastern",
-  afghan: "middleEastern",
-  uzbek: "middleEastern",
-  azerbaijani: "middleEastern",
-  israeli: "middleEastern",
-  mongolian: "grilled",
-  // African
-  moroccan: "moroccan",
-  ethiopian: "african",
-  kenyan: "african",
-  ghanaian: "african",
-  senegalese: "african",
-  tanzanian: "african",
-  "south african": "grilled",
-  nigerian: "african",
-  algerian: "moroccan",
-  malawian: "african",
-  zimbabwean: "african",
-  // European
-  italian: "european",
-  french: "european",
-  spanish: "european",
-  greek: "european",
-  portuguese: "european",
-  hungarian: "european",
-  austrian: "european",
-  ukrainian: "european",
-  british: "bread",
-  irish: "bread",
-  scandinavian: "european",
-  polish: "soup",
-  czech: "european",
-  romanian: "european",
-  bulgarian: "european",
-  maltese: "european",
-  // Americas
-  mexican: "mexican",
-  peruvian: "latam",
-  colombian: "latam",
-  argentine: "grilled",
-  chilean: "latam",
-  venezuelan: "latam",
-  ecuadorian: "latam",
-  bolivian: "latam",
-  brazilian: "latam",
-  trinidadian: "streetFood",
-  jamaican: "latam",
-  dominican: "latam",
-  "puerto rican": "latam",
-  cuban: "latam",
-  american: "grilled",
-  cajun: "soup",
-  creole: "soup",
-  southern: "grilled",
-  hawaiian: "rice",
-  canadian: "european",
-  // Oceania
-  australian: "grilled",
-  "new zealand": "grilled",
-  samoan: "seafood",
-  fijian: "seafood",
-  tongan: "seafood",
-  "papua new guinean": "seafood",
-  "cook islander": "seafood",
-  palauan: "seafood",
-};
-
-// ── Keyword → category (matched against tags + title + cuisine) ──────────────
-
-const KEYWORD_MAP: Array<[string, Category]> = [
-  ["sushi", "japanese"], ["ramen", "japanese"], ["tempura", "japanese"], ["teriyaki", "japanese"],
-  ["kimchi", "korean"], ["bibimbap", "korean"],
-  ["pad thai", "thai"], ["tom yum", "thai"],
-  ["pho", "vietnamese"], ["banh mi", "vietnamese"],
-  ["biryani", "indian"], ["dosa", "indian"], ["naan", "indian"], ["tikka", "indian"],
-  ["curry", "curry"], ["masala", "curry"], ["dal", "curry"], ["lentil", "curry"],
-  ["tagine", "moroccan"], ["couscous", "moroccan"], ["harira", "moroccan"],
-  ["hummus", "middleEastern"], ["falafel", "middleEastern"], ["kebab", "grilled"],
-  ["shawarma", "middleEastern"], ["meze", "middleEastern"], ["tahini", "middleEastern"],
-  ["injera", "african"], ["wot", "african"],
-  ["mole", "mexican"], ["taco", "mexican"], ["enchilada", "mexican"], ["salsa", "mexican"],
-  ["empanada", "latam"], ["arepa", "latam"], ["ceviche", "seafood"],
-  ["pizza", "european"], ["risotto", "european"], ["bruschetta", "european"],
-  ["pasta", "pasta"], ["spaghetti", "pasta"], ["gnocchi", "pasta"],
-  ["noodle", "noodles"], ["udon", "noodles"], ["yakisoba", "noodles"],
-  ["soup", "soup"], ["stew", "soup"], ["broth", "soup"], ["chowder", "soup"],
-  ["rice", "rice"], ["pilaf", "rice"], ["fried rice", "rice"],
-  ["grilled", "grilled"], ["bbq", "grilled"], ["barbecue", "grilled"], ["roast", "grilled"],
-  ["fish", "seafood"], ["seafood", "seafood"], ["shrimp", "seafood"], ["prawn", "seafood"],
-  ["crab", "seafood"], ["salmon", "seafood"], ["tuna", "seafood"],
-  ["bread", "bread"], ["flatbread", "bread"], ["roti", "bread"],
-  ["wrap", "bread"], ["pita", "bread"], ["tortilla", "bread"], ["dumpling", "chinese"],
-  ["cake", "dessert"], ["dessert", "dessert"], ["sweet", "dessert"],
-  ["chocolate", "dessert"], ["pudding", "dessert"],
-  ["street food", "streetFood"], ["snack", "streetFood"],
-];
-
-// ── Deterministic pick from a pool using recipe ID as seed ──────────────────
-
-const pick = (urls: readonly string[], seed: string): string => {
-  const n = seed.split("").reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) | 0, 0);
-  return urls[Math.abs(n) % urls.length];
-};
-
-// ── Public API ────────────────────────────────────────────────────────────────
+// ── Dish-specific photo lookup ────────────────────────────────────────────────
 
 /**
- * Returns a stable, relevant Wikimedia Commons food photo URL for an ExternalRecipe.
- * If the recipe already has a non-source.unsplash.com URL, it is returned as-is.
+ * Returns the Wikimedia Commons URL for this exact dish, or null if none exists.
+ * When null, the caller should render a getCuisineGradient() fallback.
  */
-export function resolveRecipeImage(recipe: ExternalRecipe): string {
-  const { image, id, cuisine } = recipe;
+export function resolveRecipeImage(recipe: ExternalRecipe): string | null {
+  // Already a stable non-Unsplash URL (e.g. TheMealDB, Spoonacular) — keep it
+  if (!recipe.image.includes("source.unsplash.com")) return recipe.image;
+  // Dish-specific verified photo
+  return RECIPE_PHOTO_MAP[recipe.id] ?? null;
+}
 
-  // Already a stable URL — keep it
-  if (!image.includes("source.unsplash.com")) return image;
+// ── Cuisine → gradient ────────────────────────────────────────────────────────
 
-  // Dish-specific Wikimedia photo (highest quality, verified match)
-  if (RECIPE_PHOTO_MAP[id]) return RECIPE_PHOTO_MAP[id];
+const GRADIENTS: Record<string, readonly [string, string]> = {
+  // East Asian
+  Chinese:         ["#c0392b", "#922b21"],
+  Cantonese:       ["#c0392b", "#922b21"],
+  Shanghainese:    ["#c0392b", "#7b241c"],
+  Sichuan:         ["#c0392b", "#e74c3c"],
+  Taiwanese:       ["#2980b9", "#c0392b"],
+  Japanese:        ["#8e44ad", "#d7bde2"],
+  Korean:          ["#c0392b", "#e67e22"],
+  // Southeast Asian
+  Thai:            ["#1e8449", "#f1c40f"],
+  Vietnamese:      ["#c0392b", "#f1c40f"],
+  Filipino:        ["#1a5276", "#c0392b"],
+  Indonesian:      ["#c0392b", "#f39c12"],
+  Malaysian:       ["#c0392b", "#f1c40f"],
+  Singaporean:     ["#c0392b", "#f1c40f"],
+  Burmese:         ["#f1c40f", "#c0392b"],
+  Cambodian:       ["#1a5276", "#e67e22"],
+  Laotian:         ["#c0392b", "#1e8449"],
+  Bruneian:        ["#f1c40f", "#1a1a1a"],
+  // South Asian
+  Indian:          ["#e67e22", "#f39c12"],
+  "North Indian":  ["#e67e22", "#f39c12"],
+  "South Indian":  ["#1e8449", "#f39c12"],
+  Pakistani:       ["#1e8449", "#27ae60"],
+  "Sri Lankan":    ["#c0392b", "#f39c12"],
+  Nepali:          ["#c0392b", "#1a5276"],
+  Bangladeshi:     ["#1e8449", "#c0392b"],
+  // Middle East & Central Asia
+  Persian:         ["#1a5276", "#c0392b"],
+  Iranian:         ["#1a5276", "#c0392b"],
+  Turkish:         ["#c0392b", "#f1c40f"],
+  Lebanese:        ["#c0392b", "#27ae60"],
+  Syrian:          ["#1a1a1a", "#c0392b"],
+  Israeli:         ["#1a5276", "#f5f5f5"],
+  Egyptian:        ["#d35400", "#f1c40f"],
+  Moroccan:        ["#d35400", "#f39c12"],
+  Afghan:          ["#1a1a1a", "#c0392b"],
+  Uzbek:           ["#1a5276", "#f1c40f"],
+  Azerbaijani:     ["#1a5276", "#c0392b"],
+  Iraqi:           ["#1a1a1a", "#27ae60"],
+  Omani:           ["#c0392b", "#27ae60"],
+  Yemeni:          ["#c0392b", "#f1c40f"],
+  Kuwaiti:         ["#1e8449", "#c0392b"],
+  Saudi:           ["#1e8449", "#f1c40f"],
+  Emirati:         ["#1e8449", "#f1c40f"],
+  Mongolian:       ["#1a5276", "#c0392b"],
+  // African
+  Ethiopian:       ["#c0392b", "#f1c40f"],
+  Kenyan:          ["#1a1a1a", "#c0392b"],
+  Nigerian:        ["#1e8449", "#808000"],
+  Ghanaian:        ["#c0392b", "#f39c12"],
+  Senegalese:      ["#1e8449", "#f1c40f"],
+  Tanzanian:       ["#1a5276", "#c0392b"],
+  Malawian:        ["#1a1a1a", "#c0392b"],
+  Zimbabwean:      ["#1a1a1a", "#c0392b"],
+  "South African": ["#1e8449", "#f1c40f"],
+  Algerian:        ["#1e8449", "#f1c40f"],
+  // European
+  Italian:         ["#1e8449", "#c0392b"],
+  French:          ["#1a5276", "#c0392b"],
+  Spanish:         ["#c0392b", "#f1c40f"],
+  Greek:           ["#1a5276", "#f5f5f5"],
+  Portuguese:      ["#1e8449", "#c0392b"],
+  German:          ["#1a1a1a", "#c0392b"],
+  Austrian:        ["#c0392b", "#f5f5f5"],
+  Hungarian:       ["#c0392b", "#27ae60"],
+  Polish:          ["#c0392b", "#f5f5f5"],
+  Czech:           ["#1a5276", "#c0392b"],
+  Romanian:        ["#1a5276", "#f1c40f"],
+  Bulgarian:       ["#1e8449", "#f5f5f5"],
+  Ukrainian:       ["#1a5276", "#f1c40f"],
+  British:         ["#c0392b", "#1a5276"],
+  Irish:           ["#1e8449", "#f5f5f5"],
+  Scandinavian:    ["#1a5276", "#f5f5f5"],
+  Maltese:         ["#c0392b", "#f5f5f5"],
+  // Americas
+  Mexican:         ["#1e8449", "#c0392b"],
+  Peruvian:        ["#c0392b", "#f5f5f5"],
+  Colombian:       ["#f1c40f", "#1a5276"],
+  Venezuelan:      ["#c0392b", "#1e8449"],
+  Brazilian:       ["#1e8449", "#f1c40f"],
+  Argentine:       ["#1a5276", "#f5f5f5"],
+  Chilean:         ["#c0392b", "#1a5276"],
+  Ecuadorian:      ["#f1c40f", "#1a5276"],
+  Bolivian:        ["#c0392b", "#f1c40f"],
+  Trinidadian:     ["#c0392b", "#1a1a1a"],
+  Jamaican:        ["#1e8449", "#f1c40f"],
+  Dominican:       ["#1a5276", "#c0392b"],
+  "Puerto Rican":  ["#c0392b", "#1a5276"],
+  Cuban:           ["#1a5276", "#c0392b"],
+  American:        ["#1a5276", "#c0392b"],
+  Cajun:           ["#c0392b", "#d35400"],
+  Creole:          ["#8e44ad", "#c0392b"],
+  Southern:        ["#d35400", "#f39c12"],
+  Hawaiian:        ["#1a5276", "#27ae60"],
+  Canadian:        ["#c0392b", "#f5f5f5"],
+  // Oceania
+  Australian:      ["#c0392b", "#f1c40f"],
+  "New Zealand":   ["#1a1a1a", "#c0392b"],
+  Samoan:          ["#c0392b", "#1a5276"],
+  Fijian:          ["#1a5276", "#c0392b"],
+  Tongan:          ["#c0392b", "#f5f5f5"],
+  Palauan:         ["#1a5276", "#c0392b"],
+};
 
-  const seed = id;
-  const cuisineLower = (cuisine ?? "").toLowerCase();
+const FALLBACK_COLORS = [
+  ["#1a5276", "#2980b9"],
+  ["#1e8449", "#27ae60"],
+  ["#c0392b", "#e74c3c"],
+  ["#d35400", "#e67e22"],
+  ["#7d3c98", "#8e44ad"],
+  ["#1a5276", "#922b21"],
+  ["#d35400", "#1e8449"],
+] as const;
 
-  // 1. Exact cuisine match
-  const direct = CUISINE_MAP[cuisineLower];
-  if (direct) return pick(W[direct], seed);
+/**
+ * Returns a CSS `linear-gradient(...)` string for the given cuisine name.
+ * Used as a fallback when no dish-specific photo is available.
+ */
+export function getCuisineGradient(cuisine: string): string {
+  const exact = GRADIENTS[cuisine];
+  if (exact) return `linear-gradient(135deg, ${exact[0]}, ${exact[1]})`;
 
-  // 2. Partial cuisine match (e.g. "North Indian", "West African")
-  for (const [key, cat] of Object.entries(CUISINE_MAP)) {
-    if (cuisineLower.includes(key) || key.includes(cuisineLower)) {
-      return pick(W[cat], seed);
+  // Partial match (e.g. "North Indian" → "Indian")
+  for (const [key, colors] of Object.entries(GRADIENTS)) {
+    if (cuisine.toLowerCase().includes(key.toLowerCase()) ||
+        key.toLowerCase().includes(cuisine.toLowerCase())) {
+      return `linear-gradient(135deg, ${colors[0]}, ${colors[1]})`;
     }
   }
 
-  // 3. Keyword match against tags + title
-  const tagStr   = (recipe.tags ?? []).join(" ").toLowerCase();
-  const titleStr = (recipe.title ?? "").toLowerCase();
-  const combined = `${cuisineLower} ${tagStr} ${titleStr}`;
-
-  for (const [kw, cat] of KEYWORD_MAP) {
-    if (combined.includes(kw)) return pick(W[cat], seed);
-  }
-
-  // 4. Fallback
-  return pick(W.general, seed);
+  // Hash-based deterministic fallback for unknown cuisines
+  const n = cuisine.split("").reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 0);
+  const pair = FALLBACK_COLORS[Math.abs(n) % FALLBACK_COLORS.length];
+  return `linear-gradient(135deg, ${pair[0]}, ${pair[1]})`;
 }
