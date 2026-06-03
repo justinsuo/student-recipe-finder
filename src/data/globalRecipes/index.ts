@@ -4,6 +4,7 @@ import { KOREAN_RECIPES } from "./korean";
 import { TAIWANESE_RECIPES } from "./taiwanese";
 import { THAI_RECIPES } from "./thai";
 import { VIETNAMESE_RECIPES } from "./vietnamese";
+import { SOUTHEAST_ASIA2_RECIPES } from "./southeastAsia2";
 
 export const GLOBAL_RECIPES = [
   ...EAST_ASIA_RECIPES,
@@ -12,4 +13,5 @@ export const GLOBAL_RECIPES = [
   ...TAIWANESE_RECIPES,
   ...THAI_RECIPES,
   ...VIETNAMESE_RECIPES,
+  ...SOUTHEAST_ASIA2_RECIPES,
 ];
