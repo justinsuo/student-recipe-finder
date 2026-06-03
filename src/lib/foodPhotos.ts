@@ -8,6 +8,7 @@
  */
 
 import type { ExternalRecipe } from "@/lib/externalTypes";
+import { RECIPE_PHOTO_MAP } from "@/data/recipePhotoMap";
 
 const PARAMS = "?w=640&h=427&fit=crop&q=80";
 const u = (id: string) => `https://images.unsplash.com/photo-${id}${PARAMS}`;
@@ -192,6 +193,9 @@ export function resolveRecipeImage(recipe: ExternalRecipe): string {
 
   // Already a stable URL — keep it
   if (!image.includes("source.unsplash.com")) return image;
+
+  // Dish-specific Wikimedia photo (highest quality, verified match)
+  if (RECIPE_PHOTO_MAP[id]) return RECIPE_PHOTO_MAP[id];
 
   const seed = id;
   const cuisineLower = (cuisine ?? "").toLowerCase();
