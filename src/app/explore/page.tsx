@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import type { ExploreFilters, ExternalRecipe } from "@/lib/externalTypes";
 import { searchExternalRecipes } from "@/lib/services/exploreService";
+import { resolveRecipeImage } from "@/lib/foodPhotos";
 import { SkeletonRecipeGrid } from "@/components/ui/SkeletonRecipeCard";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
@@ -79,7 +80,7 @@ function ExploreCard({
       <div className="relative aspect-[4/3] overflow-hidden bg-stone-100">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={recipe.image}
+          src={resolveRecipeImage(recipe)}
           alt={recipe.title}
           loading="lazy"
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
@@ -172,7 +173,7 @@ function DetailPanel({
         <div className="relative aspect-[3/1] overflow-hidden rounded-t-3xl">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={recipe.image}
+            src={resolveRecipeImage(recipe)}
             alt={recipe.title}
             className="h-full w-full object-cover"
             onError={(e) => {
