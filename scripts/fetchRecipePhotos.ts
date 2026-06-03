@@ -51,11 +51,17 @@ const REJECT = [
   "flag_of", "flag-of", "emblem", "coat_of_arms", "coat-of-arms",
   "logo", "_logo", "icon", "map_of", "locator_map", "location_map",
   "portrait", "blank_map", "wikidata", "wikimedia-logo",
+  // PDF page thumbnails (.pdf/page or .pdf.jpg in the URL)
+  ".pdf/page", ".pdf.jpg",
 ];
 
 function looksLikeFood(title: string): boolean {
   const t = title.toLowerCase();
   return !REJECT.some((p) => t.includes(p));
+}
+
+function looksLikeFoodUrl(url: string): boolean {
+  return !REJECT.some((p) => url.includes(p));
 }
 
 /**
@@ -92,7 +98,7 @@ async function commonsPhoto(query: string): Promise<string | null> {
       const p = page as any;
       if (!looksLikeFood(p.title ?? "")) continue;
       const thumb: string | undefined = p.imageinfo?.[0]?.thumburl;
-      if (thumb) return thumb;
+      if (thumb && looksLikeFoodUrl(thumb)) return thumb;
     }
     return null;
   } catch {
