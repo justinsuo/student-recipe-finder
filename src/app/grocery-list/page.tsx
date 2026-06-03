@@ -12,6 +12,10 @@ import { recommendSmartBuys } from "@/lib/recipeScoring";
 import { quoteIngredient } from "@/lib/pricing/pricingEngine";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { SectionHeading } from "@/components/ui/SectionHeading";
+import { ScrollReveal } from "@/components/motion/ScrollReveal";
+import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
 import type { IngredientCategory } from "@/lib/types";
 import { RECIPE_MAP } from "@/data/recipes";
 
@@ -57,28 +61,24 @@ export default function GroceryListPage() {
 
   return (
     <div className="space-y-8">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-sm font-medium text-emerald-700">Grocery List</p>
-          <h1 className="mt-1 text-3xl font-bold text-stone-900 sm:text-4xl">
-            Your shopping list
-          </h1>
-          <p className="mt-2 max-w-xl text-sm text-stone-600">
-            Items from recipes you&apos;ve added, plus smart suggestions. Check
-            things off as you shop.
-          </p>
-        </div>
-        {grocery.length > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            leftIcon={<Trash2 size={14} />}
-            onClick={clearGrocery}
-          >
-            Clear all
-          </Button>
-        )}
-      </header>
+      <PageHeader
+        eyebrow="Grocery List"
+        title="Your shopping list."
+        description="Items from recipes you've added, plus smart suggestions. Check things off as you shop."
+        tone="sky"
+        trailing={
+          grocery.length > 0 ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              leftIcon={<Trash2 size={14} />}
+              onClick={clearGrocery}
+            >
+              Clear all
+            </Button>
+          ) : undefined
+        }
+      />
 
       {grocery.length === 0 ? (
         <EmptyState
@@ -95,24 +95,46 @@ export default function GroceryListPage() {
           }
         />
       ) : (
-        <section className="rounded-3xl border border-stone-200 bg-white p-5 sm:p-6">
-          <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-stone-700">
-                <ShoppingBasket size={16} /> {grocery.length} items
-              </h2>
-              <p className="mt-1 text-xs text-stone-500">
-                Estimated unit prices; actual store prices may vary.
+        <ScrollReveal as="section" className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+            <SectionHeading
+              eyebrow={
+                <span className="inline-flex items-center gap-1.5">
+                  <ShoppingBasket size={11} /> Shopping cart
+                </span>
+              }
+              title={
+                <span className="inline-flex items-baseline gap-3">
+                  <AnimatedNumber value={grocery.length} duration={500} />{" "}
+                  <span className="text-base font-normal text-stone-500">
+                    {grocery.length === 1 ? "item" : "items"}
+                  </span>
+                </span>
+              }
+              description="Estimated unit prices. Actual store prices may vary."
+              tone="sky"
+              className="flex-1"
+            />
+            <div className="rounded-2xl bg-gradient-to-br from-emerald-100 to-emerald-50 px-5 py-3 text-right shadow-sm ring-1 ring-inset ring-emerald-200">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+                Estimated total
               </p>
-            </div>
-            <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-right">
-              <p className="text-xs text-emerald-800">Estimated total</p>
               <p className="text-2xl font-bold text-emerald-900">
-                ${grouped.total.toFixed(2)}
+                <AnimatedNumber
+                  value={grouped.total}
+                  duration={900}
+                  decimals={2}
+                  prefix="$"
+                />
               </p>
               {grouped.unchecked < grouped.total && (
                 <p className="text-xs text-emerald-700">
-                  Remaining: ${grouped.unchecked.toFixed(2)}
+                  Remaining: $
+                  <AnimatedNumber
+                    value={grouped.unchecked}
+                    duration={700}
+                    decimals={2}
+                  />
                 </p>
               )}
             </div>
@@ -190,19 +212,23 @@ export default function GroceryListPage() {
               </div>
             ))}
           </div>
-        </section>
+        </ScrollReveal>
       )}
 
       {smartBuys.length > 0 && (
-        <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 sm:p-6">
-          <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-amber-800">
-            <Sparkles size={16} /> Smart buy suggestions
-          </h2>
-          <p className="mt-1 text-sm text-amber-900">
-            One cheap pickup that would unlock several more recipes.
-          </p>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {smartBuys.map((sb) => {
+        <ScrollReveal as="section" className="rounded-3xl border border-amber-200 bg-gradient-to-br from-amber-50 via-amber-50/70 to-white p-5 sm:p-6">
+          <SectionHeading
+            eyebrow={
+              <span className="inline-flex items-center gap-1.5">
+                <Sparkles size={11} /> Smart buys
+              </span>
+            }
+            title="One cheap pickup, many more recipes"
+            description="Adding one of these would unlock several meals from your existing pantry."
+            tone="amber"
+          />
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {smartBuys.map((sb, i) => {
               const ing = INGREDIENT_MAP.get(sb.ingredientId);
               if (!ing) return null;
               const alreadyOnList = grocery.some(
@@ -211,14 +237,19 @@ export default function GroceryListPage() {
               return (
                 <div
                   key={sb.ingredientId}
-                  className="flex items-center justify-between rounded-2xl bg-white p-3 shadow-sm"
+                  className="flex items-center justify-between gap-3 rounded-2xl border border-amber-100 bg-white p-3 shadow-sm transition-all motion-safe:hover:-translate-y-0.5 hover:shadow-md motion-safe:animate-[fadeUp_500ms_ease-out_both]"
+                  style={{ animationDelay: `${i * 50}ms` }}
                 >
-                  <div>
-                    <p className="text-sm font-semibold text-stone-900">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-stone-900">
                       {ing.name}
                     </p>
-                    <p className="text-xs text-stone-600">
-                      Unlocks {sb.unlocks} {sb.unlocks === 1 ? "recipe" : "recipes"}
+                    <p className="mt-0.5 text-xs text-amber-800">
+                      Unlocks{" "}
+                      <span className="font-semibold">
+                        <AnimatedNumber value={sb.unlocks} duration={520} />
+                      </span>{" "}
+                      {sb.unlocks === 1 ? "recipe" : "recipes"}
                     </p>
                   </div>
                   <Button
@@ -233,7 +264,7 @@ export default function GroceryListPage() {
               );
             })}
           </div>
-        </section>
+        </ScrollReveal>
       )}
     </div>
   );

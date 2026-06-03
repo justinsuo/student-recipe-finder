@@ -3,6 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Coins, Filter, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { SectionHeading } from "@/components/ui/SectionHeading";
+import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
 import { RecipeGrid } from "@/components/recipe/RecipeGrid";
 import { rankCheapRecipes } from "@/lib/recipeScoring";
 import {
@@ -224,37 +227,41 @@ export default function CheapRecipesPage() {
 
   return (
     <div className="space-y-8">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-sm font-medium text-emerald-700">Cheap Recipe Coach</p>
-          <h1 className="mt-1 text-3xl font-bold text-stone-900 sm:text-4xl">
-            Find your cheapest dinner
-          </h1>
-          <p className="mt-2 max-w-xl text-sm text-stone-600">
-            Tell us what you can spend, what you&apos;ve got to cook with, and how you eat.
-            We&apos;ll rank recipes by cost, time, and practicality.
-          </p>
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          leftIcon={<RefreshCcw size={14} />}
-          onClick={() => {
-            setFilters(DEFAULTS);
-            setSort("best");
-          }}
-        >
-          Reset
-        </Button>
-      </header>
+      <PageHeader
+        eyebrow="Cheap Recipe Coach"
+        title="Find your cheapest dinner."
+        description="Tell us what you can spend, what you've got to cook with, and how you eat. We'll rank recipes by cost, time, and practicality."
+        tone="amber"
+        trailing={
+          <Button
+            variant="outline"
+            size="sm"
+            leftIcon={<RefreshCcw size={14} />}
+            onClick={() => {
+              setFilters(DEFAULTS);
+              setSort("best");
+            }}
+            title="Restore default budget, equipment, diet, time, and sort"
+          >
+            Reset filters
+          </Button>
+        }
+      />
 
       <LocationSetup variant="compact" />
 
-      <section className="rounded-3xl border border-stone-200 bg-white p-5 sm:p-6">
-        <div className="mb-5 flex items-center gap-2 text-stone-700">
-          <Filter size={16} />
-          <h2 className="text-sm font-semibold uppercase tracking-wide">Filters</h2>
-        </div>
+      <section className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
+        <SectionHeading
+          eyebrow={
+            <span className="inline-flex items-center gap-1.5">
+              <Filter size={11} /> Filters
+            </span>
+          }
+          title="Tune it to your kitchen"
+          description="Pick what you have. The catalog hides anything you can't actually cook."
+          tone="amber"
+          className="mb-5"
+        />
 
         <div className="mb-5">
           <SmartRecipeSearch
@@ -341,6 +348,34 @@ export default function CheapRecipesPage() {
               <div className="mt-1 flex justify-between text-[11px] text-stone-500">
                 <span>$0.50</span>
                 <span>$30.00</span>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {[
+                  { label: "Under $2", value: 2 },
+                  { label: "Under $3", value: 3 },
+                  { label: "Under $5", value: 5 },
+                  { label: "Under $8", value: 8 },
+                  { label: "Any budget", value: 30 },
+                ].map((p) => {
+                  const active = filters.budgetPerServing === p.value;
+                  return (
+                    <button
+                      key={p.label}
+                      type="button"
+                      onClick={() =>
+                        setFilters((f) => ({ ...f, budgetPerServing: p.value }))
+                      }
+                      aria-pressed={active}
+                      className={
+                        active
+                          ? "rounded-full border border-emerald-600 bg-emerald-600 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm shadow-emerald-200 motion-safe:scale-[1.02]"
+                          : "rounded-full border border-stone-200 bg-white px-2.5 py-1 text-[11px] font-medium text-stone-700 transition-all hover:-translate-y-px hover:border-emerald-300 hover:bg-emerald-50"
+                      }
+                    >
+                      {p.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -455,28 +490,35 @@ export default function CheapRecipesPage() {
 
       <section>
         {activeChips.length > 0 && (
-          <div className="mb-4 rounded-2xl border border-stone-200 bg-white p-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wide text-stone-500">
-                Active filters
-              </span>
-              {activeChips.map((chip, i) => (
+          <div className="sticky top-16 z-20 mb-4 -mx-2 px-2 py-1">
+            <div className="rounded-2xl border border-stone-200 bg-white/85 p-3 shadow-sm backdrop-blur-md">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-500">
+                  Active filters
+                </span>
+                {activeChips.map((chip, i) => (
+                  <button
+                    key={`${chip.label}-${i}`}
+                    onClick={chip.clear}
+                    className="group inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-medium text-white shadow-sm shadow-emerald-200 transition-all motion-safe:animate-[popIn_240ms_ease-out] hover:bg-emerald-700"
+                    aria-label={`Remove filter ${chip.label}`}
+                  >
+                    {chip.label}
+                    <span
+                      aria-hidden
+                      className="grid h-4 w-4 place-items-center rounded-full bg-white/20 transition-transform motion-safe:group-hover:rotate-90"
+                    >
+                      ×
+                    </span>
+                  </button>
+                ))}
                 <button
-                  key={`${chip.label}-${i}`}
-                  onClick={chip.clear}
-                  className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-emerald-700"
-                  aria-label={`Remove filter ${chip.label}`}
+                  onClick={clearAllFilters}
+                  className="ml-auto text-xs font-semibold text-stone-600 hover:text-emerald-700 hover:underline"
                 >
-                  {chip.label}
-                  <span aria-hidden>×</span>
+                  Clear all
                 </button>
-              ))}
-              <button
-                onClick={clearAllFilters}
-                className="ml-auto text-xs font-semibold text-stone-600 hover:text-emerald-700 hover:underline"
-              >
-                Clear all
-              </button>
+              </div>
             </div>
           </div>
         )}
@@ -485,10 +527,12 @@ export default function CheapRecipesPage() {
           <p className="text-sm text-stone-600">
             Showing{" "}
             <span className="font-semibold text-stone-900">
-              {Math.min(visibleCount, results.length)}
+              <AnimatedNumber value={Math.min(visibleCount, results.length)} duration={500} />
             </span>{" "}
             of{" "}
-            <span className="font-semibold text-stone-900">{results.length}</span>{" "}
+            <span className="font-semibold text-stone-900">
+              <AnimatedNumber value={results.length} duration={500} />
+            </span>{" "}
             {results.length === 1 ? "recipe" : "recipes"}
           </p>
         </div>
@@ -562,10 +606,11 @@ function Chip({
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={active}
       className={
         active
-          ? "rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm"
-          : "rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-700 hover:border-emerald-300 hover:bg-emerald-50"
+          ? "inline-flex items-center gap-1.5 rounded-full border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm shadow-emerald-200 transition-all motion-safe:scale-[1.02]"
+          : "inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-700 transition-all hover:-translate-y-px hover:border-emerald-300 hover:bg-emerald-50 active:translate-y-0"
       }
     >
       {children}

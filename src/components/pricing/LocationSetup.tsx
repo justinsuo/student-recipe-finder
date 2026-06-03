@@ -96,8 +96,9 @@ export function LocationSetup({ variant = "card", onChange }: Props) {
             variant="ghost"
             leftIcon={<Trash2 size={12} />}
             onClick={reset}
+            title="Clear ZIP and use national-average pricing"
           >
-            Reset
+            Reset pricing location
           </Button>
         )}
       </div>

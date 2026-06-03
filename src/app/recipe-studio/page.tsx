@@ -3,23 +3,26 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  Wand2,
   ChefHat,
   Sparkles,
   ArrowRight,
   Trash2,
 } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 import {
   deleteCustomRecipe,
   getCustomRecipes,
   getStoredRecipeImage,
   imageDataUrl,
 } from "@/lib/customRecipeStorage";
+import { useToast } from "@/components/ui/Toast";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { SectionHeading } from "@/components/ui/SectionHeading";
+import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import type { CustomRecipe } from "@/lib/customRecipeTypes";
 
 export default function RecipeStudioPage() {
   const [recipes, setRecipes] = useState<CustomRecipe[]>([]);
+  const toast = useToast();
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -27,8 +30,12 @@ export default function RecipeStudioPage() {
   }, []);
 
   function remove(id: string) {
+    const target = recipes.find((r) => r.id === id);
+    const name = target?.name ?? "this recipe";
+    if (!window.confirm(`Delete "${name}"? This can't be undone.`)) return;
     deleteCustomRecipe(id);
     setRecipes(getCustomRecipes());
+    toast.info(`Deleted "${name}"`);
   }
 
   const aiOnes = recipes.filter((r) => r.isAIGenerated);
@@ -36,60 +43,72 @@ export default function RecipeStudioPage() {
 
   return (
     <div className="space-y-10">
-      <header>
-        <p className="flex items-center gap-1.5 text-sm font-medium text-emerald-700">
-          <Wand2 size={14} /> Recipe Studio
-        </p>
-        <h1 className="mt-1 text-3xl font-bold text-stone-900 sm:text-4xl">
-          Make your own recipes
-        </h1>
-        <p className="mt-2 max-w-2xl text-sm text-stone-600">
-          Generate with AI or build a recipe card from scratch. Both end up in
-          your saved collection.
-        </p>
-      </header>
+      <PageHeader
+        eyebrow="Recipe Studio"
+        title="Make your own recipes."
+        description="Generate with AI or build a recipe card from scratch. Both end up in your saved collection."
+        tone="indigo"
+      />
 
-      <section className="grid gap-4 sm:grid-cols-2">
+      <ScrollReveal as="section" className="grid gap-4 sm:grid-cols-2">
         <Link
           href="/ai-chef"
-          className="group flex flex-col gap-3 rounded-3xl border border-stone-200 bg-white p-6 transition-all hover:-translate-y-0.5 hover:shadow-md"
+          className="group flex flex-col gap-3 rounded-3xl border border-stone-200 bg-white p-6 transition-all motion-safe:hover:-translate-y-1 hover:border-violet-300 hover:shadow-lg"
         >
-          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-violet-100 text-violet-700">
+          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-violet-100 text-violet-700 transition-colors group-hover:bg-violet-600 group-hover:text-white">
             <Sparkles size={22} />
           </div>
           <h2 className="text-xl font-semibold text-stone-900">
             Let AI make a recipe
           </h2>
-          <p className="text-sm text-stone-600">
+          <p className="text-sm leading-relaxed text-stone-600">
             AI Chef generates an original recipe from your ingredients, budget,
             and equipment — with an AI image attached.
           </p>
-          <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 group-hover:underline">
-            Generate with AI Chef <ArrowRight size={14} />
+          <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700">
+            Generate with AI Chef
+            <ArrowRight
+              size={14}
+              className="transition-transform motion-safe:group-hover:translate-x-1"
+            />
           </span>
         </Link>
         <Link
           href="/recipe-studio/new"
-          className="group flex flex-col gap-3 rounded-3xl border border-stone-200 bg-white p-6 transition-all hover:-translate-y-0.5 hover:shadow-md"
+          className="group flex flex-col gap-3 rounded-3xl border border-stone-200 bg-white p-6 transition-all motion-safe:hover:-translate-y-1 hover:border-emerald-300 hover:shadow-lg"
         >
-          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-emerald-100 text-emerald-700">
+          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-emerald-100 text-emerald-700 transition-colors group-hover:bg-emerald-600 group-hover:text-white">
             <ChefHat size={22} />
           </div>
           <h2 className="text-xl font-semibold text-stone-900">
             Create my own recipe card
           </h2>
-          <p className="text-sm text-stone-600">
+          <p className="text-sm leading-relaxed text-stone-600">
             Build a recipe by hand. We&apos;ll auto-generate an image for it by
             default.
           </p>
-          <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 group-hover:underline">
-            Build my recipe card <ArrowRight size={14} />
+          <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700">
+            Build my recipe card
+            <ArrowRight
+              size={14}
+              className="transition-transform motion-safe:group-hover:translate-x-1"
+            />
           </span>
         </Link>
-      </section>
+      </ScrollReveal>
 
-      <Section title="AI-generated recipes" recipes={aiOnes} onRemove={remove} />
-      <Section title="Created by you" recipes={userOnes} onRemove={remove} />
+      <Section
+        title="AI-generated recipes"
+        tone="violet"
+        recipes={aiOnes}
+        onRemove={remove}
+      />
+      <Section
+        title="Created by you"
+        tone="emerald"
+        recipes={userOnes}
+        onRemove={remove}
+      />
     </div>
   );
 }
@@ -98,26 +117,35 @@ function Section({
   title,
   recipes,
   onRemove,
+  tone = "emerald",
 }: {
   title: string;
   recipes: CustomRecipe[];
   onRemove: (id: string) => void;
+  tone?: "emerald" | "violet" | "amber" | "sky" | "indigo" | "rose";
 }) {
   return (
-    <section>
-      <h2 className="mb-3 text-lg font-semibold text-stone-900">{title}</h2>
+    <ScrollReveal as="section">
+      <SectionHeading
+        eyebrow={`${recipes.length} ${recipes.length === 1 ? "recipe" : "recipes"}`}
+        title={title}
+        tone={tone}
+      />
       {recipes.length === 0 ? (
-        <div className="rounded-2xl border-2 border-dashed border-stone-200 bg-white px-6 py-8 text-center text-sm text-stone-600">
+        <div className="mt-5 rounded-2xl border-2 border-dashed border-stone-200 bg-white px-6 py-10 text-center text-sm text-stone-600">
+          <span className="mb-2 block text-3xl" aria-hidden>
+            🍳
+          </span>
           Nothing here yet.
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {recipes.map((r) => (
             <RecipeMiniCard key={r.id} recipe={r} onRemove={onRemove} />
           ))}
         </div>
       )}
-    </section>
+    </ScrollReveal>
   );
 }
 
@@ -172,14 +200,15 @@ function RecipeMiniCard({
           {recipe.totalTimeMinutes} min
         </p>
         <div className="flex justify-end pt-1">
-          <Button
-            size="sm"
-            variant="ghost"
+          <button
+            type="button"
             onClick={() => onRemove(recipe.id)}
-            leftIcon={<Trash2 size={12} />}
+            className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold text-stone-500 transition-colors hover:bg-red-50 hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300"
+            aria-label={`Delete ${recipe.name}`}
+            title="Delete this recipe — can't be undone"
           >
-            Delete
-          </Button>
+            <Trash2 size={12} /> Delete
+          </button>
         </div>
       </div>
     </div>

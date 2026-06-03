@@ -222,6 +222,13 @@ async function openaiImage(
   async function attempt(model: string): Promise<ImageResult> {
     console.log(`[ai] image model=${model} size=${size}`);
     const body: Record<string, unknown> = { model, prompt, n: 1, size };
+    // gpt-image-1 supports a quality tier — "low" is ~$0.011/image vs
+    // ~$0.042 for "medium" (default) or ~$0.167 for "high". Plenty of
+    // detail for recipe thumbnails. dall-e-2/dall-e-3 reject this param,
+    // so only attach for the gpt-image-1 family.
+    if (model.startsWith("gpt-image-")) {
+      body.quality = "low";
+    }
     // gpt-image-1 always returns b64; dall-e-3 returns a URL by default.
     const res = await fetch(
       "https://api.openai.com/v1/images/generations",

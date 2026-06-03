@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Bookmark, ChefHat, Sparkles } from "lucide-react";
+import { ChefHat, Sparkles } from "lucide-react";
 import { useAppStore } from "@/lib/AppStore";
 import { RECIPE_MAP } from "@/data/recipes";
 import { RecipeGrid } from "@/components/recipe/RecipeGrid";
@@ -12,6 +12,11 @@ import {
   imageDataUrl,
 } from "@/lib/customRecipeStorage";
 import type { CustomRecipe } from "@/lib/customRecipeTypes";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { SectionHeading } from "@/components/ui/SectionHeading";
+import { ScrollReveal } from "@/components/motion/ScrollReveal";
+import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
 
 export default function SavedPage() {
   const { saved, hydrated } = useAppStore();
@@ -40,83 +45,89 @@ export default function SavedPage() {
 
   return (
     <div className="space-y-8">
-      <header>
-        <p className="flex items-center gap-1.5 text-sm font-medium text-emerald-700">
-          <Bookmark size={14} /> Saved Recipes
-        </p>
-        <h1 className="mt-1 text-3xl font-bold text-stone-900 sm:text-4xl">
-          Your collection
-        </h1>
-        <p className="mt-2 max-w-xl text-sm text-stone-600">
-          Database recipes you bookmarked, plus your AI-generated and custom
-          recipes.
-        </p>
-      </header>
+      <PageHeader
+        eyebrow="Saved Recipes"
+        title="Your recipe box."
+        description="Database recipes you bookmarked, plus your AI-generated and custom recipes."
+        tone="rose"
+      />
 
       {hydrated && totalCount === 0 ? (
-        <div className="rounded-2xl border-2 border-dashed border-stone-200 bg-white px-6 py-16 text-center">
-          <div className="mb-3 text-5xl" aria-hidden>
-            🔖
-          </div>
-          <h3 className="text-lg font-semibold text-stone-900">
-            No saved recipes yet
-          </h3>
-          <p className="mt-1 text-sm text-stone-600">
-            Browse recipes and tap the bookmark icon, or build one with AI
-            Chef.
-          </p>
-          <div className="mt-5 flex flex-wrap justify-center gap-2">
-            <Link
-              href="/cheap-recipes"
-              className="rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
-            >
-              Find recipes
-            </Link>
-            <Link
-              href="/ai-chef"
-              className="rounded-full border border-stone-300 bg-white px-5 py-2.5 text-sm font-semibold text-stone-800 hover:bg-stone-50"
-            >
-              Try AI Chef
-            </Link>
-          </div>
-        </div>
+        <EmptyState
+          emoji="🔖"
+          title="Your recipe box is empty"
+          description="Save recipes you want to cook later, or have AI Chef invent one from what you have."
+          action={
+            <div className="flex flex-wrap justify-center gap-2">
+              <Link
+                href="/cheap-recipes"
+                className="rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
+              >
+                Find cheap recipes
+              </Link>
+              <Link
+                href="/ai-chef"
+                className="rounded-full border border-stone-300 bg-white px-5 py-2.5 text-sm font-semibold text-stone-800 hover:bg-stone-50"
+              >
+                Ask AI Chef
+              </Link>
+            </div>
+          }
+        />
       ) : (
         <>
-          <div className="flex flex-wrap gap-2">
-            <FilterChip
-              active={filter === "all"}
-              onClick={() => setFilter("all")}
-            >
-              All ({totalCount})
-            </FilterChip>
-            <FilterChip
-              active={filter === "database"}
-              onClick={() => setFilter("database")}
-            >
-              Database ({dbCount})
-            </FilterChip>
-            <FilterChip
-              active={filter === "ai"}
-              onClick={() => setFilter("ai")}
-            >
-              <Sparkles size={11} className="mr-1" /> AI Generated ({aiCount})
-            </FilterChip>
-            <FilterChip
-              active={filter === "user"}
-              onClick={() => setFilter("user")}
-            >
-              Created by you ({userCount})
-            </FilterChip>
+          <div className="sticky top-16 z-20 -mx-2 px-2 py-1">
+            <div className="rounded-2xl border border-stone-200 bg-white/85 p-2.5 shadow-sm backdrop-blur-md">
+              <div className="flex flex-wrap items-center gap-2">
+                <FilterChip
+                  active={filter === "all"}
+                  onClick={() => setFilter("all")}
+                >
+                  All ({totalCount})
+                </FilterChip>
+                <FilterChip
+                  active={filter === "database"}
+                  onClick={() => setFilter("database")}
+                >
+                  Database ({dbCount})
+                </FilterChip>
+                <FilterChip
+                  active={filter === "ai"}
+                  onClick={() => setFilter("ai")}
+                >
+                  <Sparkles size={11} className="mr-1" /> AI Generated ({aiCount})
+                </FilterChip>
+                <FilterChip
+                  active={filter === "user"}
+                  onClick={() => setFilter("user")}
+                >
+                  Created by you ({userCount})
+                </FilterChip>
+                <span className="ml-auto text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-500">
+                  <AnimatedNumber value={totalCount} duration={520} /> total
+                </span>
+              </div>
+            </div>
           </div>
 
           {showDatabase && databaseSaved.length > 0 && (
-            <RecipeGrid recipes={databaseSaved} />
+            <ScrollReveal as="section">
+              <SectionHeading
+                eyebrow={`${dbCount} ${dbCount === 1 ? "recipe" : "recipes"}`}
+                title="From the database"
+                tone="emerald"
+              />
+              <div className="mt-5">
+                <RecipeGrid recipes={databaseSaved} />
+              </div>
+            </ScrollReveal>
           )}
 
           {showAi && (
             <CustomSection
               recipes={customSaved.filter((r) => r.isAIGenerated)}
               title="AI Generated"
+              tone="violet"
             />
           )}
 
@@ -124,6 +135,7 @@ export default function SavedPage() {
             <CustomSection
               recipes={customSaved.filter((r) => !r.isAIGenerated)}
               title="Created by you"
+              tone="sky"
             />
           )}
         </>
@@ -144,10 +156,11 @@ function FilterChip({
   return (
     <button
       onClick={onClick}
+      aria-pressed={active}
       className={
         active
-          ? "inline-flex items-center rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white"
-          : "inline-flex items-center rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-700 hover:border-emerald-300 hover:bg-emerald-50"
+          ? "inline-flex items-center rounded-full border border-emerald-600 bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm shadow-emerald-200 transition-all motion-safe:scale-[1.02]"
+          : "inline-flex items-center rounded-full border border-stone-200 bg-white px-3.5 py-1.5 text-xs font-medium text-stone-700 transition-all hover:-translate-y-px hover:border-emerald-300 hover:bg-emerald-50"
       }
     >
       {children}
@@ -158,20 +171,26 @@ function FilterChip({
 function CustomSection({
   recipes,
   title,
+  tone = "indigo",
 }: {
   recipes: CustomRecipe[];
   title: string;
+  tone?: "emerald" | "violet" | "sky" | "indigo";
 }) {
   if (recipes.length === 0) return null;
   return (
-    <section>
-      <h2 className="mb-3 text-lg font-semibold text-stone-900">{title}</h2>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <ScrollReveal as="section">
+      <SectionHeading
+        eyebrow={`${recipes.length} ${recipes.length === 1 ? "recipe" : "recipes"}`}
+        title={title}
+        tone={tone}
+      />
+      <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {recipes.map((r) => (
           <CustomCard key={r.id} recipe={r} />
         ))}
       </div>
-    </section>
+    </ScrollReveal>
   );
 }
 

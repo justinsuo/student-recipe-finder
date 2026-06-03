@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { PageHeader } from "@/components/ui/PageHeader";
 import {
   fallbackImageMeta,
   imageDataUrl,
@@ -221,23 +222,25 @@ export default function ManualRecipeBuilderPage() {
     <div className="space-y-6">
       <Link
         href="/recipe-studio"
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-stone-600 hover:text-emerald-700"
+        className="group inline-flex items-center gap-1.5 text-sm font-medium text-stone-600 hover:text-emerald-700"
       >
-        <ArrowLeft size={14} /> Back to Recipe Studio
+        <ArrowLeft
+          size={14}
+          className="transition-transform motion-safe:group-hover:-translate-x-0.5"
+        />{" "}
+        Back to Recipe Studio
       </Link>
 
-      <header>
-        <p className="flex items-center gap-1.5 text-sm font-medium text-emerald-700">
-          <ChefHat size={14} /> Build your own
-        </p>
-        <h1 className="mt-1 text-3xl font-bold text-stone-900 sm:text-4xl">
-          Recipe card builder
-        </h1>
-        <p className="mt-2 max-w-2xl text-sm text-stone-600">
-          Fill in the details, hit save, and we&apos;ll generate a custom image
-          for your recipe.
-        </p>
-      </header>
+      <PageHeader
+        eyebrow={
+          <span className="inline-flex items-center gap-1.5">
+            <ChefHat size={11} /> Build your own
+          </span>
+        }
+        title="Recipe card builder"
+        description="Fill in the details, hit save, and we'll generate a custom food image to go with it."
+        tone="indigo"
+      />
 
       {error && (
         <Card className="border-red-200 bg-red-50 text-sm text-red-800">

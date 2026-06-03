@@ -37,12 +37,35 @@ export function Chatbot() {
   ]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef(0);
+  // Hide the floating button while the user is typing in a form field
+  // so it doesn't overlap inputs / the mobile keyboard.
+  const [hiddenByInput, setHiddenByInput] = useState(false);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, open]);
+
+  useEffect(() => {
+    function isEditable(t: EventTarget | null): boolean {
+      if (!(t instanceof HTMLElement)) return false;
+      const tag = t.tagName;
+      return tag === "INPUT" || tag === "TEXTAREA" || t.isContentEditable;
+    }
+    function onFocus(e: FocusEvent) {
+      if (isEditable(e.target)) setHiddenByInput(true);
+    }
+    function onBlur(e: FocusEvent) {
+      if (isEditable(e.target)) setHiddenByInput(false);
+    }
+    document.addEventListener("focusin", onFocus);
+    document.addEventListener("focusout", onBlur);
+    return () => {
+      document.removeEventListener("focusin", onFocus);
+      document.removeEventListener("focusout", onBlur);
+    };
+  }, []);
 
   function send(text: string) {
     const trimmed = text.trim();
@@ -66,7 +89,19 @@ export function Chatbot() {
 
   return (
     <>
-      <div className="group fixed bottom-5 right-4 z-50 flex items-center gap-2 sm:bottom-6 sm:right-6">
+      <div
+        className={clsx(
+          // On mobile we sit above the BottomNav (~76px). At md+ no bottom
+          // nav exists, so we drop back to the original position.
+          "group fixed bottom-24 right-4 z-50 flex items-center gap-2 transition-opacity md:bottom-6 md:right-6",
+          // Safe area: extra room on iOS so the button doesn't sit on the
+          // home indicator.
+          "pb-[env(safe-area-inset-bottom)]",
+          // Don't obscure inputs while typing — but keep it interactive
+          // when the panel is open.
+          hiddenByInput && !open && "pointer-events-none opacity-0",
+        )}
+      >
         {/* Tooltip — visible on hover/focus */}
         <span
           role="tooltip"
@@ -80,35 +115,61 @@ export function Chatbot() {
         <button
           onClick={() => setOpen((o) => !o)}
           className={clsx(
-            "flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2",
-            open ? "bg-stone-900" : "bg-emerald-600",
+            "relative flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2",
+            open
+              ? "bg-stone-900"
+              : "bg-gradient-to-br from-emerald-500 to-emerald-700 shadow-emerald-300/40",
           )}
-          aria-label={open ? "Close chat with Pesto" : "Ask Pesto, the cooking assistant"}
+          aria-label={
+            open
+              ? "Close chat with Pesto"
+              : "Ask Pesto, the cooking assistant"
+          }
           aria-expanded={open}
         >
+          {!open && (
+            <span
+              aria-hidden
+              className="absolute inset-0 rounded-full motion-safe:animate-[pulseGlow_2.6s_ease-in-out_infinite]"
+            />
+          )}
           {open ? <X size={22} /> : <MessageCircle size={22} />}
         </button>
       </div>
 
       {open && (
-        <div className="fixed inset-x-3 bottom-24 z-50 mx-auto flex max-h-[72vh] w-auto max-w-md flex-col rounded-3xl border border-stone-200 bg-white shadow-2xl sm:inset-x-auto sm:right-6 sm:left-auto">
-          <div className="flex items-center justify-between border-b border-stone-200 px-4 py-3">
-            <div className="flex items-center gap-2">
-              <div className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-600 text-white">
-                <Sparkles size={18} />
+        <div className="fixed inset-x-3 bottom-44 z-50 mx-auto flex max-h-[72vh] w-auto max-w-md flex-col overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-2xl motion-safe:animate-[fadeUp_240ms_ease-out] sm:inset-x-auto sm:bottom-24 sm:right-6 sm:left-auto">
+          <div className="relative overflow-hidden border-b border-stone-200 px-4 py-3">
+            <div
+              aria-hidden
+              className="dot-grid pointer-events-none absolute inset-0 opacity-40 [mask-image:radial-gradient(circle_at_70%_30%,black,transparent_70%)]"
+            />
+            <div className="relative flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="relative grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-sm shadow-emerald-200/60">
+                  <Sparkles size={18} />
+                  <span
+                    aria-hidden
+                    className="absolute -bottom-0.5 -right-0.5 grid h-3.5 w-3.5 place-items-center rounded-full border-2 border-white bg-emerald-500"
+                  />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-stone-900">
+                    Pesto
+                  </p>
+                  <p className="text-[11px] text-stone-500">
+                    Cheap-eats sidekick · online
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-semibold text-stone-900">Pesto</p>
-                <p className="text-xs text-stone-500">Cheap-eats AI assistant</p>
-              </div>
+              <button
+                onClick={() => setOpen(false)}
+                className="rounded-full p-2 text-stone-500 transition-colors hover:bg-stone-100"
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
             </div>
-            <button
-              onClick={() => setOpen(false)}
-              className="rounded-full p-2 text-stone-500 hover:bg-stone-100"
-              aria-label="Close"
-            >
-              <X size={18} />
-            </button>
           </div>
 
           <div
@@ -120,15 +181,16 @@ export function Chatbot() {
             ))}
             {messages.length === 1 && (
               <div className="pt-1">
-                <p className="px-1 pb-2 text-xs font-medium uppercase tracking-wide text-stone-500">
+                <p className="px-1 pb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-500">
                   Try asking
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {STARTER_PROMPTS.map((p) => (
+                  {STARTER_PROMPTS.map((p, i) => (
                     <button
                       key={p}
                       onClick={() => send(p)}
-                      className="rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5 text-xs text-stone-700 hover:border-emerald-300 hover:bg-emerald-50"
+                      className="rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5 text-xs text-stone-700 transition-all motion-safe:hover:-translate-y-px hover:border-emerald-300 hover:bg-emerald-50 motion-safe:animate-[fadeUp_500ms_ease-out_both]"
+                      style={{ animationDelay: `${i * 70}ms` }}
                     >
                       {p}
                     </button>
@@ -139,7 +201,7 @@ export function Chatbot() {
           </div>
 
           <form
-            className="flex items-center gap-2 border-t border-stone-200 p-3"
+            className="flex items-center gap-2 border-t border-stone-200 bg-stone-50/40 p-3"
             onSubmit={(e) => {
               e.preventDefault();
               send(input);
@@ -149,13 +211,13 @@ export function Chatbot() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask about a recipe, budget, or pantry…"
-              className="flex-1 rounded-full border border-stone-200 bg-stone-50 px-4 py-2 text-sm focus:border-emerald-400 focus:bg-white focus:outline-none"
+              className="flex-1 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm shadow-sm focus:border-emerald-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-100"
               aria-label="Chat message"
             />
             <button
               type="submit"
               disabled={!input.trim()}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-600 text-white disabled:opacity-40"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-sm shadow-emerald-200 transition-transform hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:scale-100"
               aria-label="Send"
             >
               <Send size={16} />

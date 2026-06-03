@@ -3,6 +3,15 @@
 :root {
   --background: #fafaf7;
   --foreground: #1c1917;
+
+  /* Motion tokens. Use these durations / easings so animations feel like one
+     designer made them. Consumers reference via inline style or arbitrary
+     class values, e.g. transition-[transform] duration-[var(--motion-fast)]. */
+  --motion-fast: 150ms;
+  --motion-base: 220ms;
+  --motion-slow: 360ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 @theme inline {
@@ -25,10 +34,12 @@ body {
 }
 
 .app-main {
-  padding-bottom: 6rem; /* room for the floating chat button */
+  /* Room for the mobile BottomNav (~76px) + floating Pesto + safe-area. */
+  padding-bottom: 9rem;
 }
 @media (min-width: 768px) {
   .app-main {
+    /* Desktop: no bottom nav, just the floating chat button. */
     padding-bottom: 3rem;
   }
 }
@@ -37,4 +48,85 @@ body {
 .tooltip-anchor:hover .tooltip-bubble,
 .tooltip-anchor:focus-within .tooltip-bubble {
   opacity: 1;
+}
+
+/* Shared motion keyframes for skeletons + pill check fade-ins. Animations
+   are gated behind `motion-safe:` in their consumers so prefers-reduced-
+   motion users never see them. */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Gentle float used by EmptyState emoji so empty surfaces feel less dead.
+   Motion-safe consumers only. */
+@keyframes emojiFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* Fade-up — used by Stagger / ScrollReveal and inline class consumers.
+   Motion-safe consumers only. */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Tiny pop — used by save-bookmark + reward toasts. */
+@keyframes popIn {
+  0%   { opacity: 0; transform: scale(0.85); }
+  60%  { opacity: 1; transform: scale(1.04); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Soft glow halo behind active filter pills + AI-generated badges. */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.30); }
+  50%      { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+}
+
+/* Slide a 1px underline across the active nav link. */
+@keyframes navUnderlineSlide {
+  from { transform: scaleX(0); transform-origin: 0% 50%; }
+  to   { transform: scaleX(1); transform-origin: 0% 50%; }
+}
+
+/* Cooking-pot bob behind the brand mark on hover. */
+@keyframes brandBob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50%      { transform: translateY(-2px) rotate(2deg); }
+}
+
+/* Decorative dotted background used behind the home hero. */
+.dot-grid {
+  background-image:
+    radial-gradient(circle, rgba(16, 185, 129, 0.18) 1px, transparent 1.4px);
+  background-size: 22px 22px;
+  background-position: 0 0;
+}
+
+/* Reduce-motion hardening. Tailwind's motion-safe: variants already gate
+   most of our animations, but this is a belt-and-braces guard against any
+   raw CSS animation we (or future contributors) miss. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

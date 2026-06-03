@@ -27,6 +27,10 @@ import {
 import { RecipeCard } from "@/components/recipe/RecipeCard";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { SectionHeading } from "@/components/ui/SectionHeading";
+import { ScrollReveal } from "@/components/motion/ScrollReveal";
+import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
 import { PantryPhotoUpload } from "@/components/pantry/PantryPhotoUpload";
 import { PantryVoiceInput } from "@/components/pantry/PantryVoiceInput";
 import { PantrySmartAdd } from "@/components/pantry/PantrySmartAdd";
@@ -102,59 +106,63 @@ export default function PantryPage() {
 
   return (
     <div className="space-y-10">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-sm font-medium text-emerald-700">Pantry-to-Plate</p>
-          <h1 className="mt-1 text-3xl font-bold text-stone-900 sm:text-4xl">
-            What can you make right now?
-          </h1>
-          <p className="mt-2 max-w-xl text-sm text-stone-600">
-            Add what&apos;s in your kitchen. We&apos;ll surface recipes you can
-            make, and AI Chef can generate brand-new recipes from these same
-            ingredients without making you retype them.
-          </p>
-        </div>
-        {pantry.length > 0 && (
-          <Link
-            href="/ai-chef?usePantry=true"
-            className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-emerald-700"
-          >
-            ✨ Use these in AI Chef
-          </Link>
-        )}
-      </header>
+      <PageHeader
+        eyebrow="Pantry-to-Plate"
+        title="What can you make right now?"
+        description="Add what's in your kitchen. We'll surface recipes you can make, and AI Chef can generate brand-new ones from the same ingredients without making you retype them."
+        tone="emerald"
+        trailing={
+          pantry.length > 0 ? (
+            <Link
+              href="/ai-chef?usePantry=true"
+              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-emerald-200 transition-all motion-safe:hover:-translate-y-0.5 hover:bg-emerald-700"
+            >
+              <Sparkles size={14} /> Use these in AI Chef
+            </Link>
+          ) : undefined
+        }
+      />
 
       <LocationSetup />
 
-      <section className="rounded-3xl border border-stone-200 bg-white p-5 sm:p-6">
-        <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-stone-700">
-          <Wand2 size={16} /> Quick start presets
-        </h2>
-        <p className="mt-1 text-sm text-stone-600">
-          Pick a starter pack to populate your pantry instantly. Anything
-          already in your pantry is kept.
-        </p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {PANTRY_PRESETS.map((preset) => (
+      <ScrollReveal as="section" className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
+        <SectionHeading
+          eyebrow={
+            <span className="inline-flex items-center gap-1.5">
+              <Wand2 size={11} /> Quick start
+            </span>
+          }
+          title="Start from a preset"
+          description="Pick a starter pack to populate your pantry instantly. Anything already in your pantry is kept."
+          tone="emerald"
+        />
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {PANTRY_PRESETS.map((preset, i) => (
             <button
               key={preset.id}
               onClick={() => loadPreset(preset.ingredientIds)}
-              className="group flex flex-col items-start gap-2 rounded-2xl border border-stone-200 bg-stone-50 p-3 text-left transition-colors hover:border-emerald-300 hover:bg-emerald-50"
+              className="group relative flex flex-col items-start gap-2 overflow-hidden rounded-2xl border border-stone-200 bg-gradient-to-br from-stone-50 to-white p-4 text-left transition-all motion-safe:hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50 hover:shadow-md motion-safe:animate-[fadeUp_500ms_ease-out_both]"
+              style={{ animationDelay: `${i * 40}ms` }}
             >
-              <span className="text-2xl" aria-hidden>
+              <span
+                className="text-3xl transition-transform motion-safe:group-hover:scale-110"
+                aria-hidden
+              >
                 {preset.emoji}
               </span>
               <p className="text-sm font-semibold text-stone-900 group-hover:text-emerald-800">
                 {preset.name}
               </p>
-              <p className="text-xs text-stone-600">{preset.description}</p>
-              <span className="mt-1 text-[11px] font-medium text-stone-500">
-                Adds {preset.ingredientIds.length} items
+              <p className="text-xs leading-relaxed text-stone-600">
+                {preset.description}
+              </p>
+              <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+                +{preset.ingredientIds.length} items
               </span>
             </button>
           ))}
         </div>
-      </section>
+      </ScrollReveal>
 
       <PantrySmartAdd />
 
@@ -164,20 +172,32 @@ export default function PantryPage() {
 
       <PantryAIChat />
 
-      <section className="rounded-3xl border border-stone-200 bg-white p-5 sm:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-stone-700">
-            <Refrigerator size={16} /> Your pantry ({pantry.length})
-          </h2>
-          {pantry.length > 0 && (
-            <button
-              onClick={clearPantry}
-              className="text-xs font-medium text-stone-500 hover:text-red-600"
-            >
-              Clear all
-            </button>
-          )}
-        </div>
+      <ScrollReveal as="section" className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
+        <SectionHeading
+          eyebrow={
+            <span className="inline-flex items-center gap-1.5">
+              <Refrigerator size={11} /> Your pantry
+            </span>
+          }
+          title={
+            <span className="inline-flex items-baseline gap-3">
+              <AnimatedNumber value={pantry.length} duration={520} />{" "}
+              <span className="text-base font-normal text-stone-500">
+                {pantry.length === 1 ? "ingredient" : "ingredients"}
+              </span>
+            </span>
+          }
+          trailing={
+            pantry.length > 0 ? (
+              <button
+                onClick={clearPantry}
+                className="text-xs font-medium text-stone-500 hover:text-red-600"
+              >
+                Clear all
+              </button>
+            ) : undefined
+          }
+        />
 
         <div className="relative mt-4">
           <Search
@@ -291,7 +311,7 @@ export default function PantryPage() {
             Start by tapping a few quick-add staples above ↑
           </div>
         )}
-      </section>
+      </ScrollReveal>
 
       {pantry.length === 0 ? (
         <EmptyState
@@ -302,28 +322,37 @@ export default function PantryPage() {
       ) : (
         <div className="space-y-10">
           {smartBuys.length > 0 && (
-            <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 sm:p-6">
-              <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-amber-800">
-                <Sparkles size={16} /> Smart buys
-              </h2>
-              <p className="mt-1 text-sm text-amber-900">
-                Adding one of these to your pantry would unlock more recipes.
-              </p>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {smartBuys.map((sb) => {
+            <ScrollReveal as="section" className="rounded-3xl border border-amber-200 bg-gradient-to-br from-amber-50 via-amber-50/70 to-white p-5 sm:p-6">
+              <SectionHeading
+                eyebrow={
+                  <span className="inline-flex items-center gap-1.5">
+                    <Sparkles size={11} /> Smart buys
+                  </span>
+                }
+                title="One purchase unlocks more recipes"
+                description="The cheapest single item to add right now, ranked by how many new meals it unlocks."
+                tone="amber"
+              />
+              <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {smartBuys.map((sb, i) => {
                   const ing = INGREDIENT_MAP.get(sb.ingredientId);
                   if (!ing) return null;
                   return (
                     <div
                       key={sb.ingredientId}
-                      className="flex items-center justify-between rounded-2xl bg-white p-3 shadow-sm"
+                      className="flex items-center justify-between gap-3 rounded-2xl border border-amber-100 bg-white p-3 shadow-sm transition-all motion-safe:hover:-translate-y-0.5 hover:shadow-md motion-safe:animate-[fadeUp_500ms_ease-out_both]"
+                      style={{ animationDelay: `${i * 50}ms` }}
                     >
-                      <div>
-                        <p className="text-sm font-semibold text-stone-900">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-stone-900">
                           {ing.name}
                         </p>
-                        <p className="text-xs text-stone-600">
-                          Unlocks {sb.unlocks} {sb.unlocks === 1 ? "recipe" : "recipes"}
+                        <p className="mt-0.5 text-xs text-amber-800">
+                          Unlocks{" "}
+                          <span className="font-semibold">
+                            <AnimatedNumber value={sb.unlocks} duration={520} />
+                          </span>{" "}
+                          {sb.unlocks === 1 ? "recipe" : "recipes"}
                         </p>
                       </div>
                       <Button
@@ -331,13 +360,13 @@ export default function PantryPage() {
                         variant="outline"
                         onClick={() => addStapleToGrocery(sb.ingredientId)}
                       >
-                        Add to list
+                        Add
                       </Button>
                     </div>
                   );
                 })}
               </div>
-            </section>
+            </ScrollReveal>
           )}
 
           {groups.useSoon.length > 0 && (
@@ -387,26 +416,25 @@ function RecipeGroup({
   tone: "green" | "emerald" | "amber" | "sky";
 }) {
   if (recipes.length === 0) return null;
-  const dots: Record<string, string> = {
-    green: "bg-green-500",
-    emerald: "bg-emerald-500",
-    amber: "bg-amber-500",
-    sky: "bg-sky-500",
+  const tones: Record<string, "emerald" | "amber" | "sky"> = {
+    green: "emerald",
+    emerald: "emerald",
+    amber: "amber",
+    sky: "sky",
   };
   return (
-    <section>
-      <header className="mb-4 flex items-start gap-3">
-        <span className={`mt-1 h-2.5 w-2.5 rounded-full ${dots[tone]}`} />
-        <div>
-          <h2 className="text-xl font-semibold text-stone-900">{title}</h2>
-          <p className="text-sm text-stone-600">{description}</p>
-        </div>
-      </header>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <ScrollReveal as="section">
+      <SectionHeading
+        eyebrow={`${recipes.length} match${recipes.length === 1 ? "" : "es"}`}
+        title={title}
+        description={description}
+        tone={tones[tone]}
+      />
+      <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {recipes.slice(0, 6).map((r) => (
           <RecipeCard key={r.recipe.id} result={r} />
         ))}
       </div>
-    </section>
+    </ScrollReveal>
   );
 }

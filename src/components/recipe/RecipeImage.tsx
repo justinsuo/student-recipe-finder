@@ -111,8 +111,12 @@ function Fallback({
 }) {
   // Defensive fallback only — every recipe ships with a curated photo, so
   // this should only render if the network blocks Wikimedia or the image is
-  // missing for some reason.
-  const accentGradient = recipe.accentColor.replace("bg-", "from-");
+  // missing for some reason. Tolerate recipes missing `accentColor` (custom
+  // / AI-generated rows sometimes do) by defaulting to emerald.
+  const accentGradient = (recipe.accentColor || "bg-emerald-100").replace(
+    "bg-",
+    "from-",
+  );
   return (
     <div
       className={clsx(
