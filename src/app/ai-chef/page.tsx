@@ -45,6 +45,8 @@ import { useAppStore } from "@/lib/AppStore";
 import { INGREDIENTS } from "@/data/ingredients";
 import { resolvedToCustom, saveCustomIngredient, findExistingByName, getCustomIngredients } from "@/lib/customIngredientStorage";
 import { AIChefPantrySelector } from "@/components/ai/AIChefPantrySelector";
+import { PantryPhotoUpload } from "@/components/pantry/PantryPhotoUpload";
+import { PantrySmartAdd } from "@/components/pantry/PantrySmartAdd";
 import { Refrigerator } from "lucide-react";
 import { calculateNutritionForFreeForm } from "@/lib/nutritionEngine";
 import { generateRecipeQuick, generateRecipeQuickOptions, isAiEnabled } from "@/lib/anthropic";
@@ -787,14 +789,17 @@ function AIChefPage() {
                 Pantry ingredients AI Chef can use
               </label>
               <p className="mt-1 text-xs text-stone-500">
-                Tap a chip to include or exclude it from this recipe. The X
-                removes the item from your pantry entirely.
+                Tap a chip to include or exclude it from this recipe. Add more
+                below — snap a fridge photo or smart-paste a list — without
+                leaving this page.
               </p>
             </div>
             <AIChefPantrySelector
               selectedIds={selectedPantryIds}
               onChange={setSelectedPantryIds}
             />
+            <PantryPhotoUpload />
+            <PantrySmartAdd />
             <div>
               <label className="flex items-center gap-1.5 text-sm font-medium text-stone-800">
                 <Sparkles size={14} className="text-violet-600" /> Notes for AI
