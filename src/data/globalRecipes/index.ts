@@ -19,6 +19,16 @@ import { EAST_ASIA2_RECIPES } from "./eastAsia2";
 import { AMERICAS2_RECIPES } from "./americas2";
 import { AFRICAN2_RECIPES } from "./african2";
 import { PACIFIC_EUROPE_RECIPES } from "./pacificEurope";
+import { MIDDLE_EAST2_RECIPES } from "./middleEast2";
+import { LATIN_AMERICA2_RECIPES } from "./latinAmerica2";
+import { MEXICAN1_RECIPES } from "./mexican1";
+import { AFRICAN3_RECIPES } from "./african3";
+import { EUROPEAN3_RECIPES } from "./european3";
+import { SOUTH_ASIA3_RECIPES } from "./southAsia3";
+import { AMERICAS3_RECIPES } from "./americas3";
+import { OCEANIA1_RECIPES } from "./oceania1";
+import { MIXED1_RECIPES } from "./mixed1";
+import { EXTRAS1_RECIPES } from "./extras1";
 
 export const GLOBAL_RECIPES = [
   ...EAST_ASIA_RECIPES,
@@ -42,4 +52,14 @@ export const GLOBAL_RECIPES = [
   ...AMERICAS2_RECIPES,
   ...AFRICAN2_RECIPES,
   ...PACIFIC_EUROPE_RECIPES,
+  ...MIDDLE_EAST2_RECIPES,
+  ...LATIN_AMERICA2_RECIPES,
+  ...MEXICAN1_RECIPES,
+  ...AFRICAN3_RECIPES,
+  ...EUROPEAN3_RECIPES,
+  ...SOUTH_ASIA3_RECIPES,
+  ...AMERICAS3_RECIPES,
+  ...OCEANIA1_RECIPES,
+  ...MIXED1_RECIPES,
+  ...EXTRAS1_RECIPES,
 ];

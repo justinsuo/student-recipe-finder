@@ -65,7 +65,7 @@ function localSearch(filters: ExploreFilters): ExternalSearchResult {
   const q = filters.query.trim().toLowerCase();
 
   const ALL_RECIPES = [...GLOBAL_RECIPES, ...EXPLORE_RECIPES];
-  let results = ALL_RECIPES.filter((r) => {
+  const results = ALL_RECIPES.filter((r) => {
     // Text search
     if (q) {
       const haystack = [
