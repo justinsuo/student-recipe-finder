@@ -72,20 +72,24 @@ function ExploreCard({
 }) {
   const time = recipe.totalTimeMinutes;
   const difficulty = recipe.difficulty;
+  const [imgErrored, setImgErrored] = useState(false);
+  const photoUrl = resolveRecipeImage(recipe);
+  const showImage = photoUrl && !imgErrored;
+
   return (
     <button
       onClick={onClick}
       className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white text-left shadow-sm transition-all duration-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-stone-100">
-        {resolveRecipeImage(recipe) ? (
+        {showImage ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={resolveRecipeImage(recipe)!}
+            src={photoUrl}
             alt={recipe.title}
             loading="lazy"
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+            onError={() => setImgErrored(true)}
           />
         ) : (
           <div

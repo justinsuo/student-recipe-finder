@@ -15,7 +15,7 @@ export const RECIPE_PHOTO_MAP: Record<string, string> = {
   "cn-three-cup-chicken": "https://rasamalaysia.com/wp-content/uploads/2025/11/three-cup-chicken-1-3.jpg",
   "cn-spring-onion-noodles": "https://images-na.ssl-images-amazon.com/images/I/71EpB5sS8lL.jpg",
   "cn-hong-kong-macaroni": "https://tasteasianfood.com/wp-content/uploads/2020/06/Macaroni-soup-recipe.jpg.webp",
-  "cn-pork-cabbage-stir": "https://scm-assets.constant.co/scm/ahold/1d89ee8b7b228a83e121d5e8ac2ff95f/a2810805-fe73-477f-ad1e-fc12e4d61d54.jpg#pork-and-cabbage-stir-fry",
+  "cn-pork-cabbage-stir": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Making_Stir-Fry_%283286445383%29.jpg/960px-Making_Stir-Fry_%283286445383%29.jpg",
   "cn-dry-pot-cauliflower": "https://www.chinafoodrecipe.com/wp-content/uploads/2025/08/2025-08-29_225505_481.jpg",
   "cn-beef-mushroom-stir": "https://d1yfn1dfres2va.cloudfront.net/010/d9/3f/d93fde683140fcb9fb0204b8e6a5e709_640m.jpg",
   "cn-silken-tofu-chili-oil": "https://sarahsvegankitchen.com/wp-content/uploads/2024/08/Chili-Garlic-Silken-Tofu-15.jpg",
