@@ -1,32 +1,61 @@
 /**
  * fetchRecipePhotos.ts
  *
- * Builds src/data/recipePhotoMap.ts — a recipe-ID → stable-image-URL map.
+ * Builds/updates src/data/recipePhotoMap.ts — a recipe-ID → stable-image-URL map.
  *
- * Uses Wikimedia Commons generator API (search + imageinfo in ONE request per
- * recipe) so the total number of HTTP calls is minimal.  A proper User-Agent
- * header and 600 ms inter-request delay keep us inside Commons rate limits.
+ * Sources tried in order for each recipe:
+ *   1. Wikimedia Commons (food photo search, strict URL + title filtering)
+ *   2. TheMealDB (free, no API key, food-specific database)
  *
- * Run:  npx tsx scripts/fetchRecipePhotos.ts
- * Time: ~9 minutes for ~860 recipes (1 API call × 600 ms per recipe)
+ * By default only processes recipes NOT already in the current map (--missing-only
+ * is the default). Pass --all to re-fetch every recipe from scratch.
+ *
+ * Run:  npx tsx scripts/fetchRecipePhotos.ts           # fills in missing only
+ *       npx tsx scripts/fetchRecipePhotos.ts --all      # rebuilds everything
  */
 
-import { writeFileSync } from "fs";
+import { writeFileSync, readFileSync, existsSync } from "fs";
 import { GLOBAL_RECIPES } from "../src/data/globalRecipes/index";
 
-// Wikimedia asks for a descriptive User-Agent — required to avoid 429 errors.
 const USER_AGENT =
   "StudentRecipeFinder/1.0 (educational project; https://github.com/justinsuo/student-recipe-finder)";
 const COMMONS_API = "https://commons.wikimedia.org/w/api.php";
-const DELAY_MS = 600; // be well inside Wikimedia's anonymous rate limit
+const MEALDB_API  = "https://www.themealdb.com/api/json/v1/1";
+const DELAY_MS = 600;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-// ── Title variants ────────────────────────────────────────────────────────────
+// ── Load existing map ─────────────────────────────────────────────────────────
+
+function loadExistingMap(): Record<string, string> {
+  const path = "src/data/recipePhotoMap.ts";
+  if (!existsSync(path)) return {};
+  const src = readFileSync(path, "utf-8");
+  // Extract the JSON object between the first { and last }
+  const start = src.indexOf("{");
+  const end   = src.lastIndexOf("}");
+  if (start === -1 || end === -1) return {};
+  try {
+    return JSON.parse(src.slice(start, end + 1));
+  } catch {
+    return {};
+  }
+}
+
+// ── Reject filters ────────────────────────────────────────────────────────────
+
+const REJECT = [
+  "flag_of", "flag-of", "emblem", "coat_of_arms", "coat-of-arms",
+  "logo", "_logo", "icon", "map_of", "locator_map", "location_map",
+  "portrait", "blank_map", "wikidata", "wikimedia-logo",
+  ".pdf/page", ".pdf.jpg",
+];
+
+const isClean = (s: string) => !REJECT.some((p) => s.includes(p));
+
+// ── Query variants ────────────────────────────────────────────────────────────
 
 function queryVariants(title: string, cuisine: string): string[] {
-  // Remove parenthetical sub-titles, e.g. "Ghormeh Sabzi (Persian Herb Stew)"
   const noParens = title.replace(/\s*\([^)]*\)\s*/g, " ").replace(/\s+/g, " ").trim();
-  // Remove "with X", "and Y" tails
   const short = noParens
     .replace(/\s+(with|and|in|on|over|from|topped|stuffed|served)\b.*$/i, "")
     .trim();
@@ -36,59 +65,29 @@ function queryVariants(title: string, cuisine: string): string[] {
   const v: string[] = [];
   const add = (s: string) => { if (s && !seen.has(s)) { seen.add(s); v.push(s); } };
 
-  add(noParens);                                          // "Crispy Scallion Pancakes"
-  if (short !== noParens) add(short);                    // "Miso Soup" (before "with ...")
-  if (words.length >= 4) add(words.slice(1).join(" ")); // drop first adjective
-  if (words.length >= 3) add(words.slice(0, 2).join(" ")); // first 2 words
-  if (cuisine) add(`${(short || noParens)} ${cuisine}`); // add cuisine name for ambiguous titles
+  add(noParens);
+  if (short !== noParens) add(short);
+  if (words.length >= 4) add(words.slice(1).join(" "));
+  if (words.length >= 3) add(words.slice(0, 2).join(" "));
+  if (cuisine) add(`${short || noParens} ${cuisine}`);
 
-  return v.slice(0, 3); // max 3 variants to limit total API calls
+  return v.slice(0, 3);
 }
 
-// ── Wikimedia Commons single-call search ─────────────────────────────────────
+// ── Source 1: Wikimedia Commons ───────────────────────────────────────────────
 
-const REJECT = [
-  "flag_of", "flag-of", "emblem", "coat_of_arms", "coat-of-arms",
-  "logo", "_logo", "icon", "map_of", "locator_map", "location_map",
-  "portrait", "blank_map", "wikidata", "wikimedia-logo",
-  // PDF page thumbnails (.pdf/page or .pdf.jpg in the URL)
-  ".pdf/page", ".pdf.jpg",
-];
-
-function looksLikeFood(title: string): boolean {
-  const t = title.toLowerCase();
-  return !REJECT.some((p) => t.includes(p));
-}
-
-function looksLikeFoodUrl(url: string): boolean {
-  return !REJECT.some((p) => url.includes(p));
-}
-
-/**
- * One API call: search Commons File namespace for `query`, fetch imageinfo for
- * the top matches, return the first thumburl that looks like a real food photo.
- */
-async function commonsPhoto(query: string): Promise<string | null> {
+async function wikimediaPhoto(query: string): Promise<string | null> {
   const params = new URLSearchParams({
-    action:       "query",
-    generator:    "search",
-    gsrsearch:    query,
-    gsrnamespace: "6",        // File namespace
-    gsrlimit:     "6",        // check up to 6 results
-    prop:         "imageinfo",
-    iiprop:       "url",
-    iiurlwidth:   "640",
-    format:       "json",
+    action: "query", generator: "search",
+    gsrsearch: query, gsrnamespace: "6", gsrlimit: "8",
+    prop: "imageinfo", iiprop: "url", iiurlwidth: "640",
+    format: "json",
   });
   try {
     const res = await fetch(`${COMMONS_API}?${params}`, {
       headers: { "User-Agent": USER_AGENT },
     });
-    if (res.status === 429) {
-      // Back off and retry once
-      await sleep(5000);
-      return commonsPhoto(query);
-    }
+    if (res.status === 429) { await sleep(5000); return wikimediaPhoto(query); }
     if (!res.ok) return null;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data = (await res.json()) as any;
@@ -96,63 +95,135 @@ async function commonsPhoto(query: string): Promise<string | null> {
     for (const page of Object.values(pages)) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const p = page as any;
-      if (!looksLikeFood(p.title ?? "")) continue;
+      if (!isClean(p.title ?? "")) continue;
       const thumb: string | undefined = p.imageinfo?.[0]?.thumburl;
-      if (thumb && looksLikeFoodUrl(thumb)) return thumb;
+      if (thumb && isClean(thumb)) return thumb;
     }
     return null;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
-// ── Main ─────────────────────────────────────────────────────────────────────
+// ── Source 2: TheMealDB ───────────────────────────────────────────────────────
+
+/**
+ * Generates TheMealDB search queries from a dish title.
+ * Handles patterns like "Pho-Inspired Noodle Bowl" → ["Pho", "Pho Soup"]
+ * and "Quick Rendang-Spiced Chicken" → ["Rendang", "Rendang Chicken"].
+ */
+function mealdbQueries(title: string): string[] {
+  const noParens = title.replace(/\s*\([^)]*\)\s*/g, " ").replace(/\s+/g, " ").trim();
+  const out = new Set<string>();
+
+  // If the title contains a hyphen, the word(s) BEFORE the hyphen are the core
+  // dish name (e.g. "Pho-Inspired", "Rendang-Spiced", "Gua Bao-Inspired")
+  if (noParens.includes("-")) {
+    const beforeHyphen = noParens.split("-")[0].trim();
+    // Strip a leading single-word modifier (Quick, Simple, Easy, …)
+    const coreBeforeHyphen = beforeHyphen.replace(/^\w+\s(?=\S)/, "").trim();
+    if (coreBeforeHyphen.length > 2) out.add(coreBeforeHyphen);
+    // Also try the last word only (for "Quick Rendang" → "Rendang")
+    const lastWord = coreBeforeHyphen.split(" ").pop() ?? "";
+    if (lastWord.length > 3) out.add(lastWord);
+  }
+
+  // Strip modifier words and hyphens, then try the base form
+  const stripped = noParens
+    .replace(/\b(inspired|style|quick|budget|easy|simple|deconstructed|homemade|spiced|glazed|braised)\b/gi, " ")
+    .replace(/-/g, " ")
+    .replace(/\s+(bowl|rice|noodles?|soup)\s*$/i, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (stripped.length > 2) out.add(stripped);
+  const words = stripped.split(" ");
+  if (words.length > 2) out.add(words.slice(0, 2).join(" "));
+  if (words[0] && words[0].length > 3) out.add(words[0]);
+
+  return [...out].filter((q) => q.length > 2).slice(0, 5);
+}
+
+async function mealdbPhoto(title: string): Promise<string | null> {
+  for (const q of mealdbQueries(title)) {
+    try {
+      const res = await fetch(
+        `${MEALDB_API}/search.php?s=${encodeURIComponent(q)}`,
+        { headers: { "User-Agent": USER_AGENT } },
+      );
+      if (!res.ok) { await sleep(200); continue; }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data = (await res.json()) as any;
+      const thumb = data.meals?.[0]?.strMealThumb as string | undefined;
+      if (thumb) return thumb;
+      await sleep(200);
+    } catch { continue; }
+  }
+  return null;
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main() {
-  const targets = GLOBAL_RECIPES.filter((r) => r.image.includes("source.unsplash.com"));
-  console.log(`\nFetching Wikimedia Commons photos for ${targets.length} recipes…\n`);
+  const rebuildAll = process.argv.includes("--all");
+  const existing   = rebuildAll ? {} : loadExistingMap();
 
-  const map: Record<string, string> = {};
-  let found = 0;
+  const all     = GLOBAL_RECIPES.filter((r) => r.image.includes("source.unsplash.com"));
+  const targets = rebuildAll ? all : all.filter((r) => !existing[r.id]);
+
+  console.log(`\n${rebuildAll ? "Rebuilding all" : "Filling missing"} — ${targets.length} recipes to process…\n`);
+
+  const newEntries: Record<string, string> = {};
+  let wikimediaHits = 0, mealdbHits = 0;
 
   for (let i = 0; i < targets.length; i++) {
     const { id, title, cuisine } = targets[i];
     const pct = `[${String(i + 1).padStart(3)}/${targets.length}]`;
-    process.stdout.write(`${pct} ${title.slice(0, 55).padEnd(55)} `);
+    process.stdout.write(`${pct} ${title.slice(0, 52).padEnd(52)} `);
 
+    // 1. Wikimedia Commons
     let photo: string | null = null;
     for (const variant of queryVariants(title, cuisine ?? "")) {
-      photo = await commonsPhoto(variant);
+      photo = await wikimediaPhoto(variant);
       if (photo) break;
       await sleep(DELAY_MS);
     }
+    if (photo) { wikimediaHits++; process.stdout.write("WM ✓\n"); }
+
+    // 2. TheMealDB fallback
+    if (!photo) {
+      await sleep(DELAY_MS);
+      photo = await mealdbPhoto(title);
+      if (photo) { mealdbHits++; process.stdout.write("DB ✓\n"); }
+    }
 
     if (photo) {
-      map[id] = photo;
-      found++;
-      process.stdout.write("✓\n");
+      newEntries[id] = photo;
     } else {
-      process.stdout.write("✗\n");
+      process.stdout.write("   ✗\n");
     }
 
     await sleep(DELAY_MS);
   }
 
-  const pct = Math.round((100 * found) / targets.length);
+  // Merge: existing entries first, then new ones (new overwrite old if --all)
+  const merged = { ...existing, ...newEntries };
+  const total  = Object.keys(merged).length;
+  const grand  = all.length;
+  const pct    = Math.round((100 * total) / grand);
+
   console.log(`\n────────────────────────────────────────────────────`);
-  console.log(`Commons photos found  : ${found}/${targets.length} (${pct}%)`);
-  console.log(`Falling back to pools : ${targets.length - found}/${targets.length}`);
+  console.log(`Wikimedia hits : ${wikimediaHits}`);
+  console.log(`TheMealDB hits : ${mealdbHits}`);
+  console.log(`Total coverage : ${total}/${grand} (${pct}%)`);
   console.log(`────────────────────────────────────────────────────\n`);
 
   const ts = `// Auto-generated by scripts/fetchRecipePhotos.ts — do not edit manually.
 // Regenerate:  npx tsx scripts/fetchRecipePhotos.ts
 // Generated:   ${new Date().toISOString().slice(0, 10)}
-// Coverage:    ${found}/${targets.length} dish-specific Wikimedia Commons photos (${pct}%)
-export const RECIPE_PHOTO_MAP: Record<string, string> = ${JSON.stringify(map, null, 2)};
+// Coverage:    ${total}/${grand} dish-specific photos (${pct}%)
+export const RECIPE_PHOTO_MAP: Record<string, string> = ${JSON.stringify(merged, null, 2)};
 `;
-  const outPath = "src/data/recipePhotoMap.ts";
-  writeFileSync(outPath, ts, "utf-8");
-  console.log(`Wrote ${outPath}`);
+  writeFileSync("src/data/recipePhotoMap.ts", ts, "utf-8");
+  console.log(`Wrote src/data/recipePhotoMap.ts`);
 }
 
 main().catch((err) => { console.error(err); process.exit(1); });
