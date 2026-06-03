@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Search, Globe, Clock, SlidersHorizontal, X, Star, ExternalLink, Info, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Globe, Clock, SlidersHorizontal, Star, Loader2, ChevronLeft, ChevronRight, X } from "lucide-react";
 import type { ExploreFilters, ExternalRecipe } from "@/lib/externalTypes";
 import { searchExternalRecipes, getExploreSource } from "@/lib/services/exploreService";
 
@@ -16,7 +16,11 @@ const CUISINES = [
 const DIETS = ["vegetarian", "vegan", "gluten-free", "dairy-free", "keto", "paleo"];
 const TIMES = [{ label: "≤15 min", value: 15 }, { label: "≤30 min", value: 30 }, { label: "≤60 min", value: 60 }];
 
-const DEFAULT_FILTERS: ExploreFilters = { query: "", cuisine: "", diet: "", maxTime: null, sort: "popular", page: 1 };
+const DEFAULT_FILTERS: ExploreFilters = {
+  query: "", cuisine: "", region: "", diet: "", mealType: "",
+  difficulty: "", maxTime: null, maxCost: null, spiceLevel: null,
+  proteinType: "", studentMode: false, sort: "popular", page: 1,
+};
 
 // ─── Source badge ─────────────────────────────────────────────────────────────
 
@@ -164,7 +168,7 @@ function DetailPanel({ recipe, onClose }: { recipe: ExternalRecipe; onClose: () 
           )}
 
           {/* Instructions */}
-          {recipe.instructions.length > 0 ? (
+          {recipe.instructions.length > 0 && (
             <div>
               <h3 className="font-semibold text-stone-800 mb-2.5">Instructions</h3>
               <ol className="space-y-3">
@@ -176,34 +180,13 @@ function DetailPanel({ recipe, onClose }: { recipe: ExternalRecipe; onClose: () 
                 ))}
               </ol>
             </div>
-          ) : (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 flex gap-3 text-sm text-amber-800">
-              <Info size={16} className="shrink-0 mt-0.5" />
-              <div>
-                Full instructions are at the original source.
-                {recipe.sourceUrl && (
-                  <a href={recipe.sourceUrl} target="_blank" rel="noopener noreferrer"
-                    className="ml-2 inline-flex items-center gap-1 rounded-xl bg-amber-500 px-3 py-1 text-xs font-bold text-white hover:bg-amber-600 transition">
-                    <ExternalLink size={12} /> View recipe
-                  </a>
-                )}
-              </div>
-            </div>
           )}
 
           {/* Cultural note */}
           {recipe.culturalNote && (
             <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4 text-sm text-stone-700 leading-relaxed">
-              <span className="font-semibold text-stone-800">💡 Did you know? </span>{recipe.culturalNote}
+              <span className="font-semibold text-stone-800">Did you know? </span>{recipe.culturalNote}
             </div>
-          )}
-
-          {/* Source link */}
-          {recipe.sourceUrl && (
-            <a href={recipe.sourceUrl} target="_blank" rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full rounded-2xl border border-stone-200 py-3 text-sm font-semibold text-stone-700 hover:bg-stone-50 transition">
-              <ExternalLink size={15} /> View on {recipe.source === "spoonacular" ? "Spoonacular" : recipe.source === "edamam" ? "Edamam" : "original source"}
-            </a>
           )}
         </div>
       </div>
