@@ -38,6 +38,8 @@ export interface ExternalRecipe {
   culturalNote: string | null;
 
   // Extended fields for local/global recipes
+  cuisineId?: string;              // kebab-case identifier e.g. "chinese", "south-african"
+  dishType?: string | null;        // e.g. "main course", "dessert"
   region?: string;
   country?: string;
   estimatedCost?: number;           // USD per serving

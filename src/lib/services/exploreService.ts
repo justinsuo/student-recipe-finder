@@ -5,6 +5,7 @@ import { normalizeSpoonacular } from "@/lib/adapters/spoonacular";
 import { normalizeEdamam } from "@/lib/adapters/edamam";
 import { normalizeMealDB } from "@/lib/adapters/themealdb";
 import { GLOBAL_RECIPES } from "@/data/globalRecipes";
+import { EXPLORE_RECIPES } from "@/data/exploreRecipes";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -63,7 +64,8 @@ const DIFFICULTY_ORDER: Record<string, number> = { Easy: 1, Medium: 2, Hard: 3 }
 function localSearch(filters: ExploreFilters): ExternalSearchResult {
   const q = filters.query.trim().toLowerCase();
 
-  let results = GLOBAL_RECIPES.filter((r) => {
+  const ALL_RECIPES = [...GLOBAL_RECIPES, ...EXPLORE_RECIPES];
+  let results = ALL_RECIPES.filter((r) => {
     // Text search
     if (q) {
       const haystack = [
