@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Apple, BookOpen, TrendingUp, UtensilsCrossed, User } from "lucide-react";
 import { clsx } from "clsx";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
+import { OnboardingWizard } from "@/components/nourish/OnboardingWizard";
+import { isOnboarded } from "@/lib/nourish/storage";
 
 type Tab = "today" | "diary" | "trends" | "foods" | "profile";
 
@@ -19,6 +21,38 @@ const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
 
 export default function NourishPage() {
   const [tab, setTab] = useState<Tab>("today");
+  const [onboarded, setOnboarded] = useState<boolean | null>(null);
+
+  // Defer localStorage read to client to avoid hydration mismatch
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setOnboarded(isOnboarded());
+  }, []);
+
+  function handleOnboardingComplete() {
+    setOnboarded(true);
+    setTab("today");
+  }
+
+  // Still loading from localStorage
+  if (onboarded === null) return null;
+
+  // Show onboarding wizard for new users
+  if (!onboarded) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
+        <PageHeader
+          eyebrow="Nourish"
+          title="Track what fuels you"
+          description="Log meals, hit your macro targets, and discover recipes that fit what you have left in your day."
+          tone="emerald"
+        />
+        <div className="mt-6">
+          <OnboardingWizard onComplete={handleOnboardingComplete} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:px-6">
@@ -59,12 +93,12 @@ export default function NourishPage() {
         {tab === "today" && (
           <EmptyState
             emoji="🍎"
-            title="Your dashboard is getting ready"
-            description="Set up your profile and goals to see your calorie budget, macro targets, and today's meals here."
+            title="Dashboard coming soon"
+            description="Your calorie budget, macro rings, and meal log will live here. Check back after the next update!"
             tone="emerald"
             action={
-              <Button variant="primary" size="md" onClick={() => setTab("profile")}>
-                Set up profile →
+              <Button variant="ghost" size="sm" onClick={() => setTab("diary")}>
+                View diary
               </Button>
             }
           />
@@ -75,11 +109,6 @@ export default function NourishPage() {
             title="No meals logged today"
             description="Log breakfast, lunch, dinner, and snacks to see your daily totals and track your progress."
             tone="emerald"
-            action={
-              <Button variant="primary" size="md" onClick={() => setTab("today")}>
-                Go to Today
-              </Button>
-            }
           />
         )}
         {tab === "trends" && (
@@ -101,9 +130,24 @@ export default function NourishPage() {
         {tab === "profile" && (
           <EmptyState
             emoji="👤"
-            title="Profile & goals coming soon"
-            description="Enter your height, weight, age, and activity level to get personalized calorie and macro targets."
+            title="Profile editing coming soon"
+            description="You'll be able to update your stats, change your goal, and adjust your targets here."
             tone="emerald"
+            action={
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  // Reset onboarding to let user redo the wizard
+                  import("@/lib/nourish/storage").then(({ setOnboarded: so }) => {
+                    so(false);
+                    setOnboarded(false);
+                  });
+                }}
+              >
+                Re-run setup
+              </Button>
+            }
           />
         )}
       </div>
