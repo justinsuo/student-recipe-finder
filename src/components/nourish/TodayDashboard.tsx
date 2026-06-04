@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { AddFoodModal } from "./AddFoodModal";
 import { MacroRing } from "./MacroRing";
 import { MacroFitSuggestions } from "./MacroFitSuggestions";
+import { WaterTracker } from "./WaterTracker";
 import { RECIPES } from "@/data/recipes";
 import {
   getDiaryForDate,
@@ -309,6 +310,9 @@ export function TodayDashboard({ onSwitchToDiary }: Props) {
           />
         ))}
       </div>
+
+      {/* Water tracking */}
+      <WaterTracker />
 
       {/* Macro-fit recipe suggestions */}
       <MacroFitSuggestions
