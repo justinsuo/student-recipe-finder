@@ -30,6 +30,7 @@ import {
 import { BarcodeScanner } from "./BarcodeScanner";
 import { PhotoMealLogger } from "./PhotoMealLogger";
 import { RECIPES } from "@/data/recipes";
+import { MACRO_RECIPES } from "@/data/macroRecipes";
 import { recipeToDiaryFood } from "@/lib/nourish/recipeIntegration";
 import type { FoodItem, MealSlot } from "@/lib/nourish/types";
 
@@ -233,15 +234,16 @@ function RecipesTab({
   onLog: (food: FoodItem, servings: number, meal: MealSlot) => void;
 }) {
   const [query, setQuery] = useState("");
+  const ALL_RECIPES = [...RECIPES, ...MACRO_RECIPES];
   const lower = query.toLowerCase();
   const filtered = query.trim()
-    ? RECIPES.filter(
+    ? ALL_RECIPES.filter(
         (r) =>
           r.name.toLowerCase().includes(lower) ||
           r.cuisine?.toLowerCase().includes(lower) ||
           r.dietTags?.some((t) => t.toLowerCase().includes(lower)),
       )
-    : RECIPES;
+    : ALL_RECIPES;
 
   return (
     <div className="space-y-3">

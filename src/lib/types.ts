@@ -167,6 +167,12 @@ export interface Recipe {
   seasoningUpgrades?: string[];
   tasteTroubleshooting?: string[];
   flavorBadges?: FlavorBadge[];
+
+  // Macro-friendly recipe variants — three records per dish share the same
+  // variantGroup slug so the UI can surface them together.
+  variantGroup?: string;
+  variantType?: "original" | "calorie-friendly" | "protein-friendly";
+  variantNote?: string; // "what changed" note shown on cf/pf variants
 }
 
 export interface CheapFilters {
