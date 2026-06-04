@@ -38,6 +38,7 @@ import {
   pantrySetFromItems,
   calculateMissingIngredients,
 } from "@/lib/recipeScoring";
+import { LogRecipeButton } from "@/components/nourish/LogRecipeButton";
 import type { Recipe } from "@/lib/types";
 
 export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
@@ -160,6 +161,9 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
           )}
         </div>
       </header>
+
+      {/* Log to Nourish */}
+      <LogRecipeButton recipe={recipe} />
 
       {/* Media second */}
       <RecipeImage recipe={recipe} variant="hero" showAttribution className="overflow-hidden" />

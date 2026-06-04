@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { AddFoodModal } from "./AddFoodModal";
 import { MacroRing } from "./MacroRing";
+import { MacroFitSuggestions } from "./MacroFitSuggestions";
+import { RECIPES } from "@/data/recipes";
 import {
   getDiaryForDate,
   getTargets,
@@ -307,6 +309,13 @@ export function TodayDashboard({ onSwitchToDiary }: Props) {
           />
         ))}
       </div>
+
+      {/* Macro-fit recipe suggestions */}
+      <MacroFitSuggestions
+        recipes={RECIPES}
+        targets={targets}
+        consumed={totals}
+      />
 
       {/* Add food modal */}
       {addMeal && (
