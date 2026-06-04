@@ -9,6 +9,7 @@ import { AddFoodModal } from "./AddFoodModal";
 import { MacroRing } from "./MacroRing";
 import { MacroFitSuggestions } from "./MacroFitSuggestions";
 import { WaterTracker } from "./WaterTracker";
+import { PhotoMealLogger } from "./PhotoMealLogger";
 import { RECIPES } from "@/data/recipes";
 import {
   getDiaryForDate,
@@ -310,6 +311,9 @@ export function TodayDashboard({ onSwitchToDiary }: Props) {
           />
         ))}
       </div>
+
+      {/* Photo meal logging */}
+      <PhotoMealLogger onLogged={load} />
 
       {/* Water tracking */}
       <WaterTracker />
