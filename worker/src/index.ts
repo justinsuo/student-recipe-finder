@@ -16,6 +16,9 @@
 interface Env {
   OPENAI_API_KEY: string;
   ALLOWED_ORIGIN?: string;
+  // Strava OAuth proxy (client_secret stays server-side)
+  STRAVA_CLIENT_ID?: string;
+  STRAVA_CLIENT_SECRET?: string;
   // Per-task model overrides — each falls back to DEFAULT_TEXT_MODEL
   // if not set. All env vars are optional.
   DEFAULT_TEXT_MODEL?: string;
@@ -1499,6 +1502,54 @@ async function handleRemix(req: Request, env: Env): Promise<Response> {
   }
 }
 
+// ---------- Route: /oauth/strava/token ----------
+//
+// Proxies the Strava token exchange so the client_secret never touches the
+// browser. Handles both initial authorization_code grant and refresh_token
+// grant.
+
+async function handleStravaOAuth(req: Request, env: Env): Promise<Response> {
+  const origin = req.headers.get("Origin");
+  if (!env.STRAVA_CLIENT_ID || !env.STRAVA_CLIENT_SECRET) {
+    return jsonResponse({ error: "Strava credentials not configured on this server" }, 503, env, origin);
+  }
+  let body: { code?: string; refresh_token?: string; redirect_uri?: string; grant_type?: string };
+  try {
+    body = await req.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400, env, origin);
+  }
+
+  const grantType = body.grant_type ?? (body.code ? "authorization_code" : "refresh_token");
+  const params: Record<string, string> = {
+    client_id: env.STRAVA_CLIENT_ID,
+    client_secret: env.STRAVA_CLIENT_SECRET,
+    grant_type: grantType,
+  };
+  if (grantType === "authorization_code") {
+    if (!body.code) return jsonResponse({ error: "Missing code" }, 400, env, origin);
+    params.code = body.code;
+  } else {
+    if (!body.refresh_token) return jsonResponse({ error: "Missing refresh_token" }, 400, env, origin);
+    params.refresh_token = body.refresh_token;
+  }
+
+  try {
+    const res = await fetch("https://www.strava.com/oauth/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(params),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      return jsonResponse({ error: (data as { message?: string }).message ?? `Strava ${res.status}` }, res.status, env, origin);
+    }
+    return jsonResponse(data, 200, env, origin);
+  } catch (e) {
+    return jsonResponse({ error: e instanceof Error ? e.message : "Strava OAuth failed" }, 500, env, origin);
+  }
+}
+
 function buildImagePrompt(
   name: string,
   ingredients: string[],
@@ -1592,6 +1643,8 @@ export default {
         return handlePricingEstimateIngredient(req, env);
       case "/recipes/remix":
         return handleRemix(req, env);
+      case "/oauth/strava/token":
+        return handleStravaOAuth(req, env);
       default:
         return jsonResponse({ error: "Not found" }, 404, env, origin);
     }
