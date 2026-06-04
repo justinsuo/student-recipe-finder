@@ -4,12 +4,12 @@ import { useState, useEffect } from "react";
 import { Apple, BookOpen, TrendingUp, UtensilsCrossed, User } from "lucide-react";
 import { clsx } from "clsx";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { OnboardingWizard } from "@/components/nourish/OnboardingWizard";
 import { ProfileView } from "@/components/nourish/ProfileView";
 import { DiaryView } from "@/components/nourish/DiaryView";
 import { TodayDashboard } from "@/components/nourish/TodayDashboard";
 import { TrendsView } from "@/components/nourish/TrendsView";
+import { FoodsView } from "@/components/nourish/FoodsView";
 import { isOnboarded } from "@/lib/nourish/storage";
 
 type Tab = "today" | "diary" | "trends" | "foods" | "profile";
@@ -98,14 +98,7 @@ export default function NourishPage() {
         )}
         {tab === "diary" && <DiaryView />}
         {tab === "trends" && <TrendsView />}
-        {tab === "foods" && (
-          <EmptyState
-            emoji="🥘"
-            title="No custom foods yet"
-            description="Create custom foods or save frequent items here for one-tap logging."
-            tone="emerald"
-          />
-        )}
+        {tab === "foods" && <FoodsView />}
         {tab === "profile" && (
           <ProfileView onResetProfile={() => setOnboarded(false)} />
         )}
