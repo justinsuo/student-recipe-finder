@@ -47,22 +47,6 @@ const GOAL_OPTIONS: { id: GoalMode; label: string; emoji: string; description: s
 
 // ─── Rate selector helpers ────────────────────────────────────────────────────
 
-function rateOptions(mode: GoalMode, weightKg: number): { label: string; value: number }[] {
-  if (mode === "cut") {
-    return [
-      { label: "Gradual (−0.25 kg/wk)", value: -0.25 },
-      { label: "Moderate (−0.5 kg/wk)", value: -0.5 },
-      { label: `Aggressive (−${(weightKg * 0.01).toFixed(2)} kg/wk)`, value: -(weightKg * 0.01) },
-    ];
-  }
-  if (mode === "bulk") {
-    return [
-      { label: "Lean bulk (+0.25 kg/wk)", value: 0.25 },
-      { label: "Moderate (+0.5 kg/wk)", value: 0.5 },
-    ];
-  }
-  return [{ label: "At maintenance", value: 0 }];
-}
 
 // ─── Macro colour helpers ─────────────────────────────────────────────────────
 
@@ -82,15 +66,18 @@ export function OnboardingWizard({ onComplete }: Props) {
   const [step, setStep] = useState(0);
   const [units, setUnits] = useState<PreferredUnits>("metric");
 
-  // Step 1 — body stats
+  // Step 1 — body stats (canonical metric values)
   const [weightKg, setWeightKg] = useState(70);
   const [heightCm, setHeightCm] = useState(170);
   const [age, setAge] = useState(22);
   const [sex, setSex] = useState<Sex | undefined>("male");
-  // imperial helpers
-  const [lbs, setLbs] = useState(Math.round(kgToLbs(70)));
-  const [feet, setFeet] = useState(5);
-  const [inches, setInches] = useState(7);
+
+  // String display states — drives input value so the user can clear and retype
+  // without the field snapping back. Canonical number state updates only when valid.
+  const [weightStr, setWeightStr] = useState("70");
+  const [heightStr, setHeightStr] = useState("170"); // cm in metric, feet in imperial
+  const [inchesStr, setInchesStr] = useState("7");   // imperial only
+  const [ageStr, setAgeStr] = useState("22");
 
   // Step 2 — activity
   const [activity, setActivity] = useState<ActivityLevel>("moderate");
@@ -99,11 +86,12 @@ export function OnboardingWizard({ onComplete }: Props) {
   const [mode, setMode] = useState<GoalMode>("maintain");
   const [weeklyRate, setWeeklyRate] = useState(0);
 
-  // Sync weeklyRate when mode changes
+  // Set a sensible default rate when mode changes (no pace picker shown)
   function handleModeChange(m: GoalMode) {
     setMode(m);
-    const opts = rateOptions(m, weightKg);
-    setWeeklyRate(opts[0].value);
+    if (m === "cut") setWeeklyRate(-0.5);
+    else if (m === "bulk") setWeeklyRate(0.25);
+    else setWeeklyRate(0);
   }
 
   // ─── Live preview ───────────────────────────────────────────────────────────
@@ -125,32 +113,19 @@ export function OnboardingWizard({ onComplete }: Props) {
     [profile, mode, weeklyRate],
   );
 
-  // ─── Imperial sync ──────────────────────────────────────────────────────────
+  // ─── Unit toggle — syncs display strings from canonical values ──────────────
 
-  function handleWeightImperial(v: number) {
-    setLbs(v);
-    setWeightKg(parseFloat(lbsToKg(v).toFixed(1)));
-  }
-  function handleWeightMetric(v: number) {
-    setWeightKg(v);
-    setLbs(Math.round(kgToLbs(v)));
-  }
-  function handleHeightFeet(f: number) {
-    const fc = Math.max(0, f);
-    setFeet(fc);
-    setHeightCm(parseFloat(feetAndInchesToCm(fc, inches).toFixed(1)));
-  }
-  function handleHeightInches(i: number) {
-    const ic = Math.max(0, Math.min(11, i));
-    setInches(ic);
-    setHeightCm(parseFloat(feetAndInchesToCm(feet, ic).toFixed(1)));
-  }
-  function handleHeightMetric(v: number) {
-    setHeightCm(v);
-    const total = cmToInches(v);
-    const fi = inchesToFeetAndInches(total);
-    setFeet(fi.feet);
-    setInches(fi.inches);
+  function handleUnitsChange(u: PreferredUnits) {
+    setUnits(u);
+    if (u === "imperial") {
+      setWeightStr(String(Math.round(kgToLbs(weightKg))));
+      const fi = inchesToFeetAndInches(cmToInches(heightCm));
+      setHeightStr(String(fi.feet));
+      setInchesStr(String(fi.inches));
+    } else {
+      setWeightStr(String(weightKg));
+      setHeightStr(String(heightCm));
+    }
   }
 
   // ─── Save & complete ────────────────────────────────────────────────────────
@@ -167,7 +142,8 @@ export function OnboardingWizard({ onComplete }: Props) {
   const step1Valid =
     weightKg > 20 && weightKg < 500 &&
     heightCm > 100 && heightCm < 280 &&
-    age >= 14 && age <= 100;
+    age >= 14 && age <= 100 &&
+    weightStr.trim() !== "" && heightStr.trim() !== "" && ageStr.trim() !== "";
 
   // ─── Render ──────────────────────────────────────────────────────────────────
 
@@ -212,7 +188,7 @@ export function OnboardingWizard({ onComplete }: Props) {
               <SelectablePill
                 key={u}
                 active={units === u}
-                onClick={() => setUnits(u)}
+                onClick={() => handleUnitsChange(u)}
                 ariaSemantics="checked"
                 showCheck={false}
               >
@@ -227,16 +203,16 @@ export function OnboardingWizard({ onComplete }: Props) {
               Current weight {units === "imperial" ? "(lbs)" : "(kg)"}
             </span>
             <input
-              type="number"
-              min={units === "imperial" ? 44 : 20}
-              max={units === "imperial" ? 1100 : 500}
-              step={units === "imperial" ? 0.5 : 0.1}
-              value={units === "imperial" ? lbs : weightKg}
+              type="text"
+              inputMode="decimal"
+              placeholder={units === "imperial" ? "e.g. 154" : "e.g. 70"}
+              value={weightStr}
               onChange={(e) => {
+                setWeightStr(e.target.value);
                 const v = parseFloat(e.target.value);
-                if (!isNaN(v)) {
-                  if (units === "imperial") handleWeightImperial(v);
-                  else handleWeightMetric(v);
+                if (!isNaN(v) && v > 0) {
+                  if (units === "imperial") setWeightKg(parseFloat(lbsToKg(v).toFixed(1)));
+                  else setWeightKg(v);
                 }
               }}
               className="w-full rounded-xl border border-stone-300 px-3 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
@@ -252,37 +228,47 @@ export function OnboardingWizard({ onComplete }: Props) {
               <div className="flex gap-2">
                 <div className="flex-1">
                   <input
-                    type="number"
-                    min={3}
-                    max={8}
-                    value={feet}
-                    onChange={(e) => handleHeightFeet(parseInt(e.target.value) || 0)}
+                    type="text"
+                    inputMode="numeric"
                     placeholder="ft"
+                    value={heightStr}
+                    onChange={(e) => {
+                      setHeightStr(e.target.value);
+                      const f = parseInt(e.target.value);
+                      const i = parseInt(inchesStr) || 0;
+                      if (!isNaN(f) && f >= 0) setHeightCm(parseFloat(feetAndInchesToCm(f, i).toFixed(1)));
+                    }}
                     className="w-full rounded-xl border border-stone-300 px-3 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
                 <div className="flex-1">
                   <input
-                    type="number"
-                    min={0}
-                    max={11}
-                    value={inches}
-                    onChange={(e) => handleHeightInches(parseInt(e.target.value) || 0)}
+                    type="text"
+                    inputMode="numeric"
                     placeholder="in"
+                    value={inchesStr}
+                    onChange={(e) => {
+                      setInchesStr(e.target.value);
+                      const f = parseInt(heightStr) || 0;
+                      const i = parseInt(e.target.value);
+                      if (!isNaN(i) && i >= 0 && i <= 11) setHeightCm(parseFloat(feetAndInchesToCm(f, i).toFixed(1)));
+                    }}
                     className="w-full rounded-xl border border-stone-300 px-3 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
               </div>
             ) : (
               <input
-                type="number"
-                min={100}
-                max={280}
-                step={0.5}
-                value={heightCm}
+                type="text"
+                inputMode="decimal"
+                placeholder="e.g. 170"
+                value={heightStr}
                 onChange={(e) => {
+                  setHeightStr(e.target.value);
                   const v = parseFloat(e.target.value);
-                  if (!isNaN(v)) handleHeightMetric(v);
+                  if (!isNaN(v) && v > 0) {
+                    setHeightCm(v);
+                  }
                 }}
                 className="w-full rounded-xl border border-stone-300 px-3 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
               />
@@ -293,13 +279,14 @@ export function OnboardingWizard({ onComplete }: Props) {
           <label className="block space-y-1.5">
             <span className="text-sm font-medium text-stone-700">Age</span>
             <input
-              type="number"
-              min={14}
-              max={100}
-              value={age}
+              type="text"
+              inputMode="numeric"
+              placeholder="e.g. 22"
+              value={ageStr}
               onChange={(e) => {
+                setAgeStr(e.target.value);
                 const v = parseInt(e.target.value);
-                if (!isNaN(v)) setAge(v);
+                if (!isNaN(v) && v > 0) setAge(v);
               }}
               className="w-full rounded-xl border border-stone-300 px-3 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
             />
@@ -409,25 +396,6 @@ export function OnboardingWizard({ onComplete }: Props) {
             ))}
           </div>
 
-          {/* Rate selector (cut / bulk only) */}
-          {(mode === "cut" || mode === "bulk") && (
-            <div className="space-y-1.5">
-              <span className="text-sm font-medium text-stone-700">Pace</span>
-              <div className="flex flex-wrap gap-2">
-                {rateOptions(mode, weightKg).map((opt) => (
-                  <SelectablePill
-                    key={opt.value}
-                    active={weeklyRate === opt.value}
-                    onClick={() => setWeeklyRate(opt.value)}
-                    ariaSemantics="checked"
-                    showCheck={false}
-                  >
-                    {opt.label}
-                  </SelectablePill>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       )}
 

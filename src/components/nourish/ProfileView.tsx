@@ -44,22 +44,6 @@ const GOAL_OPTIONS: { id: GoalMode; label: string; emoji: string }[] = [
   { id: "recomp", label: "Recomp", emoji: "🔄" },
 ];
 
-function rateOptions(mode: GoalMode, weightKg: number): { label: string; value: number }[] {
-  if (mode === "cut") {
-    return [
-      { label: "Gradual (−0.25 kg/wk)", value: -0.25 },
-      { label: "Moderate (−0.5 kg/wk)", value: -0.5 },
-      { label: `Aggressive (−${(weightKg * 0.01).toFixed(2)} kg/wk)`, value: -(weightKg * 0.01) },
-    ];
-  }
-  if (mode === "bulk") {
-    return [
-      { label: "Lean bulk (+0.25 kg/wk)", value: 0.25 },
-      { label: "Moderate (+0.5 kg/wk)", value: 0.5 },
-    ];
-  }
-  return [{ label: "At maintenance", value: 0 }];
-}
 
 const MACRO_COLOURS = {
   protein: { bar: "bg-emerald-500", text: "text-emerald-700", bg: "bg-emerald-50", ring: "ring-emerald-200" },
@@ -74,15 +58,18 @@ interface Props {
 export function ProfileView({ onResetProfile }: Props) {
   const [hydrated, setHydrated] = useState(false);
 
-  // Stats
+  // Stats (canonical metric)
   const [units, setUnits] = useState<PreferredUnits>("metric");
   const [weightKg, setWeightKg] = useState(70);
   const [heightCm, setHeightCm] = useState(170);
   const [age, setAge] = useState(22);
   const [sex, setSex] = useState<Sex | undefined>("male");
-  const [lbs, setLbs] = useState(Math.round(kgToLbs(70)));
-  const [feet, setFeet] = useState(5);
-  const [inches, setInches] = useState(7);
+
+  // String display states — prevent snap-back when user clears a field
+  const [weightStr, setWeightStr] = useState("70");
+  const [heightStr, setHeightStr] = useState("170");
+  const [inchesStr, setInchesStr] = useState("7");
+  const [ageStr, setAgeStr] = useState("22");
 
   // Goal
   const [activity, setActivity] = useState<ActivityLevel>("moderate");
@@ -91,8 +78,7 @@ export function ProfileView({ onResetProfile }: Props) {
 
   const [saved, setSaved] = useState(false);
 
-  // Load from storage on mount — multiple setState calls here are intentional
-  // (hydrating form fields from localStorage on client).
+  // Load from storage on mount
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     const profile = getProfile();
@@ -104,11 +90,17 @@ export function ProfileView({ onResetProfile }: Props) {
       setAge(profile.age);
       setSex(profile.sex);
       setActivity(profile.activityLevel);
-      setLbs(Math.round(kgToLbs(profile.weightKg)));
-      const totalIn = cmToInches(profile.heightCm);
-      const fi = inchesToFeetAndInches(totalIn);
-      setFeet(fi.feet);
-      setInches(fi.inches);
+      // Initialise display strings from stored values
+      if (profile.preferredUnits === "imperial") {
+        setWeightStr(String(Math.round(kgToLbs(profile.weightKg))));
+        const fi = inchesToFeetAndInches(cmToInches(profile.heightCm));
+        setHeightStr(String(fi.feet));
+        setInchesStr(String(fi.inches));
+      } else {
+        setWeightStr(String(profile.weightKg));
+        setHeightStr(String(profile.heightCm));
+      }
+      setAgeStr(String(profile.age));
     }
     if (targets) {
       setMode(targets.mode);
@@ -128,36 +120,24 @@ export function ProfileView({ onResetProfile }: Props) {
     [profile, mode, weeklyRate],
   );
 
-  function handleWeightImperial(v: number) {
-    setLbs(v);
-    setWeightKg(parseFloat(lbsToKg(v).toFixed(1)));
-  }
-  function handleWeightMetric(v: number) {
-    setWeightKg(v);
-    setLbs(Math.round(kgToLbs(v)));
-  }
-  function handleHeightFeet(f: number) {
-    const fc = Math.max(0, f);
-    setFeet(fc);
-    setHeightCm(parseFloat(feetAndInchesToCm(fc, inches).toFixed(1)));
-  }
-  function handleHeightInches(i: number) {
-    const ic = Math.max(0, Math.min(11, i));
-    setInches(ic);
-    setHeightCm(parseFloat(feetAndInchesToCm(feet, ic).toFixed(1)));
-  }
-  function handleHeightMetric(v: number) {
-    setHeightCm(v);
-    const total = cmToInches(v);
-    const fi = inchesToFeetAndInches(total);
-    setFeet(fi.feet);
-    setInches(fi.inches);
+  function handleUnitsChange(u: PreferredUnits) {
+    setUnits(u);
+    if (u === "imperial") {
+      setWeightStr(String(Math.round(kgToLbs(weightKg))));
+      const fi = inchesToFeetAndInches(cmToInches(heightCm));
+      setHeightStr(String(fi.feet));
+      setInchesStr(String(fi.inches));
+    } else {
+      setWeightStr(String(weightKg));
+      setHeightStr(String(heightCm));
+    }
   }
 
   function handleModeChange(m: GoalMode) {
     setMode(m);
-    const opts = rateOptions(m, weightKg);
-    setWeeklyRate(opts[0].value);
+    if (m === "cut") setWeeklyRate(-0.5);
+    else if (m === "bulk") setWeeklyRate(0.25);
+    else setWeeklyRate(0);
   }
 
   function handleSave() {
@@ -181,7 +161,7 @@ export function ProfileView({ onResetProfile }: Props) {
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-stone-600">Units:</span>
           {(["metric", "imperial"] as PreferredUnits[]).map((u) => (
-            <SelectablePill key={u} active={units === u} onClick={() => setUnits(u)} ariaSemantics="checked" showCheck={false}>
+            <SelectablePill key={u} active={units === u} onClick={() => handleUnitsChange(u)} ariaSemantics="checked" showCheck={false}>
               {u === "metric" ? "kg / cm" : "lbs / ft"}
             </SelectablePill>
           ))}
@@ -193,16 +173,16 @@ export function ProfileView({ onResetProfile }: Props) {
             Weight ({units === "imperial" ? "lbs" : "kg"})
           </span>
           <input
-            type="number"
-            min={units === "imperial" ? 44 : 20}
-            max={units === "imperial" ? 1100 : 500}
-            step={units === "imperial" ? 0.5 : 0.1}
-            value={units === "imperial" ? lbs : weightKg}
+            type="text"
+            inputMode="decimal"
+            placeholder={units === "imperial" ? "e.g. 154" : "e.g. 70"}
+            value={weightStr}
             onChange={(e) => {
+              setWeightStr(e.target.value);
               const v = parseFloat(e.target.value);
-              if (!isNaN(v)) {
-                if (units === "imperial") handleWeightImperial(v);
-                else handleWeightMetric(v);
+              if (!isNaN(v) && v > 0) {
+                if (units === "imperial") setWeightKg(parseFloat(lbsToKg(v).toFixed(1)));
+                else setWeightKg(v);
               }
             }}
             className={inputCls}
@@ -216,18 +196,40 @@ export function ProfileView({ onResetProfile }: Props) {
           </span>
           {units === "imperial" ? (
             <div className="flex gap-2">
-              <input type="number" min={3} max={8} value={feet} onChange={(e) => handleHeightFeet(parseInt(e.target.value) || 0)} placeholder="ft" className={inputCls} />
-              <input type="number" min={0} max={11} value={inches} onChange={(e) => handleHeightInches(parseInt(e.target.value) || 0)} placeholder="in" className={inputCls} />
+              <input type="text" inputMode="numeric" placeholder="ft" value={heightStr}
+                onChange={(e) => {
+                  setHeightStr(e.target.value);
+                  const f = parseInt(e.target.value);
+                  const i = parseInt(inchesStr) || 0;
+                  if (!isNaN(f) && f >= 0) setHeightCm(parseFloat(feetAndInchesToCm(f, i).toFixed(1)));
+                }} className={inputCls} />
+              <input type="text" inputMode="numeric" placeholder="in" value={inchesStr}
+                onChange={(e) => {
+                  setInchesStr(e.target.value);
+                  const f = parseInt(heightStr) || 0;
+                  const i = parseInt(e.target.value);
+                  if (!isNaN(i) && i >= 0 && i <= 11) setHeightCm(parseFloat(feetAndInchesToCm(f, i).toFixed(1)));
+                }} className={inputCls} />
             </div>
           ) : (
-            <input type="number" min={100} max={280} step={0.5} value={heightCm} onChange={(e) => { const v = parseFloat(e.target.value); if (!isNaN(v)) handleHeightMetric(v); }} className={inputCls} />
+            <input type="text" inputMode="decimal" placeholder="e.g. 170" value={heightStr}
+              onChange={(e) => {
+                setHeightStr(e.target.value);
+                const v = parseFloat(e.target.value);
+                if (!isNaN(v) && v > 0) setHeightCm(v);
+              }} className={inputCls} />
           )}
         </div>
 
         {/* Age */}
         <label className="block space-y-1.5">
           <span className="text-sm font-medium text-stone-700">Age</span>
-          <input type="number" min={14} max={100} value={age} onChange={(e) => { const v = parseInt(e.target.value); if (!isNaN(v)) setAge(v); }} className={inputCls} />
+          <input type="text" inputMode="numeric" placeholder="e.g. 22" value={ageStr}
+            onChange={(e) => {
+              setAgeStr(e.target.value);
+              const v = parseInt(e.target.value);
+              if (!isNaN(v) && v > 0) setAge(v);
+            }} className={inputCls} />
         </label>
 
         {/* Sex */}
@@ -276,18 +278,6 @@ export function ProfileView({ onResetProfile }: Props) {
           ))}
         </div>
 
-        {(mode === "cut" || mode === "bulk") && (
-          <div className="space-y-1.5">
-            <span className="text-sm font-medium text-stone-700">Pace</span>
-            <div className="flex flex-wrap gap-2">
-              {rateOptions(mode, weightKg).map((opt) => (
-                <SelectablePill key={opt.value} active={weeklyRate === opt.value} onClick={() => setWeeklyRate(opt.value)} ariaSemantics="checked" showCheck={false}>
-                  {opt.label}
-                </SelectablePill>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Live preview */}
