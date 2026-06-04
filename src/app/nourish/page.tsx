@@ -9,6 +9,7 @@ import { OnboardingWizard } from "@/components/nourish/OnboardingWizard";
 import { ProfileView } from "@/components/nourish/ProfileView";
 import { DiaryView } from "@/components/nourish/DiaryView";
 import { TodayDashboard } from "@/components/nourish/TodayDashboard";
+import { TrendsView } from "@/components/nourish/TrendsView";
 import { isOnboarded } from "@/lib/nourish/storage";
 
 type Tab = "today" | "diary" | "trends" | "foods" | "profile";
@@ -96,14 +97,7 @@ export default function NourishPage() {
           <TodayDashboard onSwitchToDiary={() => setTab("diary")} />
         )}
         {tab === "diary" && <DiaryView />}
-        {tab === "trends" && (
-          <EmptyState
-            emoji="📈"
-            title="Trends will appear here"
-            description="Once you've logged a few days of meals and weigh-ins, you'll see your weight trend and weekly calorie averages."
-            tone="emerald"
-          />
-        )}
+        {tab === "trends" && <TrendsView />}
         {tab === "foods" && (
           <EmptyState
             emoji="🥘"
