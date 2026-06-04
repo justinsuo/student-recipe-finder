@@ -16,6 +16,8 @@ const KEYS = {
   customFoods: "srf:nourish-custom-foods",
   foodCache: "srf:nourish-food-cache",
   onboarded: "srf:nourish-onboarded",
+  adaptiveLastRun: "srf:nourish-adaptive-last-run",
+  waterLog: "srf:nourish-water-log",
 } as const;
 
 export const NOURISH_KEYS = KEYS;
@@ -197,4 +199,42 @@ export function todayString(): string {
 /** Generates a simple unique ID (timestamp + random suffix). */
 export function newId(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+// ─── Adaptive TDEE tracking ───────────────────────────────────────────────────
+
+export function getAdaptiveLastRun(): string | null {
+  return safeRead<string | null>(KEYS.adaptiveLastRun, null);
+}
+
+export function setAdaptiveLastRun(date: string): void {
+  safeWrite(KEYS.adaptiveLastRun, date);
+}
+
+// ─── Water log ────────────────────────────────────────────────────────────────
+
+export interface WaterEntry {
+  date: string;       // YYYY-MM-DD
+  mlConsumed: number; // ml consumed that day
+  goalMl: number;     // daily goal (default 2000ml)
+}
+
+export function getWaterLog(): WaterEntry[] {
+  return safeRead<WaterEntry[]>(KEYS.waterLog, []);
+}
+
+export function getWaterForDate(date: string): WaterEntry {
+  const log = getWaterLog();
+  return log.find((e) => e.date === date) ?? { date, mlConsumed: 0, goalMl: 2000 };
+}
+
+export function setWaterForDate(entry: WaterEntry): void {
+  const log = getWaterLog();
+  const idx = log.findIndex((e) => e.date === entry.date);
+  if (idx >= 0) {
+    log[idx] = entry;
+  } else {
+    log.push(entry);
+  }
+  safeWrite(KEYS.waterLog, log);
 }

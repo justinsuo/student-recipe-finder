@@ -11,6 +11,7 @@ import { TodayDashboard } from "@/components/nourish/TodayDashboard";
 import { TrendsView } from "@/components/nourish/TrendsView";
 import { FoodsView } from "@/components/nourish/FoodsView";
 import { isOnboarded } from "@/lib/nourish/storage";
+import { maybeUpdateAdaptiveTdee } from "@/lib/nourish/adaptiveTdee";
 
 type Tab = "today" | "diary" | "trends" | "foods" | "profile";
 
@@ -26,10 +27,12 @@ export default function NourishPage() {
   const [tab, setTab] = useState<Tab>("today");
   const [onboarded, setOnboarded] = useState<boolean | null>(null);
 
-  // Defer localStorage read to client to avoid hydration mismatch
+  // Defer localStorage read to client to avoid hydration mismatch.
+  // Also run the weekly adaptive TDEE update check on mount.
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setOnboarded(isOnboarded());
+    maybeUpdateAdaptiveTdee();
   }, []);
 
   function handleOnboardingComplete() {

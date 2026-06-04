@@ -13,7 +13,10 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
+import { clsx } from "clsx";
+import { RefreshCw } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { getAdaptiveTdeeDisplay } from "@/lib/nourish/adaptiveTdee";
 import {
   getWeightLog,
   getDiaryEntries,
@@ -240,6 +243,7 @@ export function TrendsView() {
   const [weights, setWeights] = useState<WeightEntry[]>([]);
   const [diary, setDiary] = useState<DiaryEntry[]>([]);
   const [targets, setTargets] = useState<TargetSnapshot | null>(null);
+  const [adaptive, setAdaptive] = useState<ReturnType<typeof getAdaptiveTdeeDisplay> | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
   /* eslint-disable react-hooks/set-state-in-effect */
@@ -247,6 +251,7 @@ export function TrendsView() {
     setWeights(getWeightLog());
     setDiary(getDiaryEntries());
     setTargets(getTargets());
+    setAdaptive(getAdaptiveTdeeDisplay());
     setHydrated(true);
   }, []);
   /* eslint-enable react-hooks/set-state-in-effect */
@@ -272,6 +277,56 @@ export function TrendsView() {
           )}
         </div>
       )}
+
+      {/* Adaptive TDEE card */}
+      <div className={clsx(
+        "rounded-2xl border p-4 shadow-sm space-y-2",
+        adaptive?.hasEnoughData ? "border-emerald-200 bg-gradient-to-br from-emerald-50 to-white" : "border-stone-200 bg-white",
+      )}>
+        <div className="flex items-center justify-between">
+          <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-600">
+            <RefreshCw size={11} />
+            Adaptive TDEE
+          </p>
+          {targets?.source && (
+            <span className={clsx(
+              "rounded-full px-2 py-0.5 text-[10px] font-semibold",
+              targets.source === "adaptive" ? "bg-emerald-100 text-emerald-700" : "bg-stone-100 text-stone-600",
+            )}>
+              {targets.source === "adaptive" ? "Targets: adaptive" : targets.source === "formula" ? "Targets: formula" : "Targets: manual"}
+            </span>
+          )}
+        </div>
+
+        {adaptive?.hasEnoughData && adaptive.adaptiveTdee ? (
+          <>
+            <p className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold tabular-nums text-stone-900">{adaptive.adaptiveTdee.toLocaleString()}</span>
+              <span className="text-sm text-stone-500">kcal/day (estimated from your data)</span>
+            </p>
+            {targets && (
+              <p className="text-xs text-stone-500">
+                Current calorie target: <strong className="text-stone-700">{targets.calorieTarget.toLocaleString()} kcal</strong>
+                {targets.source === "adaptive" && " (adaptive)"}
+              </p>
+            )}
+            {adaptive.daysSinceLastUpdate !== null && (
+              <p className="text-[10px] text-stone-400">
+                Last updated {adaptive.daysSinceLastUpdate === 0 ? "today" : `${adaptive.daysSinceLastUpdate} day${adaptive.daysSinceLastUpdate !== 1 ? "s" : ""} ago`}
+                {" · "}targets re-derive weekly
+              </p>
+            )}
+          </>
+        ) : (
+          <div>
+            <p className="text-sm font-medium text-stone-700">Not enough data yet</p>
+            <p className="text-xs text-stone-500 mt-0.5">
+              Log meals for 3+ days and weigh in 2+ times over 14 days for a personalised TDEE estimate.
+              The more data you log, the more accurate it becomes.
+            </p>
+          </div>
+        )}
+      </div>
 
       {/* Weight chart */}
       <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
