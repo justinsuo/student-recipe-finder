@@ -4,7 +4,6 @@ import { useState, useMemo, useEffect } from "react";
 import { clsx } from "clsx";
 import { Save, RefreshCw, Flame, Zap } from "lucide-react";
 import { DataExport } from "./DataExport";
-import { ActivityConnections } from "./ActivityConnections";
 import { Button } from "@/components/ui/Button";
 import { SelectablePill } from "@/components/ui/SelectablePill";
 import {
@@ -331,8 +330,6 @@ export function ProfileView({ onResetProfile }: Props) {
           {saved ? "Saved ✓" : "Save changes"}
         </Button>
       </div>
-
-      <ActivityConnections />
 
       <DataExport />
 
