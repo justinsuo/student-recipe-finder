@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
 import { OnboardingWizard } from "@/components/nourish/OnboardingWizard";
 import { ProfileView } from "@/components/nourish/ProfileView";
+import { DiaryView } from "@/components/nourish/DiaryView";
 import { isOnboarded } from "@/lib/nourish/storage";
 
 type Tab = "today" | "diary" | "trends" | "foods" | "profile";
@@ -104,14 +105,7 @@ export default function NourishPage() {
             }
           />
         )}
-        {tab === "diary" && (
-          <EmptyState
-            emoji="📖"
-            title="No meals logged today"
-            description="Log breakfast, lunch, dinner, and snacks to see your daily totals and track your progress."
-            tone="emerald"
-          />
-        )}
+        {tab === "diary" && <DiaryView />}
         {tab === "trends" && (
           <EmptyState
             emoji="📈"
