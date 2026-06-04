@@ -20,6 +20,10 @@ function apiKey(): string {
   return process.env.NEXT_PUBLIC_USDA_API_KEY ?? "DEMO_KEY";
 }
 
+export function usingDemoKey(): boolean {
+  return apiKey() === "DEMO_KEY";
+}
+
 function extractNutrient(
   nutrients: UsdaSearchResult["foodNutrients"],
   id: number,
@@ -103,6 +107,15 @@ export async function searchUsda(opts: SearchOptions): Promise<SearchResponse> {
   try {
     const res = await fetch(url, { signal });
     if (!res.ok) {
+      if (res.status === 429) {
+        return {
+          foods: [],
+          totalHits: 0,
+          error: apiKey() === "DEMO_KEY"
+            ? "Food search is limited to 30 requests/hour on the demo key. Add NEXT_PUBLIC_USDA_API_KEY for unlimited access."
+            : "USDA rate limit reached — please wait a moment and try again.",
+        };
+      }
       return { foods: [], totalHits: 0, error: `USDA returned ${res.status}` };
     }
     const json = (await res.json()) as {

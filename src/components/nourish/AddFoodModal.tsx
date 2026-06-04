@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { SelectablePill } from "@/components/ui/SelectablePill";
-import { useFoodSearch } from "@/lib/nourish/usdaClient";
+import { useFoodSearch, usingDemoKey } from "@/lib/nourish/usdaClient";
 import { saveCustomFood, addDiaryEntry, newId, todayString } from "@/lib/nourish/storage";
 import { BarcodeScanner } from "./BarcodeScanner";
 import type { FoodItem, MealSlot } from "@/lib/nourish/types";
@@ -132,6 +132,12 @@ function SearchTab({ onLog }: { onLog: (food: FoodItem, servings: number, meal: 
 
   return (
     <div className="space-y-3">
+      {usingDemoKey() && (
+        <p className="rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-[11px] text-amber-700">
+          ⚡ Using demo search key — limited to 30 requests/hour. Add{" "}
+          <code className="bg-amber-100 px-1 rounded">NEXT_PUBLIC_USDA_API_KEY</code> for unlimited.
+        </p>
+      )}
       <div className="relative">
         <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" />
         <input

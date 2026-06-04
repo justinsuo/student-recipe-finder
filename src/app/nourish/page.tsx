@@ -40,8 +40,16 @@ export default function NourishPage() {
     setTab("today");
   }
 
-  // Still loading from localStorage
-  if (onboarded === null) return null;
+  // Show minimal skeleton during client-side hydration to avoid blank flash
+  if (onboarded === null) {
+    return (
+      <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:px-6">
+        <div className="h-36 animate-pulse rounded-3xl bg-stone-100" />
+        <div className="h-12 animate-pulse rounded-2xl bg-stone-100" />
+        <div className="h-48 animate-pulse rounded-2xl bg-stone-100" />
+      </div>
+    );
+  }
 
   // Show onboarding wizard for new users
   if (!onboarded) {

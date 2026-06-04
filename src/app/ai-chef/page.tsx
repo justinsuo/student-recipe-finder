@@ -1252,7 +1252,8 @@ function AIChefPage() {
                   size="sm"
                   variant="outline"
                   onClick={() => runOptions(true)}
-                  disabled={loading}
+                  disabled={loading || !isWorkerConfigured()}
+                  title={!isWorkerConfigured() ? "AI Chef is offline — NEXT_PUBLIC_WORKER_URL not configured" : undefined}
                   leftIcon={
                     appending && loading ? (
                       <Loader2 size={14} className="animate-spin" />
@@ -1267,7 +1268,7 @@ function AIChefPage() {
                   size="sm"
                   variant="ghost"
                   onClick={() => runOptions(false)}
-                  disabled={loading}
+                  disabled={loading || !isWorkerConfigured()}
                   leftIcon={<RefreshCw size={14} />}
                 >
                   Replace all

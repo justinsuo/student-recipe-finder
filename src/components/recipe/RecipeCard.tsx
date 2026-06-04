@@ -21,8 +21,10 @@ export function RecipeCard({ result, recipe, highlight }: Props) {
   const r = result?.recipe ?? recipe;
   if (!r) return null;
   const saved = isSaved(r.id);
-  const costPerServing = result?.costPerServing ?? calculateCostPerServing(r);
+  const rawCost = result?.costPerServing ?? calculateCostPerServing(r);
+  const costPerServing = Number.isFinite(rawCost) && rawCost > 0 ? rawCost : null;
   const nutrition = bestEffortNutrition(r).estimate;
+  const hasNutrition = nutrition.calories > 0 || nutrition.protein > 0;
 
   return (
     <Link
@@ -62,10 +64,12 @@ export function RecipeCard({ result, recipe, highlight }: Props) {
 
         {/* Cost + time — frosted glass row at the bottom of the image */}
         <div className="pointer-events-none absolute inset-x-3 bottom-3 flex flex-wrap items-center gap-1.5">
-          <span className="inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-emerald-800 shadow-sm backdrop-blur">
-            <Coins size={11} /> ${costPerServing.toFixed(2)}
-            <span className="font-normal text-stone-500">/serving</span>
-          </span>
+          {costPerServing !== null && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-emerald-800 shadow-sm backdrop-blur">
+              <Coins size={11} /> ${costPerServing.toFixed(2)}
+              <span className="font-normal text-stone-500">/serving</span>
+            </span>
+          )}
           <span className="inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-amber-800 shadow-sm backdrop-blur">
             <Clock size={11} /> {r.totalTimeMinutes} min
           </span>
@@ -84,16 +88,18 @@ export function RecipeCard({ result, recipe, highlight }: Props) {
 
         <EquipmentBadges recipe={r} />
 
-        <div className="flex items-center gap-2 text-xs text-stone-600">
-          <Flame size={12} className="text-orange-500" />
-          <span className="font-medium text-stone-700">
-            {nutrition.calories} cal
-          </span>
-          <span className="text-stone-300">·</span>
-          <span className="font-medium text-stone-700">
-            {nutrition.protein}g protein
-          </span>
-        </div>
+        {hasNutrition && (
+          <div className="flex items-center gap-2 text-xs text-stone-600">
+            <Flame size={12} className="text-orange-500" />
+            <span className="font-medium text-stone-700">
+              {nutrition.calories} cal
+            </span>
+            <span className="text-stone-300">·</span>
+            <span className="font-medium text-stone-700">
+              {nutrition.protein}g protein
+            </span>
+          </div>
+        )}
 
         {(r.tags?.length ?? 0) > 0 && (
           <div className="flex flex-wrap gap-1.5">

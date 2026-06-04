@@ -7,18 +7,19 @@ import {
   Home,
   Coins,
   ChefHat,
-  ShoppingBasket,
+  Apple,
   Bookmark,
 } from "lucide-react";
 import { clsx } from "clsx";
 
 // AI Chef sits in the middle of the bottom nav as the visual anchor — it's
 // the flagship action and benefits from being one tap from anywhere.
+// Grocery moved to hamburger menu to make room for Nourish.
 const links = [
   { href: "/", label: "Home", icon: Home, hero: false },
   { href: "/cheap-recipes", label: "Cheap", icon: Coins, hero: false },
   { href: "/ai-chef", label: "AI Chef", icon: ChefHat, hero: true },
-  { href: "/grocery-list", label: "Grocery", icon: ShoppingBasket, hero: false },
+  { href: "/nourish", label: "Nourish", icon: Apple, hero: false },
   { href: "/saved", label: "Saved", icon: Bookmark, hero: false },
 ];
 
