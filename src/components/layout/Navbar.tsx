@@ -16,6 +16,7 @@ import {
   Wand2,
   Menu,
   X,
+  Apple,
 } from "lucide-react";
 import { clsx } from "clsx";
 
@@ -31,6 +32,7 @@ const links = [
   { href: "/explore", label: "Explore", icon: Globe, desktop: true },
   { href: "/grocery-list", label: "Grocery", icon: ShoppingBasket, desktop: true },
   { href: "/saved", label: "Saved", icon: Bookmark, desktop: true },
+  { href: "/nourish", label: "Nourish", icon: Apple, desktop: true },
   { href: "/about", label: "About", icon: Info, desktop: false },
 ];
 
