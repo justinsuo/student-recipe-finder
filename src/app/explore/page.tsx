@@ -502,6 +502,15 @@ export default function ExplorePage() {
           </p>
         </div>
       )}
+      {resultSource === "themealdb" && !isDemo && (
+        <div className="flex items-start gap-3 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900 shadow-sm">
+          <Info size={16} className="mt-0.5 shrink-0" />
+          <p>
+            <span className="font-semibold">Powered by TheMealDB</span> — a free, open recipe database.
+            Connect Spoonacular or Edamam in your environment variables for broader search coverage.
+          </p>
+        </div>
+      )}
 
       {/* Search + filter bar */}
       <div className="flex gap-2">

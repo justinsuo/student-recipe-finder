@@ -5,6 +5,7 @@ import type {
   DiaryEntry,
   FoodItem,
 } from "./types";
+import { entryTotals } from "./types";
 
 // ─── Keys ────────────────────────────────────────────────────────────────────
 
@@ -254,4 +255,30 @@ export function setWaterForDate(entry: WaterEntry): void {
     log.push(entry);
   }
   safeWrite(KEYS.waterLog, log);
+}
+
+// ─── Protein streak ───────────────────────────────────────────────────────────
+
+export function getProteinStreak(targetProteinG: number, threshold = 0.85): number {
+  const allEntries = getDiaryEntries();
+  if (allEntries.length === 0) return 0;
+
+  const today = new Date();
+  let streak = 0;
+
+  for (let daysBack = 1; daysBack <= 365; daysBack++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - daysBack);
+    const dateStr = d.toISOString().split("T")[0];
+
+    const dayEntries = allEntries.filter((e) => e.date === dateStr);
+    if (dayEntries.length === 0) break;
+
+    const protein = dayEntries.reduce((s, e) => s + entryTotals(e).proteinG, 0);
+    if (protein < targetProteinG * threshold) break;
+
+    streak++;
+  }
+
+  return streak;
 }

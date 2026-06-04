@@ -22,6 +22,11 @@ import { BATCH_002 } from "./batch-002";
 import { BATCH_003 } from "./batch-003";
 import { BATCH_004 } from "./batch-004";
 import { BATCH_005 } from "./batch-005";
+import { BATCH_006 } from "./batch-006";
+import { BATCH_007 } from "./batch-007";
+import { BATCH_008 } from "./batch-008";
+import { BATCH_009 } from "./batch-009";
+import { BATCH_010 } from "./batch-010";
 
 export const MACRO_RECIPES: Recipe[] = [
   ...BATCH_001,
@@ -29,6 +34,11 @@ export const MACRO_RECIPES: Recipe[] = [
   ...BATCH_003,
   ...BATCH_004,
   ...BATCH_005,
+  ...BATCH_006,
+  ...BATCH_007,
+  ...BATCH_008,
+  ...BATCH_009,
+  ...BATCH_010,
 ];
 
 export const MACRO_RECIPE_MAP = new Map(MACRO_RECIPES.map((r) => [r.id, r]));
