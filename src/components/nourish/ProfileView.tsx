@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { clsx } from "clsx";
 import { Save, RefreshCw, Flame, Zap } from "lucide-react";
+import { DataExport } from "./DataExport";
 import { Button } from "@/components/ui/Button";
 import { SelectablePill } from "@/components/ui/SelectablePill";
 import {
@@ -339,6 +340,8 @@ export function ProfileView({ onResetProfile }: Props) {
           {saved ? "Saved ✓" : "Save changes"}
         </Button>
       </div>
+
+      <DataExport />
 
       <p className="text-center text-[11px] text-stone-400">
         ⚠️ Targets are estimates only — not medical advice. Consult a healthcare
