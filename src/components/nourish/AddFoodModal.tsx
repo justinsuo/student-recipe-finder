@@ -12,17 +12,30 @@ import {
   ChevronUp,
   CheckCircle2,
   ScanBarcode,
+  Clock,
+  Camera,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { SelectablePill } from "@/components/ui/SelectablePill";
 import { useFoodSearch, usingDemoKey } from "@/lib/nourish/usdaClient";
-import { saveCustomFood, addDiaryEntry, newId, todayString } from "@/lib/nourish/storage";
+import {
+  saveCustomFood,
+  addDiaryEntry,
+  newId,
+  todayString,
+  getRecentFoods,
+  pushRecentFood,
+} from "@/lib/nourish/storage";
 import { BarcodeScanner } from "./BarcodeScanner";
+import { PhotoMealLogger } from "./PhotoMealLogger";
+import { RECIPES } from "@/data/recipes";
+import { recipeToDiaryFood } from "@/lib/nourish/recipeIntegration";
 import type { FoodItem, MealSlot } from "@/lib/nourish/types";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type Mode = "search" | "barcode" | "custom" | "quick";
+type Mode = "search" | "recent" | "recipes" | "snap" | "barcode" | "custom" | "quick";
 
 const MEAL_LABELS: Record<MealSlot, string> = {
   breakfast: "Breakfast",
@@ -35,14 +48,16 @@ const MEAL_LABELS: Record<MealSlot, string> = {
 
 function FoodResultCard({
   food,
+  defaultMeal,
   onLog,
 }: {
   food: FoodItem;
+  defaultMeal: MealSlot;
   onLog: (food: FoodItem, servings: number, meal: MealSlot) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [servings, setServings] = useState(1);
-  const [meal, setMeal] = useState<MealSlot>("lunch");
+  const [meal, setMeal] = useState<MealSlot>(defaultMeal);
 
   return (
     <div className="rounded-xl border border-stone-200 bg-white">
@@ -126,7 +141,13 @@ function FoodResultCard({
 
 // ─── Search tab ───────────────────────────────────────────────────────────────
 
-function SearchTab({ onLog }: { onLog: (food: FoodItem, servings: number, meal: MealSlot) => void }) {
+function SearchTab({
+  defaultMeal,
+  onLog,
+}: {
+  defaultMeal: MealSlot;
+  onLog: (food: FoodItem, servings: number, meal: MealSlot) => void;
+}) {
   const [query, setQuery] = useState("");
   const { results, loading, error } = useFoodSearch(query);
 
@@ -161,25 +182,127 @@ function SearchTab({ onLog }: { onLog: (food: FoodItem, servings: number, meal: 
         <p className="text-center text-sm text-stone-400 py-4">No results for &ldquo;{query}&rdquo;</p>
       )}
 
-      <div className="space-y-2 max-h-80 overflow-y-auto">
+      <div className="space-y-2 max-h-72 overflow-y-auto">
         {results.map((food) => (
-          <FoodResultCard key={food.id} food={food} onLog={onLog} />
+          <FoodResultCard key={food.id} food={food} defaultMeal={defaultMeal} onLog={onLog} />
         ))}
       </div>
     </div>
   );
 }
 
+// ─── Recent tab ───────────────────────────────────────────────────────────────
+
+function RecentTab({
+  defaultMeal,
+  onLog,
+}: {
+  defaultMeal: MealSlot;
+  onLog: (food: FoodItem, servings: number, meal: MealSlot) => void;
+}) {
+  const recent = getRecentFoods();
+
+  if (recent.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-2 py-8 text-center">
+        <Clock size={28} className="text-stone-300" />
+        <p className="text-sm font-medium text-stone-500">No recent foods yet</p>
+        <p className="text-xs text-stone-400">
+          Foods you log will appear here for fast re-logging.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2 max-h-72 overflow-y-auto">
+      {recent.map((food) => (
+        <FoodResultCard key={food.id} food={food} defaultMeal={defaultMeal} onLog={onLog} />
+      ))}
+    </div>
+  );
+}
+
+// ─── Recipes tab ──────────────────────────────────────────────────────────────
+
+function RecipesTab({
+  defaultMeal,
+  onLog,
+}: {
+  defaultMeal: MealSlot;
+  onLog: (food: FoodItem, servings: number, meal: MealSlot) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const lower = query.toLowerCase();
+  const filtered = query.trim()
+    ? RECIPES.filter(
+        (r) =>
+          r.name.toLowerCase().includes(lower) ||
+          r.cuisine?.toLowerCase().includes(lower) ||
+          r.dietTags?.some((t) => t.toLowerCase().includes(lower)),
+      )
+    : RECIPES;
+
+  return (
+    <div className="space-y-3">
+      <div className="relative">
+        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" />
+        <input
+          type="text"
+          placeholder="Filter recipes…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="w-full rounded-xl border border-stone-300 pl-9 pr-3 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+        />
+      </div>
+
+      {filtered.length === 0 && (
+        <p className="text-center text-sm text-stone-400 py-4">
+          No recipes match &ldquo;{query}&rdquo;
+        </p>
+      )}
+
+      <div className="space-y-2 max-h-72 overflow-y-auto">
+        {filtered.map((recipe) => {
+          const food = recipeToDiaryFood(recipe);
+          return (
+            <FoodResultCard key={food.id} food={food} defaultMeal={defaultMeal} onLog={onLog} />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── Snap tab (photo / describe meal) ────────────────────────────────────────
+
+function SnapTab({ onLogged, onClose }: { onLogged: () => void; onClose: () => void }) {
+  return (
+    <PhotoMealLogger
+      onLogged={() => {
+        onLogged();
+        onClose();
+      }}
+    />
+  );
+}
+
 // ─── Custom food tab ──────────────────────────────────────────────────────────
 
-function CustomFoodTab({ onLog }: { onLog: (food: FoodItem, servings: number, meal: MealSlot) => void }) {
+function CustomFoodTab({
+  defaultMeal,
+  onLog,
+}: {
+  defaultMeal: MealSlot;
+  onLog: (food: FoodItem, servings: number, meal: MealSlot) => void;
+}) {
   const [name, setName] = useState("");
   const [serving, setServing] = useState("1 serving");
   const [kcal, setKcal] = useState("");
   const [proteinG, setProteinG] = useState("");
   const [carbG, setCarbG] = useState("");
   const [fatG, setFatG] = useState("");
-  const [meal, setMeal] = useState<MealSlot>("lunch");
+  const [meal, setMeal] = useState<MealSlot>(defaultMeal);
   const [saved, setSaved] = useState(false);
 
   const valid =
@@ -267,12 +390,18 @@ function CustomFoodTab({ onLog }: { onLog: (food: FoodItem, servings: number, me
 
 // ─── Quick-add tab ────────────────────────────────────────────────────────────
 
-function QuickAddTab({ onLog }: { onLog: (food: FoodItem, servings: number, meal: MealSlot) => void }) {
+function QuickAddTab({
+  defaultMeal,
+  onLog,
+}: {
+  defaultMeal: MealSlot;
+  onLog: (food: FoodItem, servings: number, meal: MealSlot) => void;
+}) {
   const [kcal, setKcal] = useState("");
   const [proteinG, setProteinG] = useState("");
   const [carbG, setCarbG] = useState("");
   const [fatG, setFatG] = useState("");
-  const [meal, setMeal] = useState<MealSlot>("lunch");
+  const [meal, setMeal] = useState<MealSlot>(defaultMeal);
 
   const valid = Number(kcal) > 0;
 
@@ -350,10 +479,10 @@ export function AddFoodModal({ onClose, onLogged, defaultMeal = "lunch" }: Props
   const [flash, setFlash] = useState(false);
 
   function handleLog(food: FoodItem, servings: number, meal: MealSlot) {
-    const today = todayString();
+    pushRecentFood(food);
     addDiaryEntry({
       id: newId(),
-      date: today,
+      date: todayString(),
       meal,
       food,
       quantityServings: servings,
@@ -371,8 +500,6 @@ export function AddFoodModal({ onClose, onLogged, defaultMeal = "lunch" }: Props
     }, 600);
   }
 
-  void defaultMeal; // available to tabs via defaultMeal prop if needed
-
   return (
     <>
       {/* Backdrop */}
@@ -388,10 +515,10 @@ export function AddFoodModal({ onClose, onLogged, defaultMeal = "lunch" }: Props
         role="dialog"
         aria-modal="true"
         aria-label="Add food"
-        className="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-lg rounded-2xl border border-stone-200 bg-white shadow-xl motion-safe:animate-[fadeUp_220ms_ease-out]"
+        className="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-lg rounded-2xl border border-stone-200 bg-white shadow-xl motion-safe:animate-[fadeUp_220ms_ease-out] flex flex-col max-h-[85vh]"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-stone-100 px-5 py-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-stone-100 px-5 py-4">
           <h2 className="text-base font-bold text-stone-900">Add food</h2>
           <button
             type="button"
@@ -403,14 +530,17 @@ export function AddFoodModal({ onClose, onLogged, defaultMeal = "lunch" }: Props
           </button>
         </div>
 
-        {/* Mode tabs */}
-        <div className="flex gap-1 border-b border-stone-100 px-4 pt-3 pb-0">
+        {/* Mode tabs — scrollable on narrow screens */}
+        <div className="shrink-0 flex gap-0.5 overflow-x-auto border-b border-stone-100 px-3 pt-2.5 pb-0 scrollbar-hide">
           {(
             [
-              ["search", "Search", Search],
-              ["barcode", "Barcode", ScanBarcode],
-              ["custom", "Custom", Plus],
-              ["quick", "Quick", Zap],
+              ["search",  "Search",   Search],
+              ["recent",  "Recent",   Clock],
+              ["recipes", "Recipes",  BookOpen],
+              ["snap",    "Snap",     Camera],
+              ["barcode", "Barcode",  ScanBarcode],
+              ["custom",  "Custom",   Plus],
+              ["quick",   "Quick",    Zap],
             ] as [Mode, string, React.ElementType][]
           ).map(([id, label, Icon]) => (
             <button
@@ -418,20 +548,20 @@ export function AddFoodModal({ onClose, onLogged, defaultMeal = "lunch" }: Props
               type="button"
               onClick={() => setMode(id)}
               className={clsx(
-                "flex items-center gap-1.5 rounded-t-xl border-b-2 px-3 py-2 text-xs font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500",
+                "flex shrink-0 items-center gap-1 rounded-t-xl border-b-2 px-2.5 py-2 text-[11px] font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500",
                 mode === id
                   ? "border-emerald-500 text-emerald-700"
                   : "border-transparent text-stone-500 hover:text-stone-700",
               )}
             >
-              <Icon size={12} />
+              <Icon size={11} />
               {label}
             </button>
           ))}
         </div>
 
-        {/* Body */}
-        <div className="px-5 py-4">
+        {/* Body — scrollable */}
+        <div className="flex-1 overflow-y-auto px-5 py-4">
           {flash ? (
             <div className="flex flex-col items-center gap-2 py-8">
               <CheckCircle2 size={36} className="text-emerald-500 motion-safe:animate-[popIn_220ms_ease-out]" />
@@ -439,10 +569,13 @@ export function AddFoodModal({ onClose, onLogged, defaultMeal = "lunch" }: Props
             </div>
           ) : (
             <>
-              {mode === "search" && <SearchTab onLog={handleLog} />}
+              {mode === "search"  && <SearchTab  defaultMeal={defaultMeal} onLog={handleLog} />}
+              {mode === "recent"  && <RecentTab  defaultMeal={defaultMeal} onLog={handleLog} />}
+              {mode === "recipes" && <RecipesTab defaultMeal={defaultMeal} onLog={handleLog} />}
+              {mode === "snap"    && <SnapTab    onLogged={onLogged} onClose={onClose} />}
               {mode === "barcode" && <BarcodeScanner onLogged={() => { onLogged(); onClose(); }} />}
-              {mode === "custom" && <CustomFoodTab onLog={handleLog} />}
-              {mode === "quick" && <QuickAddTab onLog={handleLog} />}
+              {mode === "custom"  && <CustomFoodTab defaultMeal={defaultMeal} onLog={handleLog} />}
+              {mode === "quick"   && <QuickAddTab   defaultMeal={defaultMeal} onLog={handleLog} />}
             </>
           )}
         </div>

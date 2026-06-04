@@ -18,6 +18,7 @@ const KEYS = {
   onboarded: "srf:nourish-onboarded",
   adaptiveLastRun: "srf:nourish-adaptive-last-run",
   waterLog: "srf:nourish-water-log",
+  recentFoods: "srf:nourish-recent-foods",
 } as const;
 
 export const NOURISH_KEYS = KEYS;
@@ -209,6 +210,22 @@ export function getAdaptiveLastRun(): string | null {
 
 export function setAdaptiveLastRun(date: string): void {
   safeWrite(KEYS.adaptiveLastRun, date);
+}
+
+// ─── Recent foods ─────────────────────────────────────────────────────────────
+
+const RECENT_FOODS_MAX = 20;
+
+/** Returns the most recently logged foods, most recent first. */
+export function getRecentFoods(): FoodItem[] {
+  return safeRead<FoodItem[]>(KEYS.recentFoods, []);
+}
+
+/** Pushes a food to the front of the recent list; deduplicates by id; caps at 20. */
+export function pushRecentFood(food: FoodItem): void {
+  const list = getRecentFoods().filter((f) => f.id !== food.id);
+  list.unshift(food);
+  safeWrite(KEYS.recentFoods, list.slice(0, RECENT_FOODS_MAX));
 }
 
 // ─── Water log ────────────────────────────────────────────────────────────────

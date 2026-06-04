@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { clsx } from "clsx";
-import { Plus, Trash2, Pencil, ChevronLeft, ChevronRight, Check } from "lucide-react";
+import { Plus, Trash2, Pencil, ChevronLeft, ChevronRight, Check, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { AddFoodModal } from "./AddFoodModal";
@@ -10,7 +10,10 @@ import {
   getDiaryForDate,
   updateDiaryEntry,
   deleteDiaryEntry,
+  addDiaryEntry,
   todayString,
+  newId,
+  pushRecentFood,
 } from "@/lib/nourish/storage";
 import { entryTotals, sumTotals } from "@/lib/nourish/types";
 import type { DiaryEntry, MealSlot, DayTotals } from "@/lib/nourish/types";
@@ -62,12 +65,34 @@ function EntryRow({
 }) {
   const [editing, setEditing] = useState(false);
   const [qty, setQty] = useState(entry.quantityServings);
+  const [loggedAgain, setLoggedAgain] = useState(false);
   const totals = entryTotals({ ...entry, quantityServings: qty });
 
   function handleSave() {
     updateDiaryEntry({ ...entry, quantityServings: qty });
     setEditing(false);
     onChange();
+  }
+
+  function handleLogAgain() {
+    pushRecentFood(entry.food);
+    addDiaryEntry({
+      id: newId(),
+      date: todayString(),
+      meal: entry.meal,
+      food: entry.food,
+      quantityServings: entry.quantityServings,
+      snapshotKcal: entry.food.kcal,
+      snapshotProteinG: entry.food.proteinG,
+      snapshotCarbG: entry.food.carbG,
+      snapshotFatG: entry.food.fatG,
+      loggedAt: new Date().toISOString(),
+    });
+    setLoggedAgain(true);
+    setTimeout(() => {
+      setLoggedAgain(false);
+      onChange();
+    }, 900);
   }
 
   return (
@@ -101,6 +126,22 @@ function EntryRow({
             {totals.proteinG.toFixed(1)}P · {totals.carbG.toFixed(1)}C · {totals.fatG.toFixed(1)}F
           </p>
         </div>
+
+        {/* Log again — re-logs this entry to today */}
+        <button
+          type="button"
+          onClick={handleLogAgain}
+          aria-label="Log again today"
+          title="Log again today"
+          className={clsx(
+            "grid h-7 w-7 place-items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500",
+            loggedAgain
+              ? "bg-emerald-100 text-emerald-600"
+              : "text-stone-400 hover:bg-stone-100",
+          )}
+        >
+          {loggedAgain ? <Check size={13} /> : <RotateCcw size={13} />}
+        </button>
 
         {editing ? (
           <button
