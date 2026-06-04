@@ -11,16 +11,18 @@ import {
   ChevronDown,
   ChevronUp,
   CheckCircle2,
+  ScanBarcode,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { SelectablePill } from "@/components/ui/SelectablePill";
 import { useFoodSearch } from "@/lib/nourish/usdaClient";
 import { saveCustomFood, addDiaryEntry, newId, todayString } from "@/lib/nourish/storage";
+import { BarcodeScanner } from "./BarcodeScanner";
 import type { FoodItem, MealSlot } from "@/lib/nourish/types";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type Mode = "search" | "custom" | "quick";
+type Mode = "search" | "barcode" | "custom" | "quick";
 
 const MEAL_LABELS: Record<MealSlot, string> = {
   breakfast: "Breakfast",
@@ -400,8 +402,9 @@ export function AddFoodModal({ onClose, onLogged, defaultMeal = "lunch" }: Props
           {(
             [
               ["search", "Search", Search],
-              ["custom", "Custom food", Plus],
-              ["quick", "Quick add", Zap],
+              ["barcode", "Barcode", ScanBarcode],
+              ["custom", "Custom", Plus],
+              ["quick", "Quick", Zap],
             ] as [Mode, string, React.ElementType][]
           ).map(([id, label, Icon]) => (
             <button
@@ -431,6 +434,7 @@ export function AddFoodModal({ onClose, onLogged, defaultMeal = "lunch" }: Props
           ) : (
             <>
               {mode === "search" && <SearchTab onLog={handleLog} />}
+              {mode === "barcode" && <BarcodeScanner onLogged={() => { onLogged(); onClose(); }} />}
               {mode === "custom" && <CustomFoodTab onLog={handleLog} />}
               {mode === "quick" && <QuickAddTab onLog={handleLog} />}
             </>
