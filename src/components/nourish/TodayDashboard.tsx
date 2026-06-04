@@ -10,6 +10,7 @@ import { MacroRing } from "./MacroRing";
 import { MacroFitSuggestions } from "./MacroFitSuggestions";
 import { WaterTracker } from "./WaterTracker";
 import { PhotoMealLogger } from "./PhotoMealLogger";
+import { ActivityCard } from "./ActivityCard";
 import { RECIPES } from "@/data/recipes";
 import {
   getDiaryForDate,
@@ -311,6 +312,9 @@ export function TodayDashboard({ onSwitchToDiary }: Props) {
           />
         ))}
       </div>
+
+      {/* Activity from connected devices */}
+      <ActivityCard date={today} calorieTarget={targets.calorieTarget} />
 
       {/* Photo meal logging */}
       <PhotoMealLogger onLogged={load} />
