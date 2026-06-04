@@ -5,10 +5,10 @@ import { Apple, BookOpen, TrendingUp, UtensilsCrossed, User } from "lucide-react
 import { clsx } from "clsx";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { Button } from "@/components/ui/Button";
 import { OnboardingWizard } from "@/components/nourish/OnboardingWizard";
 import { ProfileView } from "@/components/nourish/ProfileView";
 import { DiaryView } from "@/components/nourish/DiaryView";
+import { TodayDashboard } from "@/components/nourish/TodayDashboard";
 import { isOnboarded } from "@/lib/nourish/storage";
 
 type Tab = "today" | "diary" | "trends" | "foods" | "profile";
@@ -93,17 +93,7 @@ export default function NourishPage() {
       {/* Tab panels */}
       <div role="tabpanel">
         {tab === "today" && (
-          <EmptyState
-            emoji="🍎"
-            title="Dashboard coming soon"
-            description="Your calorie budget, macro rings, and meal log will live here. Check back after the next update!"
-            tone="emerald"
-            action={
-              <Button variant="ghost" size="sm" onClick={() => setTab("diary")}>
-                View diary
-              </Button>
-            }
-          />
+          <TodayDashboard onSwitchToDiary={() => setTab("diary")} />
         )}
         {tab === "diary" && <DiaryView />}
         {tab === "trends" && (
