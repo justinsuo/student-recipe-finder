@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
 import { OnboardingWizard } from "@/components/nourish/OnboardingWizard";
+import { ProfileView } from "@/components/nourish/ProfileView";
 import { isOnboarded } from "@/lib/nourish/storage";
 
 type Tab = "today" | "diary" | "trends" | "foods" | "profile";
@@ -128,27 +129,7 @@ export default function NourishPage() {
           />
         )}
         {tab === "profile" && (
-          <EmptyState
-            emoji="👤"
-            title="Profile editing coming soon"
-            description="You'll be able to update your stats, change your goal, and adjust your targets here."
-            tone="emerald"
-            action={
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  // Reset onboarding to let user redo the wizard
-                  import("@/lib/nourish/storage").then(({ setOnboarded: so }) => {
-                    so(false);
-                    setOnboarded(false);
-                  });
-                }}
-              >
-                Re-run setup
-              </Button>
-            }
-          />
+          <ProfileView onResetProfile={() => setOnboarded(false)} />
         )}
       </div>
     </div>
