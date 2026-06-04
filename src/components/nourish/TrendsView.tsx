@@ -17,6 +17,7 @@ import { clsx } from "clsx";
 import { RefreshCw } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getAdaptiveTdeeDisplay } from "@/lib/nourish/adaptiveTdee";
+import { WeeklyReview } from "./WeeklyReview";
 import {
   getWeightLog,
   getDiaryEntries,
@@ -347,6 +348,11 @@ export function TrendsView() {
           />
         )}
       </div>
+
+      {/* Weekly review */}
+      {targets && (
+        <WeeklyReview diary={diary} weights={weights} targets={targets} />
+      )}
 
       <p className="text-center text-[11px] text-stone-400">
         ⚠️ Trends are estimates. The smoothed weight line uses exponential
