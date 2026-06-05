@@ -1334,6 +1334,24 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-nordic-ruispuuro","mfr-nordic-ruispuuro-cf","mfr-nordic-ruispuuro-pf",
     ],
   },
+  {
+    batch: 75,
+    range: "729–738",
+    theme: "American salads III",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-am-salad3-cobb","mfr-am-salad3-cobb-cf","mfr-am-salad3-cobb-pf",
+      "mfr-am-salad3-caesar","mfr-am-salad3-caesar-cf","mfr-am-salad3-caesar-pf",
+      "mfr-am-salad3-nicoise","mfr-am-salad3-nicoise-cf","mfr-am-salad3-nicoise-pf",
+      "mfr-am-salad3-wedge","mfr-am-salad3-wedge-cf","mfr-am-salad3-wedge-pf",
+      "mfr-am-salad3-waldorf","mfr-am-salad3-waldorf-cf","mfr-am-salad3-waldorf-pf",
+      "mfr-am-salad3-panzanella","mfr-am-salad3-panzanella-cf","mfr-am-salad3-panzanella-pf",
+      "mfr-am-salad3-spinach-strawberry","mfr-am-salad3-spinach-strawberry-cf","mfr-am-salad3-spinach-strawberry-pf",
+      "mfr-am-salad3-elote","mfr-am-salad3-elote-cf","mfr-am-salad3-elote-pf",
+      "mfr-am-salad3-greek","mfr-am-salad3-greek-cf","mfr-am-salad3-greek-pf",
+      "mfr-am-salad3-quinoa-power","mfr-am-salad3-quinoa-power-cf","mfr-am-salad3-quinoa-power-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
