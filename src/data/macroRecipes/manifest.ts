@@ -1586,6 +1586,42 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-bbq-pineapple-chicken","mfr-bbq-pineapple-chicken-cf","mfr-bbq-pineapple-chicken-pf",
     ],
   },
+  {
+    batch: 89,
+    range: "869–878",
+    theme: "American skillet dinners",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-skillet-chicken-mushroom","mfr-skillet-chicken-mushroom-cf","mfr-skillet-chicken-mushroom-pf",
+      "mfr-skillet-beef-peppers","mfr-skillet-beef-peppers-cf","mfr-skillet-beef-peppers-pf",
+      "mfr-skillet-sausage-potato","mfr-skillet-sausage-potato-cf","mfr-skillet-sausage-potato-pf",
+      "mfr-skillet-shrimp-corn","mfr-skillet-shrimp-corn-cf","mfr-skillet-shrimp-corn-pf",
+      "mfr-skillet-turkey-zucchini","mfr-skillet-turkey-zucchini-cf","mfr-skillet-turkey-zucchini-pf",
+      "mfr-skillet-salmon-spinach","mfr-skillet-salmon-spinach-cf","mfr-skillet-salmon-spinach-pf",
+      "mfr-skillet-chickpea-tomato","mfr-skillet-chickpea-tomato-cf","mfr-skillet-chickpea-tomato-pf",
+      "mfr-skillet-pork-apple","mfr-skillet-pork-apple-cf","mfr-skillet-pork-apple-pf",
+      "mfr-skillet-lamb-couscous","mfr-skillet-lamb-couscous-cf","mfr-skillet-lamb-couscous-pf",
+      "mfr-skillet-egg-hashbrown","mfr-skillet-egg-hashbrown-cf","mfr-skillet-egg-hashbrown-pf",
+    ],
+  },
+  {
+    batch: 90,
+    range: "879–888",
+    theme: "Italian pasta and risotto II",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-ital-cacio-e-pepe","mfr-ital-cacio-e-pepe-cf","mfr-ital-cacio-e-pepe-pf",
+      "mfr-ital-amatriciana","mfr-ital-amatriciana-cf","mfr-ital-amatriciana-pf",
+      "mfr-ital-mushroom-risotto","mfr-ital-mushroom-risotto-cf","mfr-ital-mushroom-risotto-pf",
+      "mfr-ital-pasta-norma","mfr-ital-pasta-norma-cf","mfr-ital-pasta-norma-pf",
+      "mfr-ital-shrimp-scampi","mfr-ital-shrimp-scampi-cf","mfr-ital-shrimp-scampi-pf",
+      "mfr-ital-pasta-primavera","mfr-ital-pasta-primavera-cf","mfr-ital-pasta-primavera-pf",
+      "mfr-ital-aglio-olio","mfr-ital-aglio-olio-cf","mfr-ital-aglio-olio-pf",
+      "mfr-ital-penne-vodka","mfr-ital-penne-vodka-cf","mfr-ital-penne-vodka-pf",
+      "mfr-ital-chicken-milanese","mfr-ital-chicken-milanese-cf","mfr-ital-chicken-milanese-pf",
+      "mfr-ital-seafood-risotto","mfr-ital-seafood-risotto-cf","mfr-ital-seafood-risotto-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
