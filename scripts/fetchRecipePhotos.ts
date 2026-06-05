@@ -38,7 +38,7 @@ const BRAVE_KEY   = process.env.BRAVE_API_KEY    ?? "";
 const GOOGLE_KEY  = process.env.GOOGLE_CSE_KEY   ?? "";
 const GOOGLE_CX   = process.env.GOOGLE_CSE_ID    ?? "";
 
-const USER_AGENT  = "StudentRecipeFinder/1.0 (educational; https://github.com/justinsuo/student-recipe-finder)";
+const USER_AGENT  = "Waivy/1.0 (educational; https://github.com/justinsuo/waivy)";
 const COMMONS_API = "https://commons.wikimedia.org/w/api.php";
 const MEALDB_API  = "https://www.themealdb.com/api/json/v1/1";
 
