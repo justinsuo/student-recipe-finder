@@ -20,20 +20,20 @@ import {
 } from "lucide-react";
 import { clsx } from "clsx";
 
-// Short labels are used in the desktop bar so the header never wraps.
-// Mobile drawer uses the same `label` (short) plus the icon — no need for
-// long labels there either.
+// Primary nav items shown in the desktop bar (core actions).
+// Secondary items are reachable via the "More" menu (hamburger) at all sizes.
 const links = [
-  { href: "/", label: "Home", icon: Home, desktop: true },
-  { href: "/ai-chef", label: "AI Chef", icon: ChefHat, desktop: true, emphasis: true },
-  { href: "/recipe-studio", label: "Studio", icon: Wand2, desktop: true },
-  { href: "/pantry", label: "Pantry", icon: Refrigerator, desktop: true },
-  { href: "/cheap-recipes", label: "Cheap", icon: Coins, desktop: true },
-  { href: "/explore", label: "Explore", icon: Globe, desktop: true },
-  { href: "/grocery-list", label: "Grocery", icon: ShoppingBasket, desktop: true },
-  { href: "/saved", label: "Saved", icon: Bookmark, desktop: true },
-  { href: "/nourish", label: "Nourish", icon: Apple, desktop: true },
-  { href: "/about", label: "About", icon: Info, desktop: false },
+  { href: "/", label: "Home", icon: Home, primary: true },
+  { href: "/ai-chef", label: "AI Chef", icon: ChefHat, primary: true, emphasis: true },
+  { href: "/pantry", label: "Pantry", icon: Refrigerator, primary: true },
+  { href: "/cheap-recipes", label: "Cheap Recipes", icon: Coins, primary: true },
+  { href: "/nourish", label: "Nourish", icon: Apple, primary: true },
+  // Secondary — always in "More" drawer
+  { href: "/recipe-studio", label: "Recipe Studio", icon: Wand2, primary: false },
+  { href: "/explore", label: "Explore", icon: Globe, primary: false },
+  { href: "/grocery-list", label: "Grocery List", icon: ShoppingBasket, primary: false },
+  { href: "/saved", label: "Saved", icon: Bookmark, primary: false },
+  { href: "/about", label: "About", icon: Info, primary: false },
 ];
 
 function isActive(pathname: string, href: string): boolean {
@@ -90,15 +90,13 @@ export function Navbar() {
           </div>
         </Link>
 
-        {/* Desktop nav — collapses to the hamburger below xl (1280px) so
-            8 pills + brand never feel cramped. About lives in the mobile
-            drawer only. */}
+        {/* Desktop primary nav — 5 core items */}
         <nav
-          className="hidden items-center gap-0.5 xl:flex"
+          className="hidden items-center gap-0.5 md:flex"
           aria-label="Main navigation"
         >
           {links
-            .filter((l) => l.desktop)
+            .filter((l) => l.primary)
             .map((link) => {
               const Icon = link.icon;
               const active = isActive(pathname, link.href);
@@ -138,16 +136,17 @@ export function Navbar() {
             })}
         </nav>
 
-        {/* Hamburger (mobile + tablet) */}
+        {/* "More" / hamburger — visible at all sizes; opens the full drawer */}
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls="mobile-nav-drawer"
-          aria-label={open ? "Close menu" : "Open menu"}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-stone-700 hover:bg-stone-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 xl:hidden"
+          aria-label={open ? "Close menu" : "More navigation"}
+          className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl px-2.5 text-sm font-medium text-stone-700 hover:bg-stone-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
         >
           {open ? <X size={20} /> : <Menu size={20} />}
+          <span className="hidden text-sm md:inline">{open ? "" : "More"}</span>
         </button>
       </div>
 
@@ -159,52 +158,67 @@ export function Navbar() {
             type="button"
             aria-label="Close menu"
             onClick={() => setOpen(false)}
-            className="fixed inset-0 top-16 z-30 bg-black/30 backdrop-blur-sm xl:hidden"
+            className="fixed inset-0 top-16 z-30 bg-black/30 backdrop-blur-sm"
           />
           <nav
             id="mobile-nav-drawer"
             aria-label="Main navigation"
-            className="absolute inset-x-0 top-full z-40 border-b border-stone-200 bg-white shadow-lg motion-safe:animate-[fadeUp_220ms_ease-out] xl:hidden"
+            className="absolute inset-x-0 top-full z-40 border-b border-stone-200 bg-white shadow-lg motion-safe:animate-[fadeUp_220ms_ease-out]"
           >
-            <ul className="mx-auto max-w-6xl px-4 py-3 sm:px-6">
-              {links.map((link) => {
-                const Icon = link.icon;
-                const active = isActive(pathname, link.href);
-                return (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      aria-current={active ? "page" : undefined}
-                      className={clsx(
-                        "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500",
-                        active
-                          ? "bg-emerald-50 text-emerald-800"
-                          : link.emphasis
-                            ? "border border-emerald-300 bg-emerald-50 text-emerald-800"
-                            : "text-stone-700 hover:bg-stone-100",
-                      )}
-                    >
-                      <Icon
-                        size={18}
-                        className={active ? "text-emerald-600" : undefined}
-                      />
-                      {link.label}
-                      {link.emphasis && !active && (
-                        <span className="ml-auto rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-semibold text-white">
-                          AI
-                        </span>
-                      )}
-                      {active && (
-                        <span
-                          aria-hidden
-                          className="ml-auto h-1.5 w-1.5 rounded-full bg-emerald-600"
-                        />
-                      )}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+            <div className="mx-auto max-w-6xl px-4 py-3 sm:px-6">
+              {/* Primary group */}
+              <ul>
+                {links.filter((l) => l.primary).map((link) => {
+                  const Icon = link.icon;
+                  const active = isActive(pathname, link.href);
+                  return (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        aria-current={active ? "page" : undefined}
+                        className={clsx(
+                          "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500",
+                          active ? "bg-emerald-50 text-emerald-800"
+                          : link.emphasis ? "border border-emerald-300 bg-emerald-50 text-emerald-800"
+                          : "text-stone-700 hover:bg-stone-100",
+                        )}
+                      >
+                        <Icon size={18} className={active ? "text-emerald-600" : undefined} />
+                        {link.label}
+                        {link.emphasis && !active && (
+                          <span className="ml-auto rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-semibold text-white">AI</span>
+                        )}
+                        {active && <span aria-hidden className="ml-auto h-1.5 w-1.5 rounded-full bg-emerald-600" />}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+              {/* Secondary group */}
+              <div className="my-2 border-t border-stone-100" />
+              <ul>
+                {links.filter((l) => !l.primary).map((link) => {
+                  const Icon = link.icon;
+                  const active = isActive(pathname, link.href);
+                  return (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        aria-current={active ? "page" : undefined}
+                        className={clsx(
+                          "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500",
+                          active ? "bg-emerald-50 text-emerald-800" : "text-stone-500 hover:bg-stone-100 hover:text-stone-700",
+                        )}
+                      >
+                        <Icon size={16} className={active ? "text-emerald-600" : undefined} />
+                        {link.label}
+                        {active && <span aria-hidden className="ml-auto h-1.5 w-1.5 rounded-full bg-emerald-600" />}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           </nav>
         </>
       )}
