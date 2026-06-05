@@ -68,7 +68,7 @@ const MEAL_OPTIONS: { value: MealType | "any"; label: string }[] = [
 const DEFAULTS: CheapFilters = {
   budgetPerServing: 3,
   servings: 2,
-  equipment: ["stovetop", "microwave"],
+  equipment: [],
   diet: [],
   time: "any",
   mealType: "any",
@@ -92,8 +92,16 @@ export default function CheapRecipesPage() {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   // Suppress "Showing 0 of 0" in the pre-rendered shell before hydration.
   const [hydrated, setHydrated] = useState(false);
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { setHydrated(true); }, []);
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    setHydrated(true);
+    // Read ?method= from URL — set by homepage category cards.
+    const m = new URLSearchParams(window.location.search).get("method");
+    if (m === "air-fryer" || m === "microwave" || m === "no-stove" || m === "under-2") {
+      setMethodOnly(m);
+    }
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Debounce typing → query that drives filtering
   useEffect(() => {

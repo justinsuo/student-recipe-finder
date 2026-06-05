@@ -114,8 +114,9 @@ function recipeMatchesEquipment(recipe: Recipe, allowed: Equipment[]): boolean {
     // Only allow no-cook recipes
     return recipe.equipment.includes("no-kitchen") || recipe.equipment.includes("microwave");
   }
-  // recipe must be cookable with at least one of the user's equipment
-  return recipe.equipment.some((e) => allowed.includes(e));
+  // "allowed" = equipment the user owns; show only recipes whose every required
+  // piece of equipment is in the user's set ("what I have → what I can make").
+  return recipe.equipment.every((e) => allowed.includes(e));
 }
 
 function recipeMatchesDiet(recipe: Recipe, diet: DietTag[]): boolean {
