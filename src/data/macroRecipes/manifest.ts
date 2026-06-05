@@ -1766,6 +1766,42 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-sand-grilled-cheese-deluxe","mfr-sand-grilled-cheese-deluxe-cf","mfr-sand-grilled-cheese-deluxe-pf",
     ],
   },
+  {
+    batch: 99,
+    range: "969–978",
+    theme: "Chinese dim sum and dumplings",
+    completedAt: "2026-06-05",
+    slugs: [
+      "mfr-dim-pork-dumplings","mfr-dim-pork-dumplings-cf","mfr-dim-pork-dumplings-pf",
+      "mfr-dim-char-siu-bao","mfr-dim-char-siu-bao-cf","mfr-dim-char-siu-bao-pf",
+      "mfr-dim-har-gow","mfr-dim-har-gow-cf","mfr-dim-har-gow-pf",
+      "mfr-dim-siu-mai","mfr-dim-siu-mai-cf","mfr-dim-siu-mai-pf",
+      "mfr-dim-xiao-long-bao","mfr-dim-xiao-long-bao-cf","mfr-dim-xiao-long-bao-pf",
+      "mfr-dim-lo-bak-go","mfr-dim-lo-bak-go-cf","mfr-dim-lo-bak-go-pf",
+      "mfr-dim-cheung-fun","mfr-dim-cheung-fun-cf","mfr-dim-cheung-fun-pf",
+      "mfr-dim-dan-dan-mian","mfr-dim-dan-dan-mian-cf","mfr-dim-dan-dan-mian-pf",
+      "mfr-dim-scallion-pancake","mfr-dim-scallion-pancake-cf","mfr-dim-scallion-pancake-pf",
+      "mfr-dim-egg-tart","mfr-dim-egg-tart-cf","mfr-dim-egg-tart-pf",
+    ],
+  },
+  {
+    batch: 100,
+    range: "979–988",
+    theme: "American power salads and grain bowls IV",
+    completedAt: "2026-06-05",
+    slugs: [
+      "mfr-bowl4-harvest-bowl","mfr-bowl4-harvest-bowl-cf","mfr-bowl4-harvest-bowl-pf",
+      "mfr-bowl4-mediterranean-power","mfr-bowl4-mediterranean-power-cf","mfr-bowl4-mediterranean-power-pf",
+      "mfr-bowl4-taco-salad-bowl","mfr-bowl4-taco-salad-bowl-cf","mfr-bowl4-taco-salad-bowl-pf",
+      "mfr-bowl4-salmon-kale-caesar","mfr-bowl4-salmon-kale-caesar-cf","mfr-bowl4-salmon-kale-caesar-pf",
+      "mfr-bowl4-winter-farro-bowl","mfr-bowl4-winter-farro-bowl-cf","mfr-bowl4-winter-farro-bowl-pf",
+      "mfr-bowl4-southwest-quinoa","mfr-bowl4-southwest-quinoa-cf","mfr-bowl4-southwest-quinoa-pf",
+      "mfr-bowl4-greek-chicken-salad","mfr-bowl4-greek-chicken-salad-cf","mfr-bowl4-greek-chicken-salad-pf",
+      "mfr-bowl4-steak-potato-bowl","mfr-bowl4-steak-potato-bowl-cf","mfr-bowl4-steak-potato-bowl-pf",
+      "mfr-bowl4-sesame-noodle-bowl","mfr-bowl4-sesame-noodle-bowl-cf","mfr-bowl4-sesame-noodle-bowl-pf",
+      "mfr-bowl4-wild-rice-mushroom","mfr-bowl4-wild-rice-mushroom-cf","mfr-bowl4-wild-rice-mushroom-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
