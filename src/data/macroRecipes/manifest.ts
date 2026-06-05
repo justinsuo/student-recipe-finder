@@ -1424,6 +1424,24 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-ind-masoor-dal-soup","mfr-ind-masoor-dal-soup-cf","mfr-ind-masoor-dal-soup-pf",
     ],
   },
+  {
+    batch: 80,
+    range: "779–788",
+    theme: "Mediterranean seafood dinners",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-med-shrimp-saganaki","mfr-med-shrimp-saganaki-cf","mfr-med-shrimp-saganaki-pf",
+      "mfr-med-lemon-herb-fish","mfr-med-lemon-herb-fish-cf","mfr-med-lemon-herb-fish-pf",
+      "mfr-med-tuna-tartare","mfr-med-tuna-tartare-cf","mfr-med-tuna-tartare-pf",
+      "mfr-med-baked-cod-provencal","mfr-med-baked-cod-provencal-cf","mfr-med-baked-cod-provencal-pf",
+      "mfr-med-calamari-bowl","mfr-med-calamari-bowl-cf","mfr-med-calamari-bowl-pf",
+      "mfr-med-seafood-couscous","mfr-med-seafood-couscous-cf","mfr-med-seafood-couscous-pf",
+      "mfr-med-salmon-tahini","mfr-med-salmon-tahini-cf","mfr-med-salmon-tahini-pf",
+      "mfr-med-mussels-white-wine","mfr-med-mussels-white-wine-cf","mfr-med-mussels-white-wine-pf",
+      "mfr-med-tuna-bake","mfr-med-tuna-bake-cf","mfr-med-tuna-bake-pf",
+      "mfr-med-fish-caponata","mfr-med-fish-caponata-cf","mfr-med-fish-caponata-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
