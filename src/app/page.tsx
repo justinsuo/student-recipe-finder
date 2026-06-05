@@ -1,4 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Waivy — Eat well on a student budget",
+  description: "Turn your pantry into real recipes with cost per serving, macros, and a grocery list. Waivy is the AI cooking assistant built for students.",
+  openGraph: {
+    title: "Waivy — Eat well on a student budget",
+    description: "Pantry-aware recipes, real cost per serving, macros, and a grocery list — AI cooking for students.",
+    type: "website",
+  },
+};
 import {
   ArrowRight,
   Coins,
