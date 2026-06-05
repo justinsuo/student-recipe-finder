@@ -1496,6 +1496,24 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-soup-sweet-potato-chili","mfr-soup-sweet-potato-chili-cf","mfr-soup-sweet-potato-chili-pf",
     ],
   },
+  {
+    batch: 84,
+    range: "819–828",
+    theme: "Southeast Asian noodle dishes",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-sea2-pad-thai","mfr-sea2-pad-thai-cf","mfr-sea2-pad-thai-pf",
+      "mfr-sea2-laksa","mfr-sea2-laksa-cf","mfr-sea2-laksa-pf",
+      "mfr-sea2-bun-bo-hue","mfr-sea2-bun-bo-hue-cf","mfr-sea2-bun-bo-hue-pf",
+      "mfr-sea2-mie-goreng","mfr-sea2-mie-goreng-cf","mfr-sea2-mie-goreng-pf",
+      "mfr-sea2-tom-kha","mfr-sea2-tom-kha-cf","mfr-sea2-tom-kha-pf",
+      "mfr-sea2-char-kway-teow","mfr-sea2-char-kway-teow-cf","mfr-sea2-char-kway-teow-pf",
+      "mfr-sea2-pad-krapao-noodles","mfr-sea2-pad-krapao-noodles-cf","mfr-sea2-pad-krapao-noodles-pf",
+      "mfr-sea2-banh-mi-bowl","mfr-sea2-banh-mi-bowl-cf","mfr-sea2-banh-mi-bowl-pf",
+      "mfr-sea2-khao-soi","mfr-sea2-khao-soi-cf","mfr-sea2-khao-soi-pf",
+      "mfr-sea2-pho-bo","mfr-sea2-pho-bo-cf","mfr-sea2-pho-bo-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(

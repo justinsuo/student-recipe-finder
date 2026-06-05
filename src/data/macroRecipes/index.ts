@@ -100,6 +100,7 @@ import { BATCH_080 } from "./batch-080";
 import { BATCH_081 } from "./batch-081";
 import { BATCH_082 } from "./batch-082";
 import { BATCH_083 } from "./batch-083";
+import { BATCH_084 } from "./batch-084";
 
 export const MACRO_RECIPES: Recipe[] = [
   ...BATCH_001,
@@ -185,6 +186,7 @@ export const MACRO_RECIPES: Recipe[] = [
   ...BATCH_081,
   ...BATCH_082,
   ...BATCH_083,
+  ...BATCH_084,
 ];
 
 export const MACRO_RECIPE_MAP = new Map(MACRO_RECIPES.map((r) => [r.id, r]));
