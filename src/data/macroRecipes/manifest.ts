@@ -1352,6 +1352,24 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-am-salad3-quinoa-power","mfr-am-salad3-quinoa-power-cf","mfr-am-salad3-quinoa-power-pf",
     ],
   },
+  {
+    batch: 76,
+    range: "739–748",
+    theme: "Japanese rice and noodle dishes",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-jp-katsudon","mfr-jp-katsudon-cf","mfr-jp-katsudon-pf",
+      "mfr-jp-gyudon","mfr-jp-gyudon-cf","mfr-jp-gyudon-pf",
+      "mfr-jp-tempura-udon","mfr-jp-tempura-udon-cf","mfr-jp-tempura-udon-pf",
+      "mfr-jp-zaru-soba","mfr-jp-zaru-soba-cf","mfr-jp-zaru-soba-pf",
+      "mfr-jp-tamagoyaki-bowl","mfr-jp-tamagoyaki-bowl-cf","mfr-jp-tamagoyaki-bowl-pf",
+      "mfr-jp-karaage-bowl","mfr-jp-karaage-bowl-cf","mfr-jp-karaage-bowl-pf",
+      "mfr-jp-miso-butter-udon","mfr-jp-miso-butter-udon-cf","mfr-jp-miso-butter-udon-pf",
+      "mfr-jp-salmon-teriyaki-don","mfr-jp-salmon-teriyaki-don-cf","mfr-jp-salmon-teriyaki-don-pf",
+      "mfr-jp-hiyashi-chuka","mfr-jp-hiyashi-chuka-cf","mfr-jp-hiyashi-chuka-pf",
+      "mfr-jp-ochazuke-salmon","mfr-jp-ochazuke-salmon-cf","mfr-jp-ochazuke-salmon-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
