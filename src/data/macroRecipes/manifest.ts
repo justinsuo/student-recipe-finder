@@ -1568,6 +1568,24 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-chn-hong-shao-rou","mfr-chn-hong-shao-rou-cf","mfr-chn-hong-shao-rou-pf",
     ],
   },
+  {
+    batch: 88,
+    range: "859–868",
+    theme: "American BBQ and grilled dinners",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-bbq-pulled-chicken","mfr-bbq-pulled-chicken-cf","mfr-bbq-pulled-chicken-pf",
+      "mfr-bbq-smash-burger","mfr-bbq-smash-burger-cf","mfr-bbq-smash-burger-pf",
+      "mfr-bbq-dry-rub-ribs","mfr-bbq-dry-rub-ribs-cf","mfr-bbq-dry-rub-ribs-pf",
+      "mfr-bbq-grilled-corn-chicken","mfr-bbq-grilled-corn-chicken-cf","mfr-bbq-grilled-corn-chicken-pf",
+      "mfr-bbq-nashville-hot","mfr-bbq-nashville-hot-cf","mfr-bbq-nashville-hot-pf",
+      "mfr-bbq-portobello-burger","mfr-bbq-portobello-burger-cf","mfr-bbq-portobello-burger-pf",
+      "mfr-bbq-honey-mustard-salmon","mfr-bbq-honey-mustard-salmon-cf","mfr-bbq-honey-mustard-salmon-pf",
+      "mfr-bbq-carolina-bowl","mfr-bbq-carolina-bowl-cf","mfr-bbq-carolina-bowl-pf",
+      "mfr-bbq-brisket-bowl","mfr-bbq-brisket-bowl-cf","mfr-bbq-brisket-bowl-pf",
+      "mfr-bbq-pineapple-chicken","mfr-bbq-pineapple-chicken-cf","mfr-bbq-pineapple-chicken-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
