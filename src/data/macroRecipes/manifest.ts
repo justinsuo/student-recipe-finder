@@ -1442,6 +1442,24 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-med-fish-caponata","mfr-med-fish-caponata-cf","mfr-med-fish-caponata-pf",
     ],
   },
+  {
+    batch: 81,
+    range: "789–798",
+    theme: "Mexican street food and tacos II",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-mex2-al-pastor","mfr-mex2-al-pastor-cf","mfr-mex2-al-pastor-pf",
+      "mfr-mex2-birria-quesataco","mfr-mex2-birria-quesataco-cf","mfr-mex2-birria-quesataco-pf",
+      "mfr-mex2-esquites","mfr-mex2-esquites-cf","mfr-mex2-esquites-pf",
+      "mfr-mex2-carnitas","mfr-mex2-carnitas-cf","mfr-mex2-carnitas-pf",
+      "mfr-mex2-sopa-fideo","mfr-mex2-sopa-fideo-cf","mfr-mex2-sopa-fideo-pf",
+      "mfr-mex2-stuffed-pepper-mex","mfr-mex2-stuffed-pepper-mex-cf","mfr-mex2-stuffed-pepper-mex-pf",
+      "mfr-mex2-tacos-canasta","mfr-mex2-tacos-canasta-cf","mfr-mex2-tacos-canasta-pf",
+      "mfr-mex2-tlayuda","mfr-mex2-tlayuda-cf","mfr-mex2-tlayuda-pf",
+      "mfr-mex2-pozole-rojo","mfr-mex2-pozole-rojo-cf","mfr-mex2-pozole-rojo-pf",
+      "mfr-mex2-carne-asada-bowl","mfr-mex2-carne-asada-bowl-cf","mfr-mex2-carne-asada-bowl-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
