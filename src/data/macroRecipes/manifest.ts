@@ -1460,6 +1460,24 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-mex2-carne-asada-bowl","mfr-mex2-carne-asada-bowl-cf","mfr-mex2-carne-asada-bowl-pf",
     ],
   },
+  {
+    batch: 82,
+    range: "799–808",
+    theme: "African grain bowls and stews II",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-afr2-suya-bowl","mfr-afr2-suya-bowl-cf","mfr-afr2-suya-bowl-pf",
+      "mfr-afr2-egusi-bowl","mfr-afr2-egusi-bowl-cf","mfr-afr2-egusi-bowl-pf",
+      "mfr-afr2-misir-wot","mfr-afr2-misir-wot-cf","mfr-afr2-misir-wot-pf",
+      "mfr-afr2-thieb-bowl","mfr-afr2-thieb-bowl-cf","mfr-afr2-thieb-bowl-pf",
+      "mfr-afr2-shakshuka-north","mfr-afr2-shakshuka-north-cf","mfr-afr2-shakshuka-north-pf",
+      "mfr-afr2-mafe","mfr-afr2-mafe-cf","mfr-afr2-mafe-pf",
+      "mfr-afr2-kofta-bowl","mfr-afr2-kofta-bowl-cf","mfr-afr2-kofta-bowl-pf",
+      "mfr-afr2-akara-bowl","mfr-afr2-akara-bowl-cf","mfr-afr2-akara-bowl-pf",
+      "mfr-afr2-berbere-chicken","mfr-afr2-berbere-chicken-cf","mfr-afr2-berbere-chicken-pf",
+      "mfr-afr2-nyama-choma","mfr-afr2-nyama-choma-cf","mfr-afr2-nyama-choma-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
