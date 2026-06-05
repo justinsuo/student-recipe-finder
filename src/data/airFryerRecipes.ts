@@ -284,7 +284,7 @@ export const AIR_FRYER_RECIPES: Recipe[] = [
   },
   {
     id: "af-sweet-potato-black-bean-bowl",
-    name: "Sweet Potato Black Bean Bowl",
+    name: "Air Fryer Sweet Potato Black Bean Bowl",
     description:
       "Spiced sweet potato cubes air-fried until caramelized, served with black beans and salsa over rice.",
     mealType: "dinner",
@@ -890,7 +890,7 @@ export const AIR_FRYER_RECIPES: Recipe[] = [
   },
   {
     id: "af-breakfast-quesadilla",
-    name: "Breakfast Quesadilla",
+    name: "Air Fryer Breakfast Quesadilla",
     description:
       "Scrambled eggs, cheese, and bacon (or veg) inside a crispy air-fried tortilla.",
     mealType: "breakfast",

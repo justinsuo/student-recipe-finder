@@ -118,7 +118,7 @@ export function RecipeCard({ result, recipe, highlight }: Props) {
                 : `Missing ${result.missingIngredients.length} items`}
               {result.missingCost > 0 && (
                 <span className="ml-auto text-amber-800">
-                  ~${result.missingCost.toFixed(2)}
+                  ~${result.missingCost.toFixed(2)} to buy
                 </span>
               )}
             </p>

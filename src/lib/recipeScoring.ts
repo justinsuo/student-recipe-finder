@@ -131,7 +131,7 @@ function explainCheap(recipe: Recipe): string[] {
     .map((ri) => INGREDIENT_MAP.get(ri.ingredientId)?.name)
     .filter(Boolean) as string[];
   if (cheapIngredientNames.length > 0) {
-    reasons.push(`Cheap because it uses ${cheapIngredientNames.slice(0, 3).join(", ")}`);
+    reasons.push(`Budget-friendly: uses ${cheapIngredientNames.slice(0, 3).join(", ")}`);
   }
   if (recipe.ingredients.filter((ri) => !ri.optional).length <= 6) {
     reasons.push("Short ingredient list");
