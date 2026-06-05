@@ -1406,6 +1406,24 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-bfst-pb-french-toast","mfr-bfst-pb-french-toast-cf","mfr-bfst-pb-french-toast-pf",
     ],
   },
+  {
+    batch: 79,
+    range: "769–778",
+    theme: "Indian street food and snacks",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-ind-aloo-tikki","mfr-ind-aloo-tikki-cf","mfr-ind-aloo-tikki-pf",
+      "mfr-ind-samosa-wrap","mfr-ind-samosa-wrap-cf","mfr-ind-samosa-wrap-pf",
+      "mfr-ind-masala-chai-oatmeal","mfr-ind-masala-chai-oatmeal-cf","mfr-ind-masala-chai-oatmeal-pf",
+      "mfr-ind-chhole-bowl","mfr-ind-chhole-bowl-cf","mfr-ind-chhole-bowl-pf",
+      "mfr-ind-mango-lassi-bowl","mfr-ind-mango-lassi-bowl-cf","mfr-ind-mango-lassi-bowl-pf",
+      "mfr-ind-palak-dal","mfr-ind-palak-dal-cf","mfr-ind-palak-dal-pf",
+      "mfr-ind-egg-bhurji","mfr-ind-egg-bhurji-cf","mfr-ind-egg-bhurji-pf",
+      "mfr-ind-pav-bhaji","mfr-ind-pav-bhaji-cf","mfr-ind-pav-bhaji-pf",
+      "mfr-ind-tandoori-bowl","mfr-ind-tandoori-bowl-cf","mfr-ind-tandoori-bowl-pf",
+      "mfr-ind-masoor-dal-soup","mfr-ind-masoor-dal-soup-cf","mfr-ind-masoor-dal-soup-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
