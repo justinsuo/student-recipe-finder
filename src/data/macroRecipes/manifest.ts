@@ -1172,6 +1172,24 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-euro-veg-pasta-ceci","mfr-euro-veg-pasta-ceci-cf","mfr-euro-veg-pasta-ceci-pf",
     ],
   },
+  {
+    batch: 66,
+    range: "639–648",
+    theme: "Latin American dinners III",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-latam3-feijoada","mfr-latam3-feijoada-cf","mfr-latam3-feijoada-pf",
+      "mfr-latam3-cazuela","mfr-latam3-cazuela-cf","mfr-latam3-cazuela-pf",
+      "mfr-latam3-milanesa-chimichurri","mfr-latam3-milanesa-chimichurri-cf","mfr-latam3-milanesa-chimichurri-pf",
+      "mfr-latam3-aji-de-gallina","mfr-latam3-aji-de-gallina-cf","mfr-latam3-aji-de-gallina-pf",
+      "mfr-latam3-seco-de-pollo","mfr-latam3-seco-de-pollo-cf","mfr-latam3-seco-de-pollo-pf",
+      "mfr-latam3-saltena-bowl","mfr-latam3-saltena-bowl-cf","mfr-latam3-saltena-bowl-pf",
+      "mfr-latam3-pabellon-criollo","mfr-latam3-pabellon-criollo-cf","mfr-latam3-pabellon-criollo-pf",
+      "mfr-latam3-pepian","mfr-latam3-pepian-cf","mfr-latam3-pepian-pf",
+      "mfr-latam3-gallo-pinto","mfr-latam3-gallo-pinto-cf","mfr-latam3-gallo-pinto-pf",
+      "mfr-latam3-casado","mfr-latam3-casado-cf","mfr-latam3-casado-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
