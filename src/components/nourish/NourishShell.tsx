@@ -13,14 +13,17 @@ import { isOnboarded } from "@/lib/nourish/storage";
  *   - the PageHeader + sticky sub-nav so each route's body stays short
  */
 export function NourishShell({
-  title,
+  title = "Today's nourish.",
   description,
   eyebrow = "Nourish",
+  showHeader = true,
   children,
 }: {
-  title: string;
+  title?: string;
   description?: string;
   eyebrow?: string;
+  /** Set false when the parent server component already renders the PageHeader. */
+  showHeader?: boolean;
   children: ReactNode;
 }) {
   const [onboarded, setOnboarded] = useState<boolean | null>(null);
@@ -56,12 +59,14 @@ export function NourishShell({
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow={eyebrow}
-        title={title}
-        description={description}
-        tone="emerald"
-      />
+      {showHeader && (
+        <PageHeader
+          eyebrow={eyebrow}
+          title={title}
+          description={description}
+          tone="emerald"
+        />
+      )}
       <NourishSubNav />
       <div className="space-y-6">{children}</div>
     </div>
