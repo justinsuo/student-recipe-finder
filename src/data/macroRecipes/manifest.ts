@@ -1262,6 +1262,42 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-euro-soup-cullen-skink","mfr-euro-soup-cullen-skink-cf","mfr-euro-soup-cullen-skink-pf",
     ],
   },
+  {
+    batch: 71,
+    range: "689–698",
+    theme: "Plant-based vegan dinners II",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-pb2-jackfruit-bbq-tacos","mfr-pb2-jackfruit-bbq-tacos-cf","mfr-pb2-jackfruit-bbq-tacos-pf",
+      "mfr-pb2-mushroom-bolognese","mfr-pb2-mushroom-bolognese-cf","mfr-pb2-mushroom-bolognese-pf",
+      "mfr-pb2-thai-peanut-noodles","mfr-pb2-thai-peanut-noodles-cf","mfr-pb2-thai-peanut-noodles-pf",
+      "mfr-pb2-lentil-shepherds-pie","mfr-pb2-lentil-shepherds-pie-cf","mfr-pb2-lentil-shepherds-pie-pf",
+      "mfr-pb2-teriyaki-tofu-bowl","mfr-pb2-teriyaki-tofu-bowl-cf","mfr-pb2-teriyaki-tofu-bowl-pf",
+      "mfr-pb2-vegan-shakshuka","mfr-pb2-vegan-shakshuka-cf","mfr-pb2-vegan-shakshuka-pf",
+      "mfr-pb2-cauliflower-tikka","mfr-pb2-cauliflower-tikka-cf","mfr-pb2-cauliflower-tikka-pf",
+      "mfr-pb2-loaded-sweet-potato","mfr-pb2-loaded-sweet-potato-cf","mfr-pb2-loaded-sweet-potato-pf",
+      "mfr-pb2-red-lentil-dal","mfr-pb2-red-lentil-dal-cf","mfr-pb2-red-lentil-dal-pf",
+      "mfr-pb2-tempeh-stir-fry","mfr-pb2-tempeh-stir-fry-cf","mfr-pb2-tempeh-stir-fry-pf",
+    ],
+  },
+  {
+    batch: 72,
+    range: "699–708",
+    theme: "American diner classics",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-diner-meatloaf","mfr-diner-meatloaf-cf","mfr-diner-meatloaf-pf",
+      "mfr-diner-chicken-fried-steak","mfr-diner-chicken-fried-steak-cf","mfr-diner-chicken-fried-steak-pf",
+      "mfr-diner-club-sandwich","mfr-diner-club-sandwich-cf","mfr-diner-club-sandwich-pf",
+      "mfr-diner-patty-melt","mfr-diner-patty-melt-cf","mfr-diner-patty-melt-pf",
+      "mfr-diner-eggs-benedict","mfr-diner-eggs-benedict-cf","mfr-diner-eggs-benedict-pf",
+      "mfr-diner-chicken-noodle-soup","mfr-diner-chicken-noodle-soup-cf","mfr-diner-chicken-noodle-soup-pf",
+      "mfr-diner-beef-chili","mfr-diner-beef-chili-cf","mfr-diner-beef-chili-pf",
+      "mfr-diner-hot-turkey-sandwich","mfr-diner-hot-turkey-sandwich-cf","mfr-diner-hot-turkey-sandwich-pf",
+      "mfr-diner-biscuits-gravy","mfr-diner-biscuits-gravy-cf","mfr-diner-biscuits-gravy-pf",
+      "mfr-diner-cheese-omelette","mfr-diner-cheese-omelette-cf","mfr-diner-cheese-omelette-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
