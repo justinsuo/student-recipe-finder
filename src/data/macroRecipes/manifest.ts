@@ -1658,6 +1658,42 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-ind2-lauki-chana-dal","mfr-ind2-lauki-chana-dal-cf","mfr-ind2-lauki-chana-dal-pf",
     ],
   },
+  {
+    batch: 93,
+    range: "909–918",
+    theme: "American soups and chowders II",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-soup2-clam-chowder","mfr-soup2-clam-chowder-cf","mfr-soup2-clam-chowder-pf",
+      "mfr-soup2-french-onion","mfr-soup2-french-onion-cf","mfr-soup2-french-onion-pf",
+      "mfr-soup2-baked-potato-soup","mfr-soup2-baked-potato-soup-cf","mfr-soup2-baked-potato-soup-pf",
+      "mfr-soup2-corn-chowder","mfr-soup2-corn-chowder-cf","mfr-soup2-corn-chowder-pf",
+      "mfr-soup2-chicken-noodle","mfr-soup2-chicken-noodle-cf","mfr-soup2-chicken-noodle-pf",
+      "mfr-soup2-tomato-basil-bisque","mfr-soup2-tomato-basil-bisque-cf","mfr-soup2-tomato-basil-bisque-pf",
+      "mfr-soup2-beef-veggie-stew","mfr-soup2-beef-veggie-stew-cf","mfr-soup2-beef-veggie-stew-pf",
+      "mfr-soup2-tortellini-soup","mfr-soup2-tortellini-soup-cf","mfr-soup2-tortellini-soup-pf",
+      "mfr-soup2-sweet-potato-black-bean","mfr-soup2-sweet-potato-black-bean-cf","mfr-soup2-sweet-potato-black-bean-pf",
+      "mfr-soup2-pho-style-beef","mfr-soup2-pho-style-beef-cf","mfr-soup2-pho-style-beef-pf",
+    ],
+  },
+  {
+    batch: 94,
+    range: "919–928",
+    theme: "Mexican and Tex-Mex dinners II",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-mex2-carne-asada-tacos","mfr-mex2-carne-asada-tacos-cf","mfr-mex2-carne-asada-tacos-pf",
+      "mfr-mex2-enchiladas-verdes","mfr-mex2-enchiladas-verdes-cf","mfr-mex2-enchiladas-verdes-pf",
+      "mfr-mex2-birria-tacos","mfr-mex2-birria-tacos-cf","mfr-mex2-birria-tacos-pf",
+      "mfr-mex2-tamale-bowl","mfr-mex2-tamale-bowl-cf","mfr-mex2-tamale-bowl-pf",
+      "mfr-mex2-elote-bowl","mfr-mex2-elote-bowl-cf","mfr-mex2-elote-bowl-pf",
+      "mfr-mex2-chiles-rellenos","mfr-mex2-chiles-rellenos-cf","mfr-mex2-chiles-rellenos-pf",
+      "mfr-mex2-arroz-con-pollo","mfr-mex2-arroz-con-pollo-cf","mfr-mex2-arroz-con-pollo-pf",
+      "mfr-mex2-tostadas","mfr-mex2-tostadas-cf","mfr-mex2-tostadas-pf",
+      "mfr-mex2-quesadillas","mfr-mex2-quesadillas-cf","mfr-mex2-quesadillas-pf",
+      "mfr-mex2-red-rice-beans","mfr-mex2-red-rice-beans-cf","mfr-mex2-red-rice-beans-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
