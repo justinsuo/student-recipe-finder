@@ -281,7 +281,7 @@ export default function HomePage() {
         />
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <ToolCard
-            href="/cheap-recipes"
+            href="/cheap-recipes?method=microwave"
             tone="sky"
             icon={<Microwave size={20} />}
             title="Microwave meals"
@@ -290,7 +290,7 @@ export default function HomePage() {
             bgImage="https://images.unsplash.com/photo-1642522685167-cf414ea225be?w=600&auto=format&fit=crop&q=70"
           />
           <ToolCard
-            href="/cheap-recipes"
+            href="/cheap-recipes?method=air-fryer"
             tone="violet"
             icon={<Wind size={20} />}
             title="Air fryer meals"
@@ -299,7 +299,7 @@ export default function HomePage() {
             bgImage="https://images.unsplash.com/photo-1623238913973-21e45cced554?w=600&auto=format&fit=crop&q=70"
           />
           <ToolCard
-            href="/cheap-recipes"
+            href="/cheap-recipes?method=no-stove"
             tone="emerald"
             icon={<HomeIcon size={20} />}
             title="No-stove recipes"
