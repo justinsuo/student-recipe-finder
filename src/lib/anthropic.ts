@@ -150,6 +150,60 @@ export async function recognizeIngredientsFromImage(
   return parseVisionJson(text);
 }
 
+// ----------------- Vision: parse a grocery receipt photo -----------------
+
+const RECEIPT_SYSTEM = `You are a grocery-receipt parser. The user uploads a photo of a grocery store receipt. Read every line item, identify which lines are actual food/ingredient purchases, and map each to one of the known ingredient IDs from the provided catalog when possible.
+
+Always respond with ONLY valid JSON in this exact schema (no markdown, no code fences, no commentary):
+{
+  "recognized": [
+    {"id": "<known-ingredient-id>", "name": "<display name>", "confidence": <0..1>}
+  ],
+  "unrecognized": ["<short label of an item line that does not match the catalog>"]
+}
+
+Rules:
+- "id" must be one of the IDs from the catalog. If a food item doesn't match, put a clean lower-case label (e.g. "kimchi", "tahini") in "unrecognized".
+- "confidence" reflects how legible the receipt line was AND how confident the catalog mapping is.
+- Decode common grocery abbreviations (e.g. "ORG STRAWBRY" -> strawberries, "WHL MLK" -> milk, "CHKN BRST" -> chicken-breast). Map brand-named foods to the generic catalog ingredient when reasonable ("LACTAID 2%" -> milk).
+- IGNORE non-food line items: store name, address, cashier, register number, time/date, payment method, card number fragments, change due, subtotals, tax, totals, bottle deposits, bag fees, plastic-bag charges, loyalty discounts, savings/coupon lines, "TC#" or "AID" or "AUTH" codes, barcodes, phone numbers, return/refund instructions, survey URLs.
+- IGNORE pure prices (numbers with currency symbols) on their own.
+- De-duplicate items if the same food appears multiple times on the receipt (combine into one entry).
+- If the photo isn't a receipt or no food items are legible, return {"recognized": [], "unrecognized": []}.`;
+
+export async function recognizeIngredientsFromReceipt(
+  imageBase64: string,
+  mediaType: string,
+): Promise<VisionResult> {
+  const catalog = ingredientCatalog();
+  const text = await callAnthropic({
+    system: RECEIPT_SYSTEM,
+    maxTokens: 2000,
+    temperature: 0.1,
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "image",
+            source: {
+              type: "base64",
+              media_type: mediaType,
+              data: imageBase64,
+            },
+          },
+          {
+            type: "text",
+            text: `Known ingredient catalog (id: name (category)):\n\n${catalog}\n\nParse every food line item from this grocery receipt and return JSON per the schema. Skip totals, tax, and non-food lines.`,
+          },
+        ],
+      },
+    ],
+  });
+
+  return parseVisionJson(text);
+}
+
 // ----------------- Speech: extract ingredients from a spoken transcript -----------------
 
 const VOICE_SYSTEM = `You are a pantry voice transcriber. The user dictates a list of food items they have ("I have rice, eggs, some peanut butter, frozen veg, and tortillas"). Extract every food ingredient mentioned and map each to one of the known ingredient IDs from the provided catalog.

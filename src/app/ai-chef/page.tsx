@@ -45,6 +45,7 @@ import { useAppStore } from "@/lib/AppStore";
 import { INGREDIENTS } from "@/data/ingredients";
 import { resolvedToCustom, saveCustomIngredient, findExistingByName, getCustomIngredients } from "@/lib/customIngredientStorage";
 import { AIChefPantrySelector } from "@/components/ai/AIChefPantrySelector";
+import { ReceiptUpload } from "@/components/pantry/ReceiptUpload";
 import { PantryPhotoUpload } from "@/components/pantry/PantryPhotoUpload";
 import { PantrySmartAdd } from "@/components/pantry/PantrySmartAdd";
 import { Refrigerator } from "lucide-react";
@@ -799,6 +800,7 @@ function AIChefPage() {
               onChange={setSelectedPantryIds}
             />
             <PantryPhotoUpload />
+            <ReceiptUpload variant="compact" />
             <PantrySmartAdd />
             <div>
               <label className="flex items-center gap-1.5 text-sm font-medium text-stone-800">

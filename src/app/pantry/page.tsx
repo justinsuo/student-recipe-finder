@@ -35,6 +35,7 @@ import { PantryPhotoUpload } from "@/components/pantry/PantryPhotoUpload";
 import { PantryVoiceInput } from "@/components/pantry/PantryVoiceInput";
 import { PantrySmartAdd } from "@/components/pantry/PantrySmartAdd";
 import { PantryAIChat } from "@/components/pantry/PantryAIChat";
+import { ReceiptUpload } from "@/components/pantry/ReceiptUpload";
 import { LocationSetup } from "@/components/pricing/LocationSetup";
 import { getCustomIngredients } from "@/lib/customIngredientStorage";
 import type { Ingredient, IngredientCategory } from "@/lib/types";
@@ -169,6 +170,8 @@ export default function PantryPage() {
       <PantryVoiceInput />
 
       <PantryPhotoUpload />
+
+      <ReceiptUpload />
 
       <PantryAIChat />
 
