@@ -1622,6 +1622,42 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-ital-seafood-risotto","mfr-ital-seafood-risotto-cf","mfr-ital-seafood-risotto-pf",
     ],
   },
+  {
+    batch: 91,
+    range: "889–898",
+    theme: "Japanese donburi and poke bowls",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-jp-katsu-don","mfr-jp-katsu-don-cf","mfr-jp-katsu-don-pf",
+      "mfr-jp-gyudon","mfr-jp-gyudon-cf","mfr-jp-gyudon-pf",
+      "mfr-jp-salmon-poke","mfr-jp-salmon-poke-cf","mfr-jp-salmon-poke-pf",
+      "mfr-jp-tuna-poke","mfr-jp-tuna-poke-cf","mfr-jp-tuna-poke-pf",
+      "mfr-jp-oyakodon","mfr-jp-oyakodon-cf","mfr-jp-oyakodon-pf",
+      "mfr-jp-tempura-bowl","mfr-jp-tempura-bowl-cf","mfr-jp-tempura-bowl-pf",
+      "mfr-jp-miso-tofu-bowl","mfr-jp-miso-tofu-bowl-cf","mfr-jp-miso-tofu-bowl-pf",
+      "mfr-jp-teriyaki-tofu-bowl","mfr-jp-teriyaki-tofu-bowl-cf","mfr-jp-teriyaki-tofu-bowl-pf",
+      "mfr-jp-yakisoba","mfr-jp-yakisoba-cf","mfr-jp-yakisoba-pf",
+      "mfr-jp-hiyashi-chuka","mfr-jp-hiyashi-chuka-cf","mfr-jp-hiyashi-chuka-pf",
+    ],
+  },
+  {
+    batch: 92,
+    range: "899–908",
+    theme: "Indian vegetarian II",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-ind2-paneer-tikka-masala","mfr-ind2-paneer-tikka-masala-cf","mfr-ind2-paneer-tikka-masala-pf",
+      "mfr-ind2-baingan-bharta","mfr-ind2-baingan-bharta-cf","mfr-ind2-baingan-bharta-pf",
+      "mfr-ind2-aloo-matar","mfr-ind2-aloo-matar-cf","mfr-ind2-aloo-matar-pf",
+      "mfr-ind2-palak-dal","mfr-ind2-palak-dal-cf","mfr-ind2-palak-dal-pf",
+      "mfr-ind2-veg-biryani","mfr-ind2-veg-biryani-cf","mfr-ind2-veg-biryani-pf",
+      "mfr-ind2-matar-paneer","mfr-ind2-matar-paneer-cf","mfr-ind2-matar-paneer-pf",
+      "mfr-ind2-saag-tofu","mfr-ind2-saag-tofu-cf","mfr-ind2-saag-tofu-pf",
+      "mfr-ind2-bhindi-masala","mfr-ind2-bhindi-masala-cf","mfr-ind2-bhindi-masala-pf",
+      "mfr-ind2-chole-bhature","mfr-ind2-chole-bhature-cf","mfr-ind2-chole-bhature-pf",
+      "mfr-ind2-lauki-chana-dal","mfr-ind2-lauki-chana-dal-cf","mfr-ind2-lauki-chana-dal-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
