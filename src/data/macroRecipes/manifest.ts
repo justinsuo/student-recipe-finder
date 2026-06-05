@@ -1298,6 +1298,42 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-diner-cheese-omelette","mfr-diner-cheese-omelette-cf","mfr-diner-cheese-omelette-pf",
     ],
   },
+  {
+    batch: 73,
+    range: "709–718",
+    theme: "Southeast Asian curries",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-sea-curry-thai-red-chicken","mfr-sea-curry-thai-red-chicken-cf","mfr-sea-curry-thai-red-chicken-pf",
+      "mfr-sea-curry-rendang","mfr-sea-curry-rendang-cf","mfr-sea-curry-rendang-pf",
+      "mfr-sea-curry-sayur-lodeh","mfr-sea-curry-sayur-lodeh-cf","mfr-sea-curry-sayur-lodeh-pf",
+      "mfr-sea-curry-kare-kare","mfr-sea-curry-kare-kare-cf","mfr-sea-curry-kare-kare-pf",
+      "mfr-sea-curry-ca-ri-ga","mfr-sea-curry-ca-ri-ga-cf","mfr-sea-curry-ca-ri-ga-pf",
+      "mfr-sea-curry-massaman","mfr-sea-curry-massaman-cf","mfr-sea-curry-massaman-pf",
+      "mfr-sea-curry-amok","mfr-sea-curry-amok-cf","mfr-sea-curry-amok-pf",
+      "mfr-sea-curry-laksa","mfr-sea-curry-laksa-cf","mfr-sea-curry-laksa-pf",
+      "mfr-sea-curry-panang","mfr-sea-curry-panang-cf","mfr-sea-curry-panang-pf",
+      "mfr-sea-curry-khao-suey","mfr-sea-curry-khao-suey-cf","mfr-sea-curry-khao-suey-pf",
+    ],
+  },
+  {
+    batch: 74,
+    range: "719–728",
+    theme: "Nordic and Scandinavian dishes",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-nordic-kottbullar","mfr-nordic-kottbullar-cf","mfr-nordic-kottbullar-pf",
+      "mfr-nordic-salmon-dill","mfr-nordic-salmon-dill-cf","mfr-nordic-salmon-dill-pf",
+      "mfr-nordic-smorrebrod","mfr-nordic-smorrebrod-cf","mfr-nordic-smorrebrod-pf",
+      "mfr-nordic-lohikeitto","mfr-nordic-lohikeitto-cf","mfr-nordic-lohikeitto-pf",
+      "mfr-nordic-skyr-bowl","mfr-nordic-skyr-bowl-cf","mfr-nordic-skyr-bowl-pf",
+      "mfr-nordic-yellow-pea-soup","mfr-nordic-yellow-pea-soup-cf","mfr-nordic-yellow-pea-soup-pf",
+      "mfr-nordic-frikadeller","mfr-nordic-frikadeller-cf","mfr-nordic-frikadeller-pf",
+      "mfr-nordic-klippfisk-bowl","mfr-nordic-klippfisk-bowl-cf","mfr-nordic-klippfisk-bowl-pf",
+      "mfr-nordic-gravlax","mfr-nordic-gravlax-cf","mfr-nordic-gravlax-pf",
+      "mfr-nordic-ruispuuro","mfr-nordic-ruispuuro-cf","mfr-nordic-ruispuuro-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
