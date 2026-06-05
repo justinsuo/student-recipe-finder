@@ -1388,6 +1388,24 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-it2-orecchiette-sausage","mfr-it2-orecchiette-sausage-cf","mfr-it2-orecchiette-sausage-pf",
     ],
   },
+  {
+    batch: 78,
+    range: "759–768",
+    theme: "American breakfast burritos and bowls",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-bfst-burrito-classic","mfr-bfst-burrito-classic-cf","mfr-bfst-burrito-classic-pf",
+      "mfr-bfst-southwest-bowl","mfr-bfst-southwest-bowl-cf","mfr-bfst-southwest-bowl-pf",
+      "mfr-bfst-denver-skillet","mfr-bfst-denver-skillet-cf","mfr-bfst-denver-skillet-pf",
+      "mfr-bfst-avo-toast-egg","mfr-bfst-avo-toast-egg-cf","mfr-bfst-avo-toast-egg-pf",
+      "mfr-bfst-chorizo-hash","mfr-bfst-chorizo-hash-cf","mfr-bfst-chorizo-hash-pf",
+      "mfr-bfst-green-goddess-scramble","mfr-bfst-green-goddess-scramble-cf","mfr-bfst-green-goddess-scramble-pf",
+      "mfr-bfst-banana-protein-pancakes","mfr-bfst-banana-protein-pancakes-cf","mfr-bfst-banana-protein-pancakes-pf",
+      "mfr-bfst-quesadilla-loaded","mfr-bfst-quesadilla-loaded-cf","mfr-bfst-quesadilla-loaded-pf",
+      "mfr-bfst-savory-oatmeal","mfr-bfst-savory-oatmeal-cf","mfr-bfst-savory-oatmeal-pf",
+      "mfr-bfst-pb-french-toast","mfr-bfst-pb-french-toast-cf","mfr-bfst-pb-french-toast-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
