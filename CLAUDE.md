@@ -1,4 +1,4 @@
-# Student Recipe Finder — Project Brain
+# Waivy — Project Brain
 
 This file is the working memory for any coding agent (Claude Code, Cursor, etc.) operating in this repo. Read this **first**. The skills in `.claude/skills/` extend it.
 
@@ -8,7 +8,7 @@ This file is the working memory for any coding agent (Claude Code, Cursor, etc.)
 
 ## 1. Product overview
 
-Student Recipe Finder helps broke/busy students cook real food with what they already own. Three things make it different from a generic recipe site:
+Waivy (sometimes "Waivy AI") helps broke/busy students cook real food with what they already own. Three things make it different from a generic recipe site:
 
 - **Pantry-first.** Recipes are scored against the user's actual pantry, equipment, and budget — not the other way around.
 - **Real cost per serving.** Every recipe is priced from an ingredient catalog with regional cost-of-living multipliers and user overrides. No fake store prices.
@@ -182,7 +182,7 @@ If a script you expect doesn't exist, **don't fabricate output**. Report that it
 
 - Static export must keep working (`output: "export"` in `next.config.ts`).
 - `RECIPES` array (`src/data/recipes.ts`) is the source of truth — don't delete or rename recipe IDs.
-- `localStorage` keys: `srf:pantry`, `srf:grocery`, `srf:saved`, `srf:custom-recipes`, `srf:location`. Renaming silently wipes user data.
+- `localStorage` keys: `srf:pantry`, `srf:grocery`, `srf:saved`, `srf:custom-recipes`, `srf:location`. The `srf:` prefix is legacy (from the pre-Waivy "Student Recipe Finder" name) — **do not rename it.** Renaming silently wipes every existing user's pantry / grocery / saved / custom recipes.
 - Anthropic API key is `NEXT_PUBLIC_ANTHROPIC_API_KEY`. Don't rename it.
 - Floating Pesto button hides while user is typing — don't remove that behavior; it overlaps the mobile keyboard otherwise.
 - `RecipeCard` is used on the home page, `/cheap-recipes`, `/saved`, `/explore`, `/pantry` — any visual change ripples everywhere. Verify each.

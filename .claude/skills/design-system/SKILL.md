@@ -1,6 +1,6 @@
 ---
 name: design-system
-description: The visual system for Student Recipe Finder — color tokens, typography, spacing, radii, shadows, category colors, and the rules for keeping it consistent. Use when building or auditing any visual surface.
+description: The visual system for Waivy — color tokens, typography, spacing, radii, shadows, category colors, and the rules for keeping it consistent. Use when building or auditing any visual surface.
 when_to_use:
   - You are about to introduce a new color or hover state
   - You can't decide which Tailwind class to use for a spacing or radius

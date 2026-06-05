@@ -77,12 +77,15 @@ export function Navbar() {
             </span>
           </div>
           <div className="flex flex-col leading-tight">
-            <span className="text-sm font-bold tracking-tight text-stone-900 transition-colors group-hover:text-emerald-700">
-              Student Recipe Finder
+            <span className="inline-flex items-baseline gap-1.5 text-base font-bold tracking-tight text-stone-900 transition-colors group-hover:text-emerald-700">
+              Waivy
+              <span className="hidden text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-600 sm:inline">
+                AI
+              </span>
             </span>
             {/* Tagline only on larger screens so it never crowds the nav. */}
             <span className="hidden text-[11px] text-stone-500 lg:inline">
-              Eat well, spend less.
+              Cook smart on a student budget.
             </span>
           </div>
         </Link>

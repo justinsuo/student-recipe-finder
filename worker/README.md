@@ -1,4 +1,4 @@
-# Student Recipe Finder Worker
+# Waivy Worker
 
 Cloudflare Worker that proxies OpenAI requests for the static-site frontend.
 
@@ -24,13 +24,13 @@ npm run deploy
 After deployment Wrangler prints a URL like:
 
 ```
-https://student-recipe-finder-api.<your-cf-subdomain>.workers.dev
+https://waivy-api.<your-cf-subdomain>.workers.dev
 ```
 
 Add that URL as a GitHub repo secret called `WORKER_URL` on the main repo so the frontend build can wire it in:
 
 ```bash
-gh secret set WORKER_URL --body "https://student-recipe-finder-api.<your-cf-subdomain>.workers.dev" --repo justinsuo/student-recipe-finder
+gh secret set WORKER_URL --body "https://waivy-api.<your-cf-subdomain>.workers.dev" --repo justinsuo/waivy
 ```
 
 ## Endpoints

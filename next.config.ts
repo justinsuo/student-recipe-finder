@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const isGhPages = process.env.GH_PAGES === "true";
-const repo = "student-recipe-finder";
+const repo = "waivy";
 
 const nextConfig: NextConfig = {
   output: "export",
@@ -20,3 +20,5 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+import('@opennextjs/cloudflare').then(m => m.initOpenNextCloudflareForDev());

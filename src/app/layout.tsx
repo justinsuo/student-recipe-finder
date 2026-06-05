@@ -18,9 +18,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Student Recipe Finder — Eat well, spend less",
+  title: "Waivy — Eat well, spend less",
   description:
-    "Find cheap, practical recipes built around your budget, your pantry, and your equipment.",
+    "Waivy is an AI cooking assistant for students. Pantry-aware recipes, real cost per serving, macros, and a grocery list built in.",
+  applicationName: "Waivy",
 };
 
 export default function RootLayout({

@@ -1,6 +1,8 @@
-# Student Recipe Finder
+# Waivy
 
-**Live site:** https://justinsuo.github.io/student-recipe-finder/
+**Live site:** https://justinsuo.github.io/waivy/
+
+> Waivy (sometimes "Waivy AI") is the AI cooking assistant for students. Previously released as "Student Recipe Finder" — the repo, package name, and live URL were renamed on 2026-06-02. The `srf:` localStorage prefix is kept as-is so existing users don't lose their pantry / saved / grocery list.
 
 A Next.js + TypeScript + Tailwind web app that helps students cook real food with what they already own. It started as a flat recipe database and grew into a small AI cooking platform — pantry tracking, AI Chef recipe generation, AI ingredient understanding, image generation, regional pricing, nutrition math, a guided cooking mode, a global-cuisine explorer, and a manual recipe builder.
 
@@ -546,7 +548,7 @@ All reads/writes are SSR-safe (no-op when `window` is undefined) and wrapped in 
 ## Repo layout
 
 ```
-student-recipe-finder/
+waivy/
 ├─ src/
 │  ├─ app/
 │  │  ├─ layout.tsx                       # Providers (AppStore + Toast), Navbar, Chatbot
@@ -672,7 +674,7 @@ npx wrangler secret put ALLOWED_ORIGIN      # https://justinsuo.github.io  (or y
 npm run deploy
 ```
 
-Wrangler prints a URL like `https://student-recipe-finder-api.<sub>.workers.dev`. Save it as `NEXT_PUBLIC_WORKER_URL`:
+Wrangler prints a URL like `https://waivy-api.<sub>.workers.dev`. Save it as `NEXT_PUBLIC_WORKER_URL`:
 
 - **Local:** `echo 'NEXT_PUBLIC_WORKER_URL=http://localhost:8787' >> .env.local` and run `npx wrangler dev` in `worker/`.
 - **CI / GitHub Pages:** `gh secret set WORKER_URL --body "<that url>"`, then `gh workflow run deploy.yml`.
@@ -707,7 +709,7 @@ NEXT_PUBLIC_EDAMAM_BASE_URL=https://api.edamam.com
 | `NEXT_PUBLIC_EDAMAM_APP_ID` | when source = edamam | `/explore` |  |
 | `NEXT_PUBLIC_EDAMAM_APP_KEY` | when source = edamam | `/explore` |  |
 | `NEXT_PUBLIC_EDAMAM_BASE_URL` | when source = edamam | `/explore` |  |
-| `GH_PAGES` | build-only | `next.config.ts` | When `true`, applies `basePath: "/student-recipe-finder"` for GitHub Pages. |
+| `GH_PAGES` | build-only | `next.config.ts` | When `true`, applies `basePath: "/waivy"` for GitHub Pages. |
 | `OPENAI_API_KEY` | worker secret | Worker | **Server-side only.** Never put in `.env.local`. |
 | `ALLOWED_ORIGIN` | worker secret | Worker CORS | Set to your frontend origin to lock down. |
 | `DEFAULT_TEXT_MODEL` / `RECIPE_MODEL` / `RECIPE_HIGH_QUALITY_MODEL` / `LIGHTWEIGHT_MODEL` / `PRICING_MODEL` / `INGREDIENT_MODEL` / `WEB_RECIPE_MODEL` | worker var | Worker | Override OpenAI model per task. Defaults to `gpt-5-nano`. |
@@ -763,7 +765,7 @@ This repo ships a project brain and a small skill library so an AI agent can bui
   | `ai-chef-integration` | Touching Anthropic, OpenAI, or the Cloudflare Worker |
   | `pricing-nutrition` | Displaying $/serving, totals, or macros; saving an AI recipe |
   | `mobile-accessibility-qa` | After any visible change — per-route checklist in `checklist.md` |
-  | `run-and-verify-student-recipe-finder` | Confirming a change works before commit |
+  | `run-and-verify-waivy` | Confirming a change works before commit |
 
 - **Design tokens** live in [`src/app/globals.css`](./src/app/globals.css) and in [`.claude/skills/design-system/reference.md`](./.claude/skills/design-system/reference.md). Category-color rules are mandatory: microwave=sky, air fryer=orange, dorm-friendly=emerald, high protein=violet, use-soon=amber, etc.
 
@@ -781,7 +783,7 @@ A push to `main` triggers `.github/workflows/deploy.yml` which:
    - `NEXT_PUBLIC_WORKER_URL` — required for OpenAI features (AI Chef, Recipe Studio, ingredient enrichment, AI re-pricing, Remix, Web search)
 3. Uploads `out/` to GitHub Pages.
 
-The site is served from `https://justinsuo.github.io/student-recipe-finder/` and uses `basePath: "/student-recipe-finder"` at build time.
+The site is served from `https://justinsuo.github.io/waivy/` and uses `basePath: "/waivy"` at build time. (GitHub keeps the old `student-recipe-finder` URL redirecting, so existing links still work.)
 
 ### Cloudflare (optional)
 

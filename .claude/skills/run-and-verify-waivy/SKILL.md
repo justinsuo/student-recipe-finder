@@ -1,6 +1,6 @@
 ---
-name: run-and-verify-student-recipe-finder
-description: How to install, run, and verify the Student Recipe Finder locally. Use whenever you need to confirm a change actually works.
+name: run-and-verify-waivy
+description: How to install, run, and verify Waivy locally. Use whenever you need to confirm a change actually works.
 when_to_use:
   - You finished implementing a change and need to verify it
   - You can't tell if the app builds
@@ -15,7 +15,7 @@ The app is a Next.js 16 static export. The worker is a separate Cloudflare Worke
 ## Install
 
 ```bash
-cd /Users/justinsuo/student-recipe-finder
+cd /Users/justinsuo/student-recipe-finder   # local dir, kept as-is for now
 npm install
 ```
 

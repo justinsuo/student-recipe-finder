@@ -1,5 +1,5 @@
 {
-  "name": "student-recipe-finder-worker",
+  "name": "waivy-worker",
   "version": "1.0.0",
   "private": true,
   "scripts": {

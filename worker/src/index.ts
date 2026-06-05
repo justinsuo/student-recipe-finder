@@ -1,5 +1,5 @@
 /**
- * Student Recipe Finder API — Cloudflare Worker
+ * Waivy API — Cloudflare Worker
  *
  * Proxies OpenAI calls so the OPENAI_API_KEY stays server-side. The frontend
  * (static export hosted on GitHub Pages) calls these endpoints with CORS.
@@ -935,7 +935,7 @@ async function handleImportUrl(req: Request, env: Env): Promise<Response> {
     const fetchRes = await fetch(targetUrl, {
       headers: {
         "User-Agent":
-          "StudentRecipeFinder/1.0 (+https://github.com/justinsuo/student-recipe-finder) recipe-importer",
+          "Waivy/1.0 (+https://github.com/justinsuo/waivy) recipe-importer",
         Accept: "text/html,application/xhtml+xml",
       },
       cf: { cacheTtl: 0 } as RequestInitCfProperties,

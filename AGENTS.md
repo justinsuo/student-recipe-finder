@@ -1,4 +1,4 @@
-# Agent instructions — Student Recipe Finder
+# Agent instructions — Waivy
 
 Read `CLAUDE.md` first. It is the canonical project brain. This file exists so tools that read `AGENTS.md` (Cursor, etc.) pick up the same context.
 

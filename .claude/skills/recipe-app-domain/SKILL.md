@@ -1,6 +1,6 @@
 ---
 name: recipe-app-domain
-description: The Student Recipe Finder domain model — what a Recipe, Pantry, Ingredient, etc. actually is in this codebase. Read before touching anything that reads or writes recipe data.
+description: The Waivy domain model — what a Recipe, Pantry, Ingredient, etc. actually is in this codebase. Read before touching anything that reads or writes recipe data.
 when_to_use:
   - You are adding a field to Recipe or CustomRecipe
   - You are reading from pantry, grocery, or saved
