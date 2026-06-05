@@ -90,6 +90,10 @@ export default function CheapRecipesPage() {
     "any" | "air-fryer" | "microwave" | "no-stove" | "under-2"
   >("any");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  // Suppress "Showing 0 of 0" in the pre-rendered shell before hydration.
+  const [hydrated, setHydrated] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { setHydrated(true); }, []);
 
   // Debounce typing → query that drives filtering
   useEffect(() => {
@@ -524,17 +528,21 @@ export default function CheapRecipesPage() {
         )}
 
         <div className="mb-4 flex items-center justify-between">
-          <p className="text-sm text-stone-600">
-            Showing{" "}
-            <span className="font-semibold text-stone-900">
-              <AnimatedNumber value={Math.min(visibleCount, results.length)} duration={500} />
-            </span>{" "}
-            of{" "}
-            <span className="font-semibold text-stone-900">
-              <AnimatedNumber value={results.length} duration={500} />
-            </span>{" "}
-            {results.length === 1 ? "recipe" : "recipes"}
-          </p>
+          {hydrated ? (
+            <p className="text-sm text-stone-600">
+              Showing{" "}
+              <span className="font-semibold text-stone-900">
+                <AnimatedNumber value={Math.min(visibleCount, results.length)} duration={500} />
+              </span>{" "}
+              of{" "}
+              <span className="font-semibold text-stone-900">
+                <AnimatedNumber value={results.length} duration={500} />
+              </span>{" "}
+              {results.length === 1 ? "recipe" : "recipes"}
+            </p>
+          ) : (
+            <p className="text-sm text-stone-600">Loading recipes…</p>
+          )}
         </div>
         {results.length === 0 && debouncedQuery.trim() ? (
           <SearchZeroState
