@@ -637,7 +637,7 @@ export const BATCH_043: Recipe[] = [
       "50% more chicken. Toss edamame in the sauce at the end.",
     ],
     cheapTips:["Edamame in sweet and sour sauce is an unexpected but excellent addition"],
-    substitutions:[{ingredientId:"edamame",swap:"Snap peas"}],
+    substitutions:[{forIngredientId:"edamame",swap:"Snap peas"}],
     estimatedNutrition:{calories:630, protein:56, carbs:80, fat:10, fiber:8},
     variantGroup:"mfr-chinese-sweet-sour-chicken", variantType:"protein-friendly",
     variantNote:"50% more chicken + edamame. Adds ~18 g protein per serving.",

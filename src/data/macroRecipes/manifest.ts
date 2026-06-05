@@ -830,6 +830,24 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-italian-minestrone-sausage","mfr-italian-minestrone-sausage-cf","mfr-italian-minestrone-sausage-pf",
     ],
   },
+  {
+    batch: 47,
+    range: "449–458",
+    theme: "Quick weeknight dinners under 20 minutes",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-garlic-shrimp-pasta","mfr-garlic-shrimp-pasta-cf","mfr-garlic-shrimp-pasta-pf",
+      "mfr-chicken-spinach-saute","mfr-chicken-spinach-saute-cf","mfr-chicken-spinach-saute-pf",
+      "mfr-ground-turkey-quick-bowl","mfr-ground-turkey-quick-bowl-cf","mfr-ground-turkey-quick-bowl-pf",
+      "mfr-black-bean-quesadillas","mfr-black-bean-quesadillas-cf","mfr-black-bean-quesadillas-pf",
+      "mfr-pesto-chicken-quick","mfr-pesto-chicken-quick-cf","mfr-pesto-chicken-quick-pf",
+      "mfr-salmon-tacos-quick","mfr-salmon-tacos-quick-cf","mfr-salmon-tacos-quick-pf",
+      "mfr-quick-steak-bowl","mfr-quick-steak-bowl-cf","mfr-quick-steak-bowl-pf",
+      "mfr-tofu-scramble-quick","mfr-tofu-scramble-quick-cf","mfr-tofu-scramble-quick-pf",
+      "mfr-shrimp-tacos-easy","mfr-shrimp-tacos-easy-cf","mfr-shrimp-tacos-easy-pf",
+      "mfr-chicken-stir-fry-quick","mfr-chicken-stir-fry-quick-cf","mfr-chicken-stir-fry-quick-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
