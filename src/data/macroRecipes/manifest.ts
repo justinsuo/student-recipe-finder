@@ -1802,6 +1802,24 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-bowl4-wild-rice-mushroom","mfr-bowl4-wild-rice-mushroom-cf","mfr-bowl4-wild-rice-mushroom-pf",
     ],
   },
+  {
+    batch: 101,
+    range: "989–998",
+    theme: "European comfort dinners",
+    completedAt: "2026-06-05",
+    slugs: [
+      "mfr-eu2-beef-bourguignon","mfr-eu2-beef-bourguignon-cf","mfr-eu2-beef-bourguignon-pf",
+      "mfr-eu2-sauerbraten","mfr-eu2-sauerbraten-cf","mfr-eu2-sauerbraten-pf",
+      "mfr-eu2-cottage-pie","mfr-eu2-cottage-pie-cf","mfr-eu2-cottage-pie-pf",
+      "mfr-eu2-swedish-meatballs","mfr-eu2-swedish-meatballs-cf","mfr-eu2-swedish-meatballs-pf",
+      "mfr-eu2-coq-au-vin","mfr-eu2-coq-au-vin-cf","mfr-eu2-coq-au-vin-pf",
+      "mfr-eu2-bangers-mash","mfr-eu2-bangers-mash-cf","mfr-eu2-bangers-mash-pf",
+      "mfr-eu2-chicken-marsala","mfr-eu2-chicken-marsala-cf","mfr-eu2-chicken-marsala-pf",
+      "mfr-eu2-lohikeitto","mfr-eu2-lohikeitto-cf","mfr-eu2-lohikeitto-pf",
+      "mfr-eu2-ratatouille","mfr-eu2-ratatouille-cf","mfr-eu2-ratatouille-pf",
+      "mfr-eu2-irish-stew","mfr-eu2-irish-stew-cf","mfr-eu2-irish-stew-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
