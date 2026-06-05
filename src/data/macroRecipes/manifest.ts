@@ -1730,6 +1730,42 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-brk2-dutch-baby","mfr-brk2-dutch-baby-cf","mfr-brk2-dutch-baby-pf",
     ],
   },
+  {
+    batch: 97,
+    range: "949–958",
+    theme: "North African and Moroccan dinners II",
+    completedAt: "2026-06-05",
+    slugs: [
+      "mfr-nafr2-chicken-tagine","mfr-nafr2-chicken-tagine-cf","mfr-nafr2-chicken-tagine-pf",
+      "mfr-nafr2-shakshuka-green","mfr-nafr2-shakshuka-green-cf","mfr-nafr2-shakshuka-green-pf",
+      "mfr-nafr2-harira","mfr-nafr2-harira-cf","mfr-nafr2-harira-pf",
+      "mfr-nafr2-shakshuka-classic","mfr-nafr2-shakshuka-classic-cf","mfr-nafr2-shakshuka-classic-pf",
+      "mfr-nafr2-ful-medames","mfr-nafr2-ful-medames-cf","mfr-nafr2-ful-medames-pf",
+      "mfr-nafr2-kefta-tomato","mfr-nafr2-kefta-tomato-cf","mfr-nafr2-kefta-tomato-pf",
+      "mfr-nafr2-couscous-royale","mfr-nafr2-couscous-royale-cf","mfr-nafr2-couscous-royale-pf",
+      "mfr-nafr2-matbucha","mfr-nafr2-matbucha-cf","mfr-nafr2-matbucha-pf",
+      "mfr-nafr2-merguez-couscous","mfr-nafr2-merguez-couscous-cf","mfr-nafr2-merguez-couscous-pf",
+      "mfr-nafr2-tunisian-brik","mfr-nafr2-tunisian-brik-cf","mfr-nafr2-tunisian-brik-pf",
+    ],
+  },
+  {
+    batch: 98,
+    range: "959–968",
+    theme: "American sandwiches and sliders",
+    completedAt: "2026-06-05",
+    slugs: [
+      "mfr-sand-pulled-pork","mfr-sand-pulled-pork-cf","mfr-sand-pulled-pork-pf",
+      "mfr-sand-philly-cheesesteak","mfr-sand-philly-cheesesteak-cf","mfr-sand-philly-cheesesteak-pf",
+      "mfr-sand-blt","mfr-sand-blt-cf","mfr-sand-blt-pf",
+      "mfr-sand-sloppy-joe","mfr-sand-sloppy-joe-cf","mfr-sand-sloppy-joe-pf",
+      "mfr-sand-club-sandwich","mfr-sand-club-sandwich-cf","mfr-sand-club-sandwich-pf",
+      "mfr-sand-meatball-sub","mfr-sand-meatball-sub-cf","mfr-sand-meatball-sub-pf",
+      "mfr-sand-shrimp-roll","mfr-sand-shrimp-roll-cf","mfr-sand-shrimp-roll-pf",
+      "mfr-sand-tuna-melt","mfr-sand-tuna-melt-cf","mfr-sand-tuna-melt-pf",
+      "mfr-sand-chicken-salad","mfr-sand-chicken-salad-cf","mfr-sand-chicken-salad-pf",
+      "mfr-sand-grilled-cheese-deluxe","mfr-sand-grilled-cheese-deluxe-cf","mfr-sand-grilled-cheese-deluxe-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
