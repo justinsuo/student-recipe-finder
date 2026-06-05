@@ -1478,6 +1478,24 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-afr2-nyama-choma","mfr-afr2-nyama-choma-cf","mfr-afr2-nyama-choma-pf",
     ],
   },
+  {
+    batch: 83,
+    range: "809–818",
+    theme: "American comfort soups",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-soup-beef-veg","mfr-soup-beef-veg-cf","mfr-soup-beef-veg-pf",
+      "mfr-soup-clam-chowder","mfr-soup-clam-chowder-cf","mfr-soup-clam-chowder-pf",
+      "mfr-soup-chicken-wild-rice","mfr-soup-chicken-wild-rice-cf","mfr-soup-chicken-wild-rice-pf",
+      "mfr-soup-loaded-potato","mfr-soup-loaded-potato-cf","mfr-soup-loaded-potato-pf",
+      "mfr-soup-tomato-basil","mfr-soup-tomato-basil-cf","mfr-soup-tomato-basil-pf",
+      "mfr-soup-split-pea-ham","mfr-soup-split-pea-ham-cf","mfr-soup-split-pea-ham-pf",
+      "mfr-soup-corn-crab-chowder","mfr-soup-corn-crab-chowder-cf","mfr-soup-corn-crab-chowder-pf",
+      "mfr-soup-french-onion","mfr-soup-french-onion-cf","mfr-soup-french-onion-pf",
+      "mfr-soup-sausage-minestrone","mfr-soup-sausage-minestrone-cf","mfr-soup-sausage-minestrone-pf",
+      "mfr-soup-sweet-potato-chili","mfr-soup-sweet-potato-chili-cf","mfr-soup-sweet-potato-chili-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
