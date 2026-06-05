@@ -8,7 +8,10 @@ import {
   Refrigerator,
   ShoppingBasket,
   ArrowRight,
+  Beef,
+  Plus,
 } from "lucide-react";
+import { useToast } from "@/components/ui/Toast";
 import {
   getTargets,
   getDiaryForDate,
@@ -17,12 +20,32 @@ import {
 import { sumTotals, type TargetSnapshot } from "@/lib/nourish/types";
 import { useAppStore } from "@/lib/AppStore";
 import { RECIPES } from "@/data/recipes";
+import { INGREDIENT_MAP } from "@/data/ingredients";
 import { bestEffortNutrition } from "@/lib/nutritionEngine";
 import {
   calculateCostPerServing,
   calculatePantryMatch,
   pantrySetFromItems,
 } from "@/lib/recipeScoring";
+
+// Curated set of catalog IDs we can confidently suggest as protein
+// staples. All present in src/data/ingredients.ts. Order matters — we
+// stop once 4 are missing so the suggestion stays short.
+const HIGH_PROTEIN_STAPLES = [
+  "eggs",
+  "greek-yogurt",
+  "peanut-butter",
+  "chicken-breast",
+  "tuna",
+  "tofu",
+  "lentils",
+  "black-beans",
+  "chickpeas",
+  "cottage-cheese",
+  "milk",
+  "oats",
+  "protein-powder",
+];
 
 /**
  * "What should I cook?" insights panel. Reads your remaining macros for
@@ -35,7 +58,8 @@ import {
  * Chef are deep links the user can act on with the same numbers.
  */
 export function NourishInsights() {
-  const { pantry } = useAppStore();
+  const { pantry, grocery, addStapleToGrocery } = useAppStore();
+  const toast = useToast();
   const [targets, setTargets] = useState<TargetSnapshot | null>(null);
   const [consumed, setConsumed] = useState({
     kcal: 0,
@@ -135,6 +159,29 @@ export function NourishInsights() {
     targetProtein: String(Math.round(remaining.proteinG)),
   }).toString();
 
+  // Missing high-protein staples — only show if the user is genuinely
+  // short on protein for the day (>30g remaining) AND at least 3 of the
+  // staples are absent from pantry + grocery list. Caps at 4 suggestions.
+  const pantryIds = new Set(pantry.map((p) => p.ingredientId));
+  const groceryIds = new Set(grocery.map((g) => g.ingredientId));
+  const missingProteinStaples = HIGH_PROTEIN_STAPLES
+    .filter((id) => INGREDIENT_MAP.has(id))
+    .filter((id) => !pantryIds.has(id) && !groceryIds.has(id))
+    .slice(0, 4);
+  const showProteinNudge =
+    remaining.proteinG > 30 && missingProteinStaples.length >= 3;
+
+  function addStaplesToGrocery() {
+    let added = 0;
+    for (const id of missingProteinStaples) {
+      addStapleToGrocery(id);
+      added += 1;
+    }
+    toast.success(
+      `Added ${added} high-protein staple${added === 1 ? "" : "s"} to your grocery list.`,
+    );
+  }
+
   return (
     <section className="rounded-3xl border border-emerald-200/70 bg-gradient-to-br from-emerald-50 via-white to-violet-50/40 p-5 shadow-sm sm:p-6">
       <div className="flex items-start gap-3">
@@ -187,6 +234,39 @@ export function NourishInsights() {
         </Link>
       </div>
 
+      {showProteinNudge && (
+        <div className="mt-5 rounded-2xl border border-violet-200 bg-violet-50/60 p-4">
+          <div className="flex items-start gap-2.5">
+            <div className="grid h-8 w-8 flex-none place-items-center rounded-xl bg-violet-100 text-violet-700">
+              <Beef size={14} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-violet-700">
+                Low on protein
+              </p>
+              <p className="text-sm font-semibold text-stone-900">
+                {Math.round(remaining.proteinG)} g protein left, and a few
+                cheap staples missing from your pantry.
+              </p>
+              <p className="mt-1 text-xs text-violet-900">
+                {missingProteinStaples
+                  .map((id) => INGREDIENT_MAP.get(id)?.name)
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+              <button
+                type="button"
+                onClick={addStaplesToGrocery}
+                className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm shadow-violet-200 transition-all motion-safe:hover:-translate-y-0.5 hover:bg-violet-700"
+              >
+                <Plus size={12} />
+                Add {missingProteinStaples.length} to grocery list
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {suggestions.length > 0 && (
         <div className="mt-5 border-t border-emerald-100 pt-4">
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-500">
@@ -216,8 +296,43 @@ export function NourishInsights() {
         </div>
       )}
 
+      <div className="mt-5 border-t border-emerald-100 pt-4">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-500">
+          Quick questions
+        </p>
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {[
+            {
+              q: "Am I on track today?",
+              href: "/nourish/progress",
+            },
+            {
+              q: "What can I cook from my pantry?",
+              href: `/ai-chef?${aiChefQuery}`,
+            },
+            {
+              q: "Find high-protein recipes",
+              href: "/nourish/recipes",
+            },
+            {
+              q: "How's my week looking?",
+              href: "/nourish/progress",
+            },
+          ].map(({ q, href }) => (
+            <Link
+              key={q}
+              href={href}
+              className="rounded-full border border-stone-200 bg-white px-3 py-1.5 text-[11px] font-medium text-stone-700 transition-all hover:-translate-y-px hover:border-emerald-300 hover:bg-emerald-50"
+            >
+              {q}
+            </Link>
+          ))}
+        </div>
+      </div>
+
       <p className="mt-4 text-[10px] text-stone-500">
-        Nutrition estimates are for general tracking only. Not medical advice.
+        Suggestions are based on your diary, goals, and pantry — not medical
+        advice. Nutrition estimates may vary by brand, portion, and preparation.
       </p>
     </section>
   );

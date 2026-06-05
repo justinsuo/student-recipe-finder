@@ -5,10 +5,13 @@ import { usePathname } from "next/navigation";
 import {
   Apple,
   BookOpen,
+  Plus,
   TrendingUp,
   UtensilsCrossed,
   Target,
   Layers,
+  CalendarDays,
+  Timer,
   FileBarChart,
   Settings,
   Soup,
@@ -18,11 +21,14 @@ import { clsx } from "clsx";
 const ITEMS = [
   { href: "/nourish", label: "Today", icon: Apple, exact: true },
   { href: "/nourish/diary", label: "Diary", icon: BookOpen },
+  { href: "/nourish/log-food", label: "Log food", icon: Plus },
   { href: "/nourish/progress", label: "Progress", icon: TrendingUp },
   { href: "/nourish/goals", label: "Goals", icon: Target },
   { href: "/nourish/foods", label: "Foods", icon: UtensilsCrossed },
   { href: "/nourish/meals", label: "Meals", icon: Layers },
   { href: "/nourish/recipes", label: "Recipes", icon: Soup },
+  { href: "/nourish/meal-planner", label: "Planner", icon: CalendarDays },
+  { href: "/nourish/fasting", label: "Fasting", icon: Timer },
   { href: "/nourish/reports", label: "Reports", icon: FileBarChart },
   { href: "/nourish/settings", label: "Settings", icon: Settings },
 ];

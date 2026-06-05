@@ -2,7 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Layers, Plus, Trash2, ArrowRight, Save } from "lucide-react";
+import {
+  Layers,
+  Plus,
+  Trash2,
+  ArrowRight,
+  Save,
+  CalendarDays,
+  Check,
+} from "lucide-react";
+import { clsx } from "clsx";
 import { NourishShell } from "@/components/nourish/NourishShell";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -31,12 +40,39 @@ const SLOTS: { value: MealSlot; label: string }[] = [
   { value: "snack", label: "Snack" },
 ];
 
+const DAYS_AHEAD = 7;
+
+// Build the next 7 days starting from `today`. Each entry has the YYYY-MM-DD
+// key + a short label ("Today", "Tomorrow", "Wed 11").
+function buildDayPickerOptions(today: string): {
+  date: string;
+  label: string;
+}[] {
+  const out: { date: string; label: string }[] = [];
+  const base = new Date(today + "T00:00:00");
+  const fmt = new Intl.DateTimeFormat(undefined, {
+    weekday: "short",
+    day: "numeric",
+  });
+  for (let i = 0; i < DAYS_AHEAD; i++) {
+    const d = new Date(base);
+    d.setDate(d.getDate() + i);
+    const key = d.toISOString().slice(0, 10);
+    const label = i === 0 ? "Today" : i === 1 ? "Tomorrow" : fmt.format(d);
+    out.push({ date: key, label });
+  }
+  return out;
+}
+
 export default function NourishMealsPage() {
   const toast = useToast();
   const [meals, setMeals] = useState<NourishMeal[]>([]);
   const [hydrated, setHydrated] = useState(false);
-  const [picking, setPicking] = useState<MealSlot | null>(null);
+  const [savePicking, setSavePicking] = useState<MealSlot | null>(null);
   const [pickName, setPickName] = useState("");
+  const [scheduling, setScheduling] = useState<string | null>(null);
+  const [pickedDays, setPickedDays] = useState<Set<string>>(new Set());
+  const [pickedSlot, setPickedSlot] = useState<MealSlot>("lunch");
 
   function refresh() {
     setMeals(getMeals());
@@ -66,17 +102,43 @@ export default function NourishMealsPage() {
       new Date().toISOString(),
     );
     saveMeal(meal);
-    setPicking(null);
+    setSavePicking(null);
     setPickName("");
     refresh();
     toast.success(`Meal saved — ${entries.length} items grouped as "${name}".`);
   }
 
-  function logMealToToday(meal: NourishMeal) {
-    const slot: MealSlot = meal.defaultSlot ?? "lunch";
-    const entries = mealToDiaryEntries(meal, todayString(), slot, newId);
-    for (const e of entries) addDiaryEntry(e);
-    toast.reward(`Logged — ${entries.length} items added to today's ${slot}.`);
+  function openScheduler(meal: NourishMeal) {
+    setScheduling(meal.id);
+    // Default to today only + the meal's preferred slot.
+    setPickedDays(new Set([todayString()]));
+    setPickedSlot(meal.defaultSlot ?? "lunch");
+  }
+
+  function toggleDay(date: string) {
+    const next = new Set(pickedDays);
+    if (next.has(date)) next.delete(date);
+    else next.add(date);
+    setPickedDays(next);
+  }
+
+  function commitSchedule(meal: NourishMeal) {
+    if (pickedDays.size === 0) {
+      toast.info("Pick at least one day.");
+      return;
+    }
+    let totalEntries = 0;
+    for (const day of pickedDays) {
+      const entries = mealToDiaryEntries(meal, day, pickedSlot, newId);
+      for (const e of entries) addDiaryEntry(e);
+      totalEntries += entries.length;
+    }
+    const days = pickedDays.size;
+    setScheduling(null);
+    setPickedDays(new Set());
+    toast.reward(
+      `Logged ${totalEntries} item${totalEntries === 1 ? "" : "s"} to ${days} day${days === 1 ? "" : "s"} of ${pickedSlot}.`,
+    );
   }
 
   function remove(meal: NourishMeal) {
@@ -85,10 +147,13 @@ export default function NourishMealsPage() {
     toast.info(`Removed "${meal.name}".`);
   }
 
+  const today = todayString();
+  const dayOptions = buildDayPickerOptions(today);
+
   return (
     <NourishShell
       title="My meals."
-      description="Reusable groups of foods you eat together. Save your usual breakfast once, log it in one tap from then on."
+      description="Reusable groups of foods you eat together. Save your usual breakfast once, log it to a single day or your whole meal-prep week in one tap."
     >
       <section className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
         <SectionHeading
@@ -103,13 +168,13 @@ export default function NourishMealsPage() {
         />
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {SLOTS.map(({ value, label }) => {
-            const active = picking === value;
+            const active = savePicking === value;
             return (
               <button
                 key={value}
                 type="button"
                 onClick={() => {
-                  setPicking(active ? null : value);
+                  setSavePicking(active ? null : value);
                   setPickName("");
                 }}
                 aria-pressed={active}
@@ -120,13 +185,15 @@ export default function NourishMealsPage() {
                 }
               >
                 <p className="text-sm font-semibold text-stone-900">{label}</p>
-                <p className="mt-0.5 text-xs text-stone-500">Save today&apos;s {label.toLowerCase()}</p>
+                <p className="mt-0.5 text-xs text-stone-500">
+                  Save today&apos;s {label.toLowerCase()}
+                </p>
               </button>
             );
           })}
         </div>
 
-        {picking && (
+        {savePicking && (
           <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4">
             <label className="block">
               <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-800">
@@ -136,19 +203,22 @@ export default function NourishMealsPage() {
                 type="text"
                 value={pickName}
                 onChange={(e) => setPickName(e.target.value)}
-                placeholder={`My ${picking}`}
+                placeholder={`My ${savePicking}`}
                 className="mt-1 w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100"
               />
             </label>
             <div className="mt-3 flex flex-wrap gap-2">
-              <Button onClick={() => saveFromDiary(picking)} leftIcon={<Save size={14} />}>
-                Save as &ldquo;{pickName.trim() || `My ${picking}`}&rdquo;
+              <Button
+                onClick={() => saveFromDiary(savePicking)}
+                leftIcon={<Save size={14} />}
+              >
+                Save as &ldquo;{pickName.trim() || `My ${savePicking}`}&rdquo;
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  setPicking(null);
+                  setSavePicking(null);
                   setPickName("");
                 }}
               >
@@ -157,7 +227,7 @@ export default function NourishMealsPage() {
             </div>
             <p className="mt-2 text-[11px] text-emerald-800">
               We&apos;ll bundle the foods you&apos;ve logged to today&apos;s{" "}
-              {picking}. Log some first if you haven&apos;t.
+              {savePicking}. Log some first if you haven&apos;t.
             </p>
           </div>
         )}
@@ -171,7 +241,7 @@ export default function NourishMealsPage() {
             </span>
           }
           title={`${meals.length} meal${meals.length === 1 ? "" : "s"}`}
-          description="Tap a meal to log all its foods to today's diary."
+          description="Log a meal to today, or schedule it across multiple days for meal prep."
           tone="violet"
         />
         {hydrated && meals.length === 0 ? (
@@ -179,7 +249,7 @@ export default function NourishMealsPage() {
             <EmptyState
               emoji="🥗"
               title="No saved meals yet"
-              description="Save your usual breakfast, your go-to lunch, or your post-gym snack — then log them in one tap."
+              description="Save your usual breakfast, your go-to lunch, or your post-gym snack — then log them in one tap, today or all week."
               tone="emerald"
               action={
                 <Link
@@ -236,19 +306,123 @@ export default function NourishMealsPage() {
                 <p className="text-[11px] text-stone-500">
                   {meal.items.length} items
                 </p>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  leftIcon={<Plus size={14} />}
-                  onClick={() => logMealToToday(meal)}
-                >
-                  Log to today
-                </Button>
+
+                {scheduling === meal.id ? (
+                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-800">
+                      Pick days
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {dayOptions.map((d) => {
+                        const active = pickedDays.has(d.date);
+                        return (
+                          <button
+                            key={d.date}
+                            type="button"
+                            onClick={() => toggleDay(d.date)}
+                            aria-pressed={active}
+                            className={clsx(
+                              "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all",
+                              active
+                                ? "border-emerald-600 bg-emerald-600 text-white shadow-sm shadow-emerald-200 motion-safe:scale-[1.04]"
+                                : "border-stone-200 bg-white text-stone-700 hover:-translate-y-px hover:border-emerald-300 hover:bg-emerald-50",
+                            )}
+                          >
+                            {active && <Check size={10} />}
+                            {d.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-800">
+                      Slot
+                    </p>
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      {SLOTS.map(({ value, label }) => {
+                        const active = pickedSlot === value;
+                        return (
+                          <button
+                            key={value}
+                            type="button"
+                            onClick={() => setPickedSlot(value)}
+                            aria-pressed={active}
+                            className={
+                              active
+                                ? "rounded-full border border-emerald-600 bg-emerald-600 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm shadow-emerald-200"
+                                : "rounded-full border border-stone-200 bg-white px-2.5 py-1 text-[11px] font-medium text-stone-700 hover:border-emerald-300 hover:bg-emerald-50"
+                            }
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => commitSchedule(meal)}
+                        disabled={pickedDays.size === 0}
+                        leftIcon={<Plus size={14} />}
+                      >
+                        Log to {pickedDays.size}{" "}
+                        {pickedDays.size === 1 ? "day" : "days"}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setScheduling(null);
+                          setPickedDays(new Set());
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      leftIcon={<Plus size={14} />}
+                      onClick={() => {
+                        const slot: MealSlot = meal.defaultSlot ?? "lunch";
+                        const entries = mealToDiaryEntries(
+                          meal,
+                          todayString(),
+                          slot,
+                          newId,
+                        );
+                        for (const e of entries) addDiaryEntry(e);
+                        toast.reward(
+                          `Logged — ${entries.length} items added to today's ${slot}.`,
+                        );
+                      }}
+                    >
+                      Log to today
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      leftIcon={<CalendarDays size={14} />}
+                      onClick={() => openScheduler(meal)}
+                    >
+                      Log to multiple days
+                    </Button>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
         )}
       </section>
+
+      <p className="text-[11px] text-stone-500">
+        Nutrition estimates are for general tracking only and may vary by
+        brand, portion, and preparation. Not medical advice.
+      </p>
     </NourishShell>
   );
 }
