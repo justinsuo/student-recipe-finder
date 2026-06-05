@@ -1532,6 +1532,24 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-eu-irish-egg-bake","mfr-eu-irish-egg-bake-cf","mfr-eu-irish-egg-bake-pf",
     ],
   },
+  {
+    batch: 86,
+    range: "839–848",
+    theme: "Korean dinners II",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-kor2-doenjang-jjigae","mfr-kor2-doenjang-jjigae-cf","mfr-kor2-doenjang-jjigae-pf",
+      "mfr-kor2-sundubu","mfr-kor2-sundubu-cf","mfr-kor2-sundubu-pf",
+      "mfr-kor2-bokkeumbap","mfr-kor2-bokkeumbap-cf","mfr-kor2-bokkeumbap-pf",
+      "mfr-kor2-gamja-jorim","mfr-kor2-gamja-jorim-cf","mfr-kor2-gamja-jorim-pf",
+      "mfr-kor2-japchae-chicken","mfr-kor2-japchae-chicken-cf","mfr-kor2-japchae-chicken-pf",
+      "mfr-kor2-jeyuk-bokkeum","mfr-kor2-jeyuk-bokkeum-cf","mfr-kor2-jeyuk-bokkeum-pf",
+      "mfr-kor2-galbijjim","mfr-kor2-galbijjim-cf","mfr-kor2-galbijjim-pf",
+      "mfr-kor2-tteokbokki","mfr-kor2-tteokbokki-cf","mfr-kor2-tteokbokki-pf",
+      "mfr-kor2-pajeon","mfr-kor2-pajeon-cf","mfr-kor2-pajeon-pf",
+      "mfr-kor2-miyeok-guk","mfr-kor2-miyeok-guk-cf","mfr-kor2-miyeok-guk-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
