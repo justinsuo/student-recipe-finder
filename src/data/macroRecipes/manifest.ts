@@ -1370,6 +1370,24 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-jp-ochazuke-salmon","mfr-jp-ochazuke-salmon-cf","mfr-jp-ochazuke-salmon-pf",
     ],
   },
+  {
+    batch: 77,
+    range: "749–758",
+    theme: "Italian pasta dinners II",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-it2-cacio-e-pepe","mfr-it2-cacio-e-pepe-cf","mfr-it2-cacio-e-pepe-pf",
+      "mfr-it2-pasta-norma","mfr-it2-pasta-norma-cf","mfr-it2-pasta-norma-pf",
+      "mfr-it2-pasta-e-ceci","mfr-it2-pasta-e-ceci-cf","mfr-it2-pasta-e-ceci-pf",
+      "mfr-it2-amatriciana","mfr-it2-amatriciana-cf","mfr-it2-amatriciana-pf",
+      "mfr-it2-vongole","mfr-it2-vongole-cf","mfr-it2-vongole-pf",
+      "mfr-it2-arrabbiata","mfr-it2-arrabbiata-cf","mfr-it2-arrabbiata-pf",
+      "mfr-it2-tuscan-white-bean-pasta","mfr-it2-tuscan-white-bean-pasta-cf","mfr-it2-tuscan-white-bean-pasta-pf",
+      "mfr-it2-pasta-gricia","mfr-it2-pasta-gricia-cf","mfr-it2-pasta-gricia-pf",
+      "mfr-it2-pasta-con-tonno","mfr-it2-pasta-con-tonno-cf","mfr-it2-pasta-con-tonno-pf",
+      "mfr-it2-orecchiette-sausage","mfr-it2-orecchiette-sausage-cf","mfr-it2-orecchiette-sausage-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
