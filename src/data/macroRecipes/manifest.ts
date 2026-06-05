@@ -1550,6 +1550,24 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-kor2-miyeok-guk","mfr-kor2-miyeok-guk-cf","mfr-kor2-miyeok-guk-pf",
     ],
   },
+  {
+    batch: 87,
+    range: "849–858",
+    theme: "Chinese stir-fries and rice dishes",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-chn-steamed-fish","mfr-chn-steamed-fish-cf","mfr-chn-steamed-fish-pf",
+      "mfr-chn-mapo-tofu","mfr-chn-mapo-tofu-cf","mfr-chn-mapo-tofu-pf",
+      "mfr-chn-egg-fried-rice","mfr-chn-egg-fried-rice-cf","mfr-chn-egg-fried-rice-pf",
+      "mfr-chn-kung-pao-shrimp","mfr-chn-kung-pao-shrimp-cf","mfr-chn-kung-pao-shrimp-pf",
+      "mfr-chn-hoisin-pork","mfr-chn-hoisin-pork-cf","mfr-chn-hoisin-pork-pf",
+      "mfr-chn-congee","mfr-chn-congee-cf","mfr-chn-congee-pf",
+      "mfr-chn-three-cup-chicken","mfr-chn-three-cup-chicken-cf","mfr-chn-three-cup-chicken-pf",
+      "mfr-chn-dan-dan","mfr-chn-dan-dan-cf","mfr-chn-dan-dan-pf",
+      "mfr-chn-char-siu-chicken","mfr-chn-char-siu-chicken-cf","mfr-chn-char-siu-chicken-pf",
+      "mfr-chn-hong-shao-rou","mfr-chn-hong-shao-rou-cf","mfr-chn-hong-shao-rou-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
