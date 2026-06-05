@@ -1514,6 +1514,24 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-sea2-pho-bo","mfr-sea2-pho-bo-cf","mfr-sea2-pho-bo-pf",
     ],
   },
+  {
+    batch: 85,
+    range: "829–838",
+    theme: "European baked dinners",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-eu-moussaka","mfr-eu-moussaka-cf","mfr-eu-moussaka-pf",
+      "mfr-eu-tortilla-espanola","mfr-eu-tortilla-espanola-cf","mfr-eu-tortilla-espanola-pf",
+      "mfr-eu-quiche-lorraine","mfr-eu-quiche-lorraine-cf","mfr-eu-quiche-lorraine-pf",
+      "mfr-eu-shepherds-pie","mfr-eu-shepherds-pie-cf","mfr-eu-shepherds-pie-pf",
+      "mfr-eu-ratatouille-eggs","mfr-eu-ratatouille-eggs-cf","mfr-eu-ratatouille-eggs-pf",
+      "mfr-eu-spanakopita-bake","mfr-eu-spanakopita-bake-cf","mfr-eu-spanakopita-bake-pf",
+      "mfr-eu-bigos","mfr-eu-bigos-cf","mfr-eu-bigos-pf",
+      "mfr-eu-salmon-gratin","mfr-eu-salmon-gratin-cf","mfr-eu-salmon-gratin-pf",
+      "mfr-eu-schnitzel-bowl","mfr-eu-schnitzel-bowl-cf","mfr-eu-schnitzel-bowl-pf",
+      "mfr-eu-irish-egg-bake","mfr-eu-irish-egg-bake-cf","mfr-eu-irish-egg-bake-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
