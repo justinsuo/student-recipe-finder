@@ -32,6 +32,23 @@ import { BATCH_012 } from "./batch-012";
 import { BATCH_013 } from "./batch-013";
 import { BATCH_014 } from "./batch-014";
 import { BATCH_015 } from "./batch-015";
+import { BATCH_016 } from "./batch-016";
+import { BATCH_017 } from "./batch-017";
+import { BATCH_018 } from "./batch-018";
+import { BATCH_019 } from "./batch-019";
+import { BATCH_020 } from "./batch-020";
+import { BATCH_021 } from "./batch-021";
+import { BATCH_022 } from "./batch-022";
+import { BATCH_023 } from "./batch-023";
+import { BATCH_024 } from "./batch-024";
+import { BATCH_025 } from "./batch-025";
+import { BATCH_026 } from "./batch-026";
+import { BATCH_027 } from "./batch-027";
+import { BATCH_028 } from "./batch-028";
+import { BATCH_029 } from "./batch-029";
+import { BATCH_030 } from "./batch-030";
+import { BATCH_031 } from "./batch-031";
+import { BATCH_032 } from "./batch-032";
 
 export const MACRO_RECIPES: Recipe[] = [
   ...BATCH_001,
@@ -49,6 +66,23 @@ export const MACRO_RECIPES: Recipe[] = [
   ...BATCH_013,
   ...BATCH_014,
   ...BATCH_015,
+  ...BATCH_016,
+  ...BATCH_017,
+  ...BATCH_018,
+  ...BATCH_019,
+  ...BATCH_020,
+  ...BATCH_021,
+  ...BATCH_022,
+  ...BATCH_023,
+  ...BATCH_024,
+  ...BATCH_025,
+  ...BATCH_026,
+  ...BATCH_027,
+  ...BATCH_028,
+  ...BATCH_029,
+  ...BATCH_030,
+  ...BATCH_031,
+  ...BATCH_032,
 ];
 
 export const MACRO_RECIPE_MAP = new Map(MACRO_RECIPES.map((r) => [r.id, r]));
