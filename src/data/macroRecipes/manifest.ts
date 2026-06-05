@@ -1694,6 +1694,42 @@ export const MANIFEST: BatchRecord[] = [
       "mfr-mex2-red-rice-beans","mfr-mex2-red-rice-beans-cf","mfr-mex2-red-rice-beans-pf",
     ],
   },
+  {
+    batch: 95,
+    range: "929–938",
+    theme: "Thai and Indonesian dinners II",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-thai2-massaman-curry","mfr-thai2-massaman-curry-cf","mfr-thai2-massaman-curry-pf",
+      "mfr-thai2-pad-thai-tofu","mfr-thai2-pad-thai-tofu-cf","mfr-thai2-pad-thai-tofu-pf",
+      "mfr-thai2-nasi-goreng","mfr-thai2-nasi-goreng-cf","mfr-thai2-nasi-goreng-pf",
+      "mfr-thai2-red-curry-veg","mfr-thai2-red-curry-veg-cf","mfr-thai2-red-curry-veg-pf",
+      "mfr-thai2-rendang","mfr-thai2-rendang-cf","mfr-thai2-rendang-pf",
+      "mfr-thai2-larb","mfr-thai2-larb-cf","mfr-thai2-larb-pf",
+      "mfr-thai2-gado-gado","mfr-thai2-gado-gado-cf","mfr-thai2-gado-gado-pf",
+      "mfr-thai2-basil-pork","mfr-thai2-basil-pork-cf","mfr-thai2-basil-pork-pf",
+      "mfr-thai2-tom-kha","mfr-thai2-tom-kha-cf","mfr-thai2-tom-kha-pf",
+      "mfr-thai2-chicken-satay","mfr-thai2-chicken-satay-cf","mfr-thai2-chicken-satay-pf",
+    ],
+  },
+  {
+    batch: 96,
+    range: "939–948",
+    theme: "American breakfasts II",
+    completedAt: "2026-06-04",
+    slugs: [
+      "mfr-brk2-eggs-benedict","mfr-brk2-eggs-benedict-cf","mfr-brk2-eggs-benedict-pf",
+      "mfr-brk2-avocado-toast-egg","mfr-brk2-avocado-toast-egg-cf","mfr-brk2-avocado-toast-egg-pf",
+      "mfr-brk2-breakfast-burrito","mfr-brk2-breakfast-burrito-cf","mfr-brk2-breakfast-burrito-pf",
+      "mfr-brk2-pancakes","mfr-brk2-pancakes-cf","mfr-brk2-pancakes-pf",
+      "mfr-brk2-french-toast","mfr-brk2-french-toast-cf","mfr-brk2-french-toast-pf",
+      "mfr-brk2-biscuits-gravy","mfr-brk2-biscuits-gravy-cf","mfr-brk2-biscuits-gravy-pf",
+      "mfr-brk2-waffles","mfr-brk2-waffles-cf","mfr-brk2-waffles-pf",
+      "mfr-brk2-breakfast-bowl","mfr-brk2-breakfast-bowl-cf","mfr-brk2-breakfast-bowl-pf",
+      "mfr-brk2-bagel-lox","mfr-brk2-bagel-lox-cf","mfr-brk2-bagel-lox-pf",
+      "mfr-brk2-dutch-baby","mfr-brk2-dutch-baby-cf","mfr-brk2-dutch-baby-pf",
+    ],
+  },
 ];
 
 export const completedCount: number = MANIFEST.reduce(
