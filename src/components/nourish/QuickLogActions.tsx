@@ -75,11 +75,15 @@ export function QuickLogActions({
   onAddWater: () => void;
   onLogExercise: () => void;
 }) {
+  // Voice / Scan / Receipt deep-link to the unified /nourish/log-food hub
+  // (which honors ?tab=…). The hub points users at the existing tools in
+  // /pantry; we don't duplicate them, but the hub is the canonical entry
+  // point so Nourish stays self-contained.
   const actions: Action[] = [
     { key: "log", label: "Log food", icon: Plus, tone: "emerald", onClick: onLogFood },
-    { key: "voice", label: "Voice log", icon: Mic, tone: "violet", href: "/pantry#voice" },
-    { key: "scan", label: "Scan meal", icon: Camera, tone: "amber", href: "/pantry#photo" },
-    { key: "receipt", label: "Scan receipt", icon: Receipt, tone: "rose", href: "/pantry#receipt" },
+    { key: "voice", label: "Voice log", icon: Mic, tone: "violet", href: "/nourish/log-food?tab=voice" },
+    { key: "scan", label: "Scan meal", icon: Camera, tone: "amber", href: "/nourish/log-food?tab=scan" },
+    { key: "receipt", label: "Scan receipt", icon: Receipt, tone: "rose", href: "/nourish/log-food?tab=receipt" },
     { key: "quick", label: "Quick add", icon: Zap, tone: "sky", onClick: onQuickAdd },
     { key: "water", label: "Add water", icon: GlassWater, tone: "cyan", onClick: onAddWater },
     { key: "exercise", label: "Log exercise", icon: Dumbbell, tone: "emerald", onClick: onLogExercise },

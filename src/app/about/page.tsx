@@ -20,6 +20,7 @@ import {
   Globe,
   Wand2,
   ArrowRight,
+  Apple,
 } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -85,6 +86,13 @@ export default function AboutPage() {
             description="Build your own recipe cards or remix AI ones. Optional auto-generated food images."
             href="/recipe-studio"
           />
+          <Step
+            icon={<Apple size={20} />}
+            tone="rose"
+            title="Nourish"
+            description="Track calories and macros, log meals from recipes or voice, plan the week, and let the Coach pick what to cook from your remaining budget."
+            href="/nourish"
+          />
         </div>
       </ScrollReveal>
 
@@ -130,11 +138,15 @@ export default function AboutPage() {
             "Per-ingredient nutrition from USDA data",
             "AI Chef (4 parallel options per request)",
             "Voice / paste / fridge-photo pantry input",
+            "Grocery-receipt OCR straight into the pantry",
             "Smart-buy suggestions",
             "Use-soon flag to reduce food waste",
             "Air fryer / microwave / no-stove filters",
             "Guided cooking mode with smart timers",
             "Manual recipe builder + AI image gen",
+            "Nourish — calorie + macro tracker with a Coach",
+            "7-day meal planner with pantry-aware grocery roll-up",
+            "Intermittent fasting tracker with summary stats",
           ].map((line) => (
             <li
               key={line}

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   Search,
   Zap,
@@ -48,10 +49,32 @@ const TONE_TINT: Record<string, string> = {
  * direct CTA. Honest about which paths require AI configuration.
  */
 export default function LogFoodPage() {
-  const [tab, setTab] = useState<Tab>("search");
+  return (
+    <Suspense fallback={null}>
+      <LogFoodBody />
+    </Suspense>
+  );
+}
+
+function LogFoodBody() {
+  const params = useSearchParams();
+  const initialTab = ((): Tab => {
+    const t = params.get("tab");
+    const valid: Tab[] = ["search", "quick", "voice", "scan", "receipt", "recipe"];
+    return (valid as string[]).includes(t ?? "") ? (t as Tab) : "search";
+  })();
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [openSearch, setOpenSearch] = useState(false);
   const [openQuick, setOpenQuick] = useState(false);
   const [slot] = useState<MealSlot>("snack");
+
+  // Auto-open the right modal when query says quick or search.
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    if (initialTab === "quick") setOpenQuick(true);
+    if (initialTab === "search") setOpenSearch(false); // keep panel; user clicks
+  }, [initialTab]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   return (
     <NourishShell

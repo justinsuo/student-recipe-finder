@@ -55,6 +55,7 @@ import { useToast } from "@/components/ui/Toast";
 import { AIChefSteppedLoader } from "@/components/ai/AIChefSteppedLoader";
 import { RecipeStatsRow } from "@/components/recipe/RecipeStatsRow";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { LogGeneratedRecipeButton } from "@/components/nourish/LogGeneratedRecipeButton";
 
 // If the AI's ingredient list maps cleanly to our catalog, replace its
 // guessed macros with the deterministic engine result. Falls back to the
@@ -1440,6 +1441,12 @@ function AIChefPage() {
                 </>
               )}
             </div>
+            <div className="pt-2">
+              <LogGeneratedRecipeButton
+                recipe={selectedOption.recipe}
+                savedId={optionSavedIds[selectedOption.id]}
+              />
+            </div>
           </header>
 
           <div className="grid gap-6 md:grid-cols-2">
@@ -1656,6 +1663,9 @@ function AIChefPage() {
               >
                 Open full page <ArrowRight size={14} />
               </Link>
+            </div>
+            <div className="pt-2">
+              <LogGeneratedRecipeButton recipe={recipe} savedId={savedId} />
             </div>
           </header>
 

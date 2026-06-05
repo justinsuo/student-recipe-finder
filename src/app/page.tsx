@@ -386,6 +386,106 @@ export default function HomePage() {
         </div>
       </ScrollReveal>
 
+      {/* ─── 6.5. Nourish promo ────────────────────────────────────────── */}
+      <ScrollReveal as="section" className="relative overflow-hidden rounded-3xl border border-emerald-200/70 bg-gradient-to-br from-emerald-50/70 via-white to-violet-50/40 p-6 sm:p-10">
+        <div
+          aria-hidden
+          className="dot-grid pointer-events-none absolute inset-0 opacity-40 [mask-image:radial-gradient(circle_at_70%_30%,black,transparent_60%)]"
+        />
+        <div className="relative grid gap-8 md:grid-cols-[1.1fr_1fr] md:items-center">
+          <div className="space-y-3">
+            <p className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700 backdrop-blur">
+              <Sparkles size={12} /> Nourish
+            </p>
+            <h2 className="text-2xl font-semibold leading-tight text-stone-900 sm:text-3xl">
+              Track what fuels you.
+              <br className="hidden sm:block" />
+              Cook to hit your goals.
+            </h2>
+            <p className="text-sm leading-relaxed text-stone-600">
+              Log meals by search, voice, photo, or a grocery receipt. See
+              calories and macros remaining. Plan the week, save your usual
+              meals, and let the Coach surface the cheapest high-protein
+              picks for what you have left.
+            </p>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <Link
+                href="/nourish"
+                className="group inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-emerald-200 transition-all motion-safe:hover:-translate-y-0.5 hover:bg-emerald-700"
+              >
+                <Sparkles size={14} /> Open Nourish
+                <ArrowRight
+                  size={14}
+                  className="transition-transform motion-safe:group-hover:translate-x-0.5"
+                />
+              </Link>
+              <Link
+                href="/nourish/goals"
+                className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white px-4 py-2.5 text-sm font-semibold text-stone-800 hover:bg-stone-50"
+              >
+                Set goals
+              </Link>
+              <Link
+                href="/nourish/meal-planner"
+                className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white px-4 py-2.5 text-sm font-semibold text-stone-800 hover:bg-stone-50"
+              >
+                Plan the week
+              </Link>
+            </div>
+          </div>
+          <div className="grid gap-3">
+            <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+                Today
+              </p>
+              <div className="mt-1 flex items-baseline gap-1.5">
+                <span className="text-3xl font-bold tabular-nums text-stone-900">
+                  1,420
+                </span>
+                <span className="text-sm text-stone-400">/ 2,200 kcal</span>
+              </div>
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-stone-100">
+                <div className="h-full w-[65%] rounded-full bg-gradient-to-r from-emerald-500 to-emerald-700" />
+              </div>
+              <p className="mt-2 text-xs text-stone-600">
+                <span className="font-semibold text-emerald-700">780 kcal</span> and{" "}
+                <span className="font-semibold text-violet-700">48 g protein</span>{" "}
+                left.
+              </p>
+            </div>
+            <div className="grid gap-2.5 sm:grid-cols-3">
+              <div className="rounded-xl border border-violet-200 bg-violet-50/60 p-3">
+                <p className="text-[9px] font-semibold uppercase tracking-wide text-violet-700">
+                  Protein
+                </p>
+                <p className="mt-0.5 text-lg font-bold tabular-nums text-violet-900">
+                  92 g
+                </p>
+                <p className="text-[10px] text-violet-700">of 140</p>
+              </div>
+              <div className="rounded-xl border border-sky-200 bg-sky-50/60 p-3">
+                <p className="text-[9px] font-semibold uppercase tracking-wide text-sky-700">
+                  Carbs
+                </p>
+                <p className="mt-0.5 text-lg font-bold tabular-nums text-sky-900">
+                  165 g
+                </p>
+                <p className="text-[10px] text-sky-700">of 250</p>
+              </div>
+              <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-3">
+                <p className="text-[9px] font-semibold uppercase tracking-wide text-amber-700">
+                  Fat
+                </p>
+                <p className="mt-0.5 text-lg font-bold tabular-nums text-amber-900">
+                  48 g
+                </p>
+                <p className="text-[10px] text-amber-700">of 70</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ScrollReveal>
+
       {/* ─── 7. AI Chef demo ────────────────────────────────────────────── */}
       <ScrollReveal as="section" className="overflow-hidden rounded-3xl border border-stone-200 bg-gradient-to-br from-violet-50/60 via-stone-50 to-amber-50/60 p-6 sm:p-10">
         <div className="grid gap-8 md:grid-cols-2 md:items-center">
