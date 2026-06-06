@@ -20,7 +20,9 @@ function triggerDownload(filename: string, content: string, mimeType: string) {
   a.href = url;
   a.download = filename;
   a.click();
-  URL.revokeObjectURL(url);
+  // Revoke after the current tick so Safari's queued click can still
+  // resolve the URL. Revoking synchronously cancels the download.
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
 function exportJson() {

@@ -92,7 +92,14 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
         const existing = map.get(id);
         if (existing) {
           if (!existing.recipeIds.includes(recipe.id)) {
-            existing.recipeIds = [...existing.recipeIds, recipe.id];
+            // Replace, don't mutate. Directly assigning into
+            // existing.recipeIds was mutating the prior state object,
+            // which broke any downstream useMemo that depended on
+            // referential equality of individual grocery rows.
+            map.set(id, {
+              ...existing,
+              recipeIds: [...existing.recipeIds, recipe.id],
+            });
           }
         } else {
           map.set(id, {

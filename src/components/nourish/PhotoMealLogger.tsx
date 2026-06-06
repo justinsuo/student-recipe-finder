@@ -179,8 +179,19 @@ export function PhotoMealLogger({ onLogged }: Props) {
     const canvas = document.createElement("canvas");
     const img = new Image();
     const objectUrl = URL.createObjectURL(file);
-    img.src = objectUrl;
-    await new Promise<void>((r) => { img.onload = () => r(); });
+    try {
+      img.src = objectUrl;
+      // Resolve on load; reject on decode error so we don't hang forever
+      // on a corrupted upload.
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error("Image decode failed"));
+      });
+    } catch {
+      URL.revokeObjectURL(objectUrl);
+      setError("Couldn't read that image. Try another file.");
+      return;
+    }
     URL.revokeObjectURL(objectUrl);
 
     const MAX = 768;
