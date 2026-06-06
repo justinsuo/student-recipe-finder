@@ -40,6 +40,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Stagger } from "@/components/motion/Stagger";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
+import { ThreeDLink } from "@/components/ui/ThreeDButton";
 
 export default function HomePage() {
   // Hero collage prefers recipes with curated photos.
@@ -92,27 +93,28 @@ export default function HomePage() {
               your pantry into real recipes — with cost, macros, and a
               grocery list built in.
             </p>
-            <div className="flex flex-col gap-2.5 pt-1 sm:flex-row sm:flex-wrap sm:items-center">
-              <Link
+            <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap sm:items-center">
+              <ThreeDLink
                 href="/ai-chef"
-                className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-emerald-200 transition-all motion-safe:hover:-translate-y-0.5 hover:bg-emerald-700 hover:shadow-md sm:w-auto"
+                variant="primary"
+                size="lg"
+                block
+                className="sm:w-auto"
+                leftIcon={<Sparkles size={16} />}
+                rightIcon={<ArrowRight size={14} />}
               >
-                <Sparkles
-                  size={16}
-                  className="transition-transform motion-safe:group-hover:rotate-12"
-                />
                 Start with AI Chef
-                <ArrowRight
-                  size={14}
-                  className="transition-transform motion-safe:group-hover:translate-x-0.5"
-                />
-              </Link>
-              <Link
+              </ThreeDLink>
+              <ThreeDLink
                 href="/pantry"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-stone-300 bg-white px-5 py-3 text-sm font-semibold text-stone-800 transition-colors hover:bg-stone-50 sm:w-auto"
+                variant="secondary"
+                size="lg"
+                block
+                className="sm:w-auto"
+                leftIcon={<Refrigerator size={16} />}
               >
-                <Refrigerator size={16} /> Build my pantry
-              </Link>
+                Build my pantry
+              </ThreeDLink>
               <Link
                 href="/cheap-recipes"
                 className="inline-flex items-center justify-center gap-1.5 text-sm font-semibold text-emerald-700 hover:underline sm:self-center"

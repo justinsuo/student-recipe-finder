@@ -12,6 +12,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { clsx } from "clsx";
+import { hapticLight } from "@/lib/haptics";
 
 type Action = {
   key: string;
@@ -127,13 +128,21 @@ export function QuickLogActions({
         return (
           <div key={a.key} role="listitem">
             {a.href ? (
-              <Link href={a.href} aria-label={a.label} className="block h-full">
+              <Link
+                href={a.href}
+                onClick={() => hapticLight()}
+                aria-label={a.label}
+                className="block h-full"
+              >
                 {inner}
               </Link>
             ) : (
               <button
                 type="button"
-                onClick={a.onClick}
+                onClick={() => {
+                  hapticLight();
+                  a.onClick?.();
+                }}
                 aria-label={a.label}
                 className="block h-full w-full text-left"
               >

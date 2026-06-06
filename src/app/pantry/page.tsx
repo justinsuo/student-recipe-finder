@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import {
   Refrigerator,
   Plus,
@@ -31,6 +30,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/components/ui/Toast";
+import { ThreeDLink } from "@/components/ui/ThreeDButton";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
 import { PantryPhotoUpload } from "@/components/pantry/PantryPhotoUpload";
@@ -134,12 +134,14 @@ export default function PantryPage() {
         tone="emerald"
         trailing={
           pantry.length > 0 ? (
-            <Link
+            <ThreeDLink
               href="/ai-chef?usePantry=true"
-              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-emerald-200 transition-all motion-safe:hover:-translate-y-0.5 hover:bg-emerald-700"
+              variant="primary"
+              size="md"
+              leftIcon={<Sparkles size={14} />}
             >
-              <Sparkles size={14} /> Use these in AI Chef
-            </Link>
+              Use in AI Chef
+            </ThreeDLink>
           ) : undefined
         }
       />

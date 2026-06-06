@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Nunito, Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppStoreProvider } from "@/lib/AppStore";
 import { Navbar } from "@/components/layout/Navbar";
@@ -7,9 +7,24 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { Chatbot } from "@/components/layout/Chatbot";
 import { ToastProvider } from "@/components/ui/Toast";
 
-const geistSans = Geist({
+// Nunito = warm, rounded, app-like — used everywhere the existing code
+// references --font-geist-sans. The variable name is kept for
+// backwards-compat with the rest of the codebase; only the underlying
+// face changes.
+const nunito = Nunito({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  display: "swap",
+});
+
+// Inter for very small UI bits + tabular numerics where Nunito's
+// rounder shapes get noisy.
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -30,7 +45,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="en" className={`${nunito.variable} ${inter.variable} ${geistMono.variable}`}>
       <body className="min-h-screen bg-stone-50 text-stone-900 antialiased">
         <AppStoreProvider>
           <ToastProvider>

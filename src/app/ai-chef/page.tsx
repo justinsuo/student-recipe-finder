@@ -56,6 +56,8 @@ import { AIChefSteppedLoader } from "@/components/ai/AIChefSteppedLoader";
 import { RecipeStatsRow } from "@/components/recipe/RecipeStatsRow";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { LogGeneratedRecipeButton } from "@/components/nourish/LogGeneratedRecipeButton";
+import { ThreeDButton } from "@/components/ui/ThreeDButton";
+import { hapticMedium } from "@/lib/haptics";
 
 // If the AI's ingredient list maps cleanly to our catalog, replace its
 // guessed macros with the deterministic engine result. Falls back to the
@@ -1078,36 +1080,34 @@ function AIChefPage() {
         </div>
 
         <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-          <button
-            type="button"
-            onClick={() => (mode === "pantry" || mode === "imagine" || mode === "have" ? runOptions(false) : run())}
+          <ThreeDButton
+            variant="success"
+            size="lg"
+            block
+            className="sm:w-auto"
+            loading={loading}
             disabled={
-              loading ||
               !isWorkerConfigured() ||
               (mode === "pantry" && selectedPantryIds.size === 0)
             }
-            className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-700 px-6 py-3.5 text-sm font-semibold text-white shadow-md shadow-emerald-300/50 transition-all motion-safe:hover:-translate-y-0.5 hover:from-emerald-600 hover:to-emerald-800 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:from-stone-300 disabled:via-stone-300 disabled:to-stone-300 disabled:text-stone-100 disabled:shadow-none disabled:hover:translate-y-0 sm:w-auto"
+            leftIcon={loading ? undefined : <Sparkles size={16} />}
+            rightIcon={loading ? undefined : <ArrowRight size={14} />}
+            haptic={false}
+            onClick={() => {
+              if (!loading) hapticMedium();
+              if (mode === "pantry" || mode === "imagine" || mode === "have") {
+                runOptions(false);
+              } else {
+                run();
+              }
+            }}
           >
-            {loading ? (
-              <Loader2 size={16} className="animate-spin" />
-            ) : (
-              <Sparkles
-                size={16}
-                className="transition-transform motion-safe:group-hover:rotate-12"
-              />
-            )}
             {loading
               ? "Thinking…"
               : mode === "pantry"
                 ? `Generate from my pantry (${selectedPantryIds.size})`
                 : "Generate my recipe"}
-            {!loading && (
-              <ArrowRight
-                size={14}
-                className="transition-transform motion-safe:group-hover:translate-x-0.5"
-              />
-            )}
-          </button>
+          </ThreeDButton>
           <p className="text-[11px] text-stone-500 sm:ml-2">
             <span className="font-semibold text-stone-700">4 options</span> · re-priced from your region · macros + grocery list built in
           </p>
