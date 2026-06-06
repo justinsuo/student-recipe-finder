@@ -60,10 +60,14 @@ export function AnimatedNumber({
   }, [value, duration]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
+  // Guard against NaN / Infinity reaching toFixed (which prints "NaN")
+  // or toLocaleString (which can throw on some engines). Falls back to
+  // a zero so the UI never shows raw arithmetic failure to the user.
+  const safe = Number.isFinite(display) ? display : 0;
   const formatted =
     decimals > 0
-      ? display.toFixed(decimals)
-      : Math.round(display).toLocaleString();
+      ? safe.toFixed(decimals)
+      : Math.round(safe).toLocaleString();
 
   return (
     <span className={className}>

@@ -122,12 +122,13 @@ export function LogGeneratedRecipeButton({ recipe, savedId }: Props) {
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
+                    aria-label="Decrease servings"
                     onClick={() =>
                       setServings((s) =>
                         Math.max(0.5, parseFloat((s - 0.5).toFixed(1))),
                       )
                     }
-                    className="grid h-7 w-7 place-items-center rounded-full border border-stone-200 text-stone-600 hover:bg-stone-50"
+                    className="grid h-7 w-7 place-items-center rounded-full border border-stone-200 text-stone-600 hover:bg-stone-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
                   >
                     −
                   </button>
@@ -136,12 +137,13 @@ export function LogGeneratedRecipeButton({ recipe, savedId }: Props) {
                   </span>
                   <button
                     type="button"
+                    aria-label="Increase servings"
                     onClick={() =>
                       setServings((s) =>
                         parseFloat((s + 0.5).toFixed(1)),
                       )
                     }
-                    className="grid h-7 w-7 place-items-center rounded-full border border-stone-200 text-stone-600 hover:bg-stone-50"
+                    className="grid h-7 w-7 place-items-center rounded-full border border-stone-200 text-stone-600 hover:bg-stone-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
                   >
                     +
                   </button>

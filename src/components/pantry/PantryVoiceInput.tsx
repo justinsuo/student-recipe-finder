@@ -90,6 +90,22 @@ export function PantryVoiceInput() {
     setSupported(!!Ctor);
   }, []);
 
+  // Stop any active SpeechRecognition on unmount so navigating away
+  // mid-listen doesn't leave the microphone held open in the background.
+  useEffect(() => {
+    return () => {
+      const rec = recognitionRef.current;
+      if (rec) {
+        try {
+          rec.stop();
+        } catch {
+          /* recognition may already be stopped */
+        }
+        recognitionRef.current = null;
+      }
+    };
+  }, []);
+
   if (!isWorkerConfigured() || !supported) return null;
 
   function start() {
