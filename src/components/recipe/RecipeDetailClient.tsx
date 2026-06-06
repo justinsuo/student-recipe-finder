@@ -68,14 +68,24 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
 function RecipeDetailBody({ recipe }: { recipe: Recipe }) {
   const { isSaved, toggleSaved, pantry, addGroceryItems } = useAppStore();
   const toast = useToast();
+  // Guard against rapid double-clicks: if two presses land in the same
+  // batch both see `wasSaved=false` and the progress counter would bump
+  // twice for one save event. The ref locks the bump to one per
+  // save→unsave cycle.
+  const lastBumpedIdRef = useRef<string | null>(null);
 
   function handleToggleSaved() {
     const wasSaved = isSaved(recipe.id);
     toggleSaved(recipe.id);
     if (!wasSaved) {
+      if (lastBumpedIdRef.current === recipe.id) return;
+      lastBumpedIdRef.current = recipe.id;
       const count = bumpProgress("recipesSaved");
       const milestone = milestoneMessage("recipesSaved", count);
       if (milestone) toast.reward(milestone);
+    } else {
+      // Unsaved — clear the lock so a future re-save bumps again.
+      if (lastBumpedIdRef.current === recipe.id) lastBumpedIdRef.current = null;
     }
   }
 

@@ -555,6 +555,17 @@ function AIChefPage() {
               : undefined,
           });
       const merged = append ? [...options, ...res.options] : res.options;
+      const count = res.options.length;
+      // Guard the "0 options returned" edge — surface a real error
+      // instead of a celebratory "Created 0 recipe ideas 🎉" toast.
+      if (count === 0) {
+        if (!append) {
+          throw new Error("AI Chef didn't return any ideas — try again");
+        } else {
+          toast.info("No additional ideas this round — try again");
+          return;
+        }
+      }
       setOptions(merged);
       const mainId = append
         ? selectedOptionId ?? res.mainOptionId
@@ -567,7 +578,6 @@ function AIChefPage() {
       if (mainOpt && !append) {
         void generateImageForOption(mainOpt);
       }
-      const count = res.options.length;
       toast.reward(
         append
           ? `Added ${count} more recipe idea${count === 1 ? "" : "s"}`
