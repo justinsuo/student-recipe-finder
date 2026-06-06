@@ -495,7 +495,16 @@ export function AddFoodModal({ onClose, onLogged, defaultMeal = "lunch" }: Props
   const closeRef = useRef<HTMLButtonElement | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
+  const flashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const toast = useToast();
+
+  // Clear the post-log auto-close timer on unmount in case the user
+  // closes the modal manually during the 600ms flash window.
+  useEffect(() => {
+    return () => {
+      if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
+    };
+  }, []);
 
   // Escape closes + Tab cycles inside the dialog + focus-return on close.
   useEffect(() => {
@@ -552,7 +561,8 @@ export function AddFoodModal({ onClose, onLogged, defaultMeal = "lunch" }: Props
     const milestone = milestoneMessage("mealsLogged", count);
     if (milestone) toast.reward(milestone);
     setFlash(true);
-    setTimeout(() => {
+    if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
+    flashTimeoutRef.current = setTimeout(() => {
       setFlash(false);
       onLogged();
       onClose();
