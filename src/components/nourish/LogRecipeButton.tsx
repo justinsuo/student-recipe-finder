@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { clsx } from "clsx";
 import { Apple, CheckCircle2, ChevronDown, ChevronUp, Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -26,6 +26,14 @@ export function LogRecipeButton({ recipe }: Props) {
   const [servings, setServings] = useState(1);
   const [meal, setMeal] = useState<MealSlot>("lunch");
   const [done, setDone] = useState(false);
+  const doneTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clear the auto-collapse timer on unmount.
+  useEffect(() => {
+    return () => {
+      if (doneTimeoutRef.current) clearTimeout(doneTimeoutRef.current);
+    };
+  }, []);
 
   const food = recipeToDiaryFood(recipe);
 
@@ -43,7 +51,8 @@ export function LogRecipeButton({ recipe }: Props) {
       loggedAt: new Date().toISOString(),
     });
     setDone(true);
-    setTimeout(() => { setDone(false); setOpen(false); }, 1500);
+    if (doneTimeoutRef.current) clearTimeout(doneTimeoutRef.current);
+    doneTimeoutRef.current = setTimeout(() => { setDone(false); setOpen(false); }, 1500);
   }
 
   return (

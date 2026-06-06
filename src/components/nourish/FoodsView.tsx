@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Trash2, Search, Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -27,6 +27,15 @@ export function FoodsView() {
   const [showModal, setShowModal] = useState(false);
   const [logMeal, setLogMeal] = useState<MealSlot>("lunch");
   const [flash, setFlash] = useState<string | null>(null);
+  const flashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clean up the row-flash timer on unmount so a quick navigate-away
+  // doesn't fire setFlash(null) on an unmounted component.
+  useEffect(() => {
+    return () => {
+      if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
+    };
+  }, []);
 
   /* eslint-disable react-hooks/set-state-in-effect */
   const load = useCallback(() => {
@@ -61,7 +70,8 @@ export function FoodsView() {
       loggedAt: new Date().toISOString(),
     });
     setFlash(food.id);
-    setTimeout(() => setFlash(null), 1200);
+    if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
+    flashTimeoutRef.current = setTimeout(() => setFlash(null), 1200);
   }
 
   return (

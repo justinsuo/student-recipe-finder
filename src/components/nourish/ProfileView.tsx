@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { clsx } from "clsx";
 import { Save, RefreshCw, Flame, Zap } from "lucide-react";
 import { DataExport } from "./DataExport";
@@ -77,6 +77,15 @@ export function ProfileView({ onResetProfile }: Props) {
   const [weeklyRate, setWeeklyRate] = useState(0);
 
   const [saved, setSaved] = useState(false);
+  const savedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clean up the "Saved!" toast timeout on unmount so a quick navigate
+  // away doesn't fire setSaved(false) on an unmounted component.
+  useEffect(() => {
+    return () => {
+      if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
+    };
+  }, []);
 
   // Load from storage on mount
   /* eslint-disable react-hooks/set-state-in-effect */
@@ -144,7 +153,8 @@ export function ProfileView({ onResetProfile }: Props) {
     setProfile(profile);
     setTargets(preview);
     setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
+    savedTimeoutRef.current = setTimeout(() => setSaved(false), 2000);
   }
 
   if (!hydrated) return null;
