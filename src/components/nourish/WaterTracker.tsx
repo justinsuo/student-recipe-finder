@@ -46,11 +46,14 @@ export function WaterTracker() {
     setEditGoal(false);
   }
 
-  const fraction = Math.min(entry.mlConsumed / entry.goalMl, 1);
+  // Guard against a corrupted/zero goal in storage so the ring math
+  // doesn't divide by zero and render 100% / Infinity glasses.
+  const safeGoal = entry.goalMl > 0 ? entry.goalMl : 2000;
+  const fraction = Math.min(entry.mlConsumed / safeGoal, 1);
   const pct = Math.round(fraction * 100);
-  const glasses = Math.round(entry.goalMl / 250);
+  const glasses = Math.round(safeGoal / 250);
   const glassesConsumed = Math.round(entry.mlConsumed / 250);
-  const met = entry.mlConsumed >= entry.goalMl;
+  const met = entry.mlConsumed >= safeGoal;
 
   return (
     <div className="rounded-2xl border border-sky-200 bg-gradient-to-br from-sky-50 to-white p-4 shadow-sm space-y-3">

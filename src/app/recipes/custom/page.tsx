@@ -104,10 +104,11 @@ function CustomRecipePage() {
     }
   }
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!id) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRecipe(null);
+      setImageSrc(null);
       return;
     }
     const r = getCustomRecipe(id);
@@ -119,8 +120,14 @@ function CustomRecipePage() {
         if (stored?.b64) src = imageDataUrl(stored.b64);
       }
       setImageSrc(src ?? null);
+    } else {
+      // Recipe id changed to one that no longer exists — clear the
+      // previous image src so a stale image doesn't render under
+      // "Recipe not found".
+      setImageSrc(null);
     }
   }, [id]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (!id || !recipe) {
     return (
