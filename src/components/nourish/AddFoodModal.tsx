@@ -310,6 +310,14 @@ function CustomFoodTab({
   const [fatG, setFatG] = useState("");
   const [meal, setMeal] = useState<MealSlot>(defaultMeal);
   const [saved, setSaved] = useState(false);
+  const savedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clear the "Saved!" flash timer on unmount (modal close).
+  useEffect(() => {
+    return () => {
+      if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
+    };
+  }, []);
 
   const valid =
     name.trim().length > 0 &&
@@ -332,7 +340,8 @@ function CustomFoodTab({
     };
     saveCustomFood(food);
     setSaved(true);
-    setTimeout(() => setSaved(false), 1200);
+    if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
+    savedTimeoutRef.current = setTimeout(() => setSaved(false), 1200);
     onLog(food, 1, meal);
   }
 
