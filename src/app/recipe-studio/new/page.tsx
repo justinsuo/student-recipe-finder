@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { useToast } from "@/components/ui/Toast";
 import {
   fallbackImageMeta,
   imageDataUrl,
@@ -63,6 +64,7 @@ function coerceNumberInput(raw: string, fallback: number, min = 0): number {
 
 export default function ManualRecipeBuilderPage() {
   const router = useRouter();
+  const toast = useToast();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [mealType, setMealType] = useState<UserCreatedRecipe["mealType"]>("dinner");
@@ -202,6 +204,12 @@ export default function ManualRecipeBuilderPage() {
                 model: img.model,
               },
             });
+          } else {
+            // Image generation succeeded but local cache is full — tell the
+            // user so they don't wonder why the recipe has a fallback emoji.
+            toast.info(
+              "Recipe saved, but local image cache is full. Delete a few generated recipes to free space.",
+            );
           }
         } else if (img.url) {
           saveCustomRecipe({
