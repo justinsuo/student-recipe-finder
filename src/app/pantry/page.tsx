@@ -29,6 +29,8 @@ import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useToast } from "@/components/ui/Toast";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
 import { PantryPhotoUpload } from "@/components/pantry/PantryPhotoUpload";
@@ -51,13 +53,31 @@ export default function PantryPage() {
   } = useAppStore();
 
   const [search, setSearch] = useState("");
+  const toast = useToast();
 
-  function loadPreset(ingredientIds: string[]) {
+  type ConfirmState =
+    | { kind: "preset"; presetId: string; name: string; ids: string[] }
+    | { kind: "clear" }
+    | null;
+  const [confirm, setConfirm] = useState<ConfirmState>(null);
+
+  function performLoadPreset(ingredientIds: string[]) {
+    let added = 0;
     for (const id of ingredientIds) {
       if (pantry.some((p) => p.ingredientId === id)) continue;
       if (!INGREDIENT_MAP.has(id)) continue;
       addPantryItem({ ingredientId: id });
+      added += 1;
     }
+    toast.success(
+      `Added ${added} item${added === 1 ? "" : "s"} to your pantry.`,
+    );
+  }
+
+  function performClearPantry() {
+    const count = pantry.length;
+    clearPantry();
+    toast.info(`Cleared ${count} pantry item${count === 1 ? "" : "s"}.`);
   }
 
   const filtered = useMemo(() => {
@@ -141,7 +161,14 @@ export default function PantryPage() {
           {PANTRY_PRESETS.map((preset, i) => (
             <button
               key={preset.id}
-              onClick={() => loadPreset(preset.ingredientIds)}
+              onClick={() =>
+                setConfirm({
+                  kind: "preset",
+                  presetId: preset.id,
+                  name: preset.name,
+                  ids: preset.ingredientIds,
+                })
+              }
               className="group relative flex flex-col items-start gap-2 overflow-hidden rounded-2xl border border-stone-200 bg-gradient-to-br from-stone-50 to-white p-4 text-left transition-all motion-safe:hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50 hover:shadow-md motion-safe:animate-[fadeUp_500ms_ease-out_both]"
               style={{ animationDelay: `${i * 40}ms` }}
             >
@@ -193,7 +220,7 @@ export default function PantryPage() {
           trailing={
             pantry.length > 0 ? (
               <button
-                onClick={clearPantry}
+                onClick={() => setConfirm({ kind: "clear" })}
                 className="text-xs font-medium text-stone-500 hover:text-red-600"
               >
                 Clear all
@@ -403,6 +430,56 @@ export default function PantryPage() {
           />
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirm?.kind === "preset"}
+        title={
+          confirm?.kind === "preset"
+            ? `Add ${confirm.name}?`
+            : "Add preset?"
+        }
+        body={
+          confirm?.kind === "preset" ? (
+            <>
+              This adds{" "}
+              <span className="font-semibold text-stone-900">
+                {confirm.ids.filter((id) => !pantry.some((p) => p.ingredientId === id)).length}{" "}
+                new item
+                {confirm.ids.filter((id) => !pantry.some((p) => p.ingredientId === id)).length === 1
+                  ? ""
+                  : "s"}
+              </span>{" "}
+              to your pantry. Items you already have are skipped.
+            </>
+          ) : null
+        }
+        confirmLabel={
+          confirm?.kind === "preset"
+            ? `Add ${confirm.ids.filter((id) => !pantry.some((p) => p.ingredientId === id)).length} items`
+            : "Add"
+        }
+        onConfirm={() => {
+          if (confirm?.kind === "preset") performLoadPreset(confirm.ids);
+        }}
+        onClose={() => setConfirm(null)}
+      />
+
+      <ConfirmDialog
+        open={confirm?.kind === "clear"}
+        title="Clear your pantry?"
+        body={
+          <>
+            This removes all{" "}
+            <span className="font-semibold text-stone-900">{pantry.length}</span>{" "}
+            pantry items from this device. Saved recipes and your grocery
+            list aren&apos;t affected.
+          </>
+        }
+        confirmLabel="Clear pantry"
+        destructive
+        onConfirm={performClearPantry}
+        onClose={() => setConfirm(null)}
+      />
     </div>
   );
 }
@@ -435,7 +512,7 @@ function RecipeGroup({
       />
       <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {recipes.slice(0, 6).map((r) => (
-          <RecipeCard key={r.recipe.id} result={r} />
+          <RecipeCard key={r.recipe.id} result={r} from="pantry" />
         ))}
       </div>
     </ScrollReveal>

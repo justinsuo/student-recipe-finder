@@ -314,9 +314,19 @@ function PickerSheet({
   const toast = useToast();
   const [tab, setTab] = useState<"recipe" | "meal">("recipe");
   const [query, setQuery] = useState("");
+  const PAGE = 20;
+  const [visibleCount, setVisibleCount] = useState(PAGE);
+
+  // Reset pagination whenever the query changes — otherwise users
+  // hitting "Load more" on a 200-item query and then changing query
+  // would still render 200 rows.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setVisibleCount(PAGE);
+  }, [query]);
 
   const meals = useMemo(() => getMeals(), []);
-  const recipes = useMemo(() => {
+  const allRecipes = useMemo(() => {
     const q = query.trim().toLowerCase();
     return RECIPES.filter((r) => {
       if (!q) return true;
@@ -324,10 +334,13 @@ function PickerSheet({
         r.name.toLowerCase().includes(q) ||
         r.description.toLowerCase().includes(q)
       );
-    })
-      .slice(0, 30)
-      .map((r) => ({ r, n: bestEffortNutrition(r).estimate }));
+    }).map((r) => ({ r, n: bestEffortNutrition(r).estimate }));
   }, [query]);
+  const recipes = useMemo(
+    () => allRecipes.slice(0, visibleCount),
+    [allRecipes, visibleCount],
+  );
+  const totalMatches = allRecipes.length;
 
   function pickRecipe(recipeId: string, name: string, kcal: number, proteinG: number) {
     upsertPlanItem({
@@ -429,25 +442,64 @@ function PickerSheet({
                   className="w-full rounded-full border border-stone-200 bg-stone-50 py-2.5 pl-9 pr-3 text-sm focus:border-emerald-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
-              <ul className="max-h-80 space-y-1.5 overflow-y-auto">
-                {recipes.map(({ r, n }) => (
-                  <li key={r.id}>
-                    <button
-                      type="button"
-                      onClick={() => pickRecipe(r.id, r.name, n.calories, n.protein)}
-                      className="flex w-full items-center justify-between gap-3 rounded-xl border border-stone-200 bg-white p-2.5 text-left transition-all hover:-translate-y-px hover:border-emerald-300 hover:bg-emerald-50/50"
-                    >
-                      <span className="min-w-0 flex-1 truncate text-sm font-semibold text-stone-900">
-                        {r.name}
-                      </span>
-                      <span className="shrink-0 text-[10px] font-semibold tabular-nums text-stone-600">
-                        {Math.round(n.calories)} kcal ·{" "}
-                        {Math.round(n.protein)} g P
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              {totalMatches > 0 && (
+                <p className="text-[11px] text-stone-500" aria-live="polite">
+                  Showing{" "}
+                  <span className="font-semibold text-stone-700">
+                    {Math.min(visibleCount, totalMatches)}
+                  </span>{" "}
+                  of{" "}
+                  <span className="font-semibold text-stone-700">
+                    {totalMatches}
+                  </span>{" "}
+                  recipe{totalMatches === 1 ? "" : "s"}
+                </p>
+              )}
+              {totalMatches === 0 ? (
+                <div className="rounded-2xl border border-dashed border-stone-200 bg-stone-50 p-6 text-center text-sm text-stone-600">
+                  No recipes match{" "}
+                  <span className="font-semibold text-stone-800">
+                    &ldquo;{query.trim()}&rdquo;
+                  </span>
+                  . Try a shorter search.
+                </div>
+              ) : (
+                <ul className="max-h-80 space-y-1.5 overflow-y-auto">
+                  {recipes.map(({ r, n }) => (
+                    <li key={r.id}>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          pickRecipe(r.id, r.name, n.calories, n.protein)
+                        }
+                        className="flex w-full items-center justify-between gap-3 rounded-xl border border-stone-200 bg-white p-2.5 text-left transition-all hover:-translate-y-px hover:border-emerald-300 hover:bg-emerald-50/50"
+                      >
+                        <span className="min-w-0 flex-1 truncate text-sm font-semibold text-stone-900">
+                          {r.name}
+                        </span>
+                        <span className="shrink-0 text-[10px] font-semibold tabular-nums text-stone-600">
+                          {Math.round(n.calories)} kcal ·{" "}
+                          {Math.round(n.protein)} g P
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                  {visibleCount < totalMatches && (
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setVisibleCount((c) => Math.min(c + PAGE, totalMatches))
+                        }
+                        className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-stone-200 bg-stone-50 p-2.5 text-xs font-semibold text-stone-700 transition-all hover:-translate-y-px hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
+                      >
+                        Load{" "}
+                        {Math.min(PAGE, totalMatches - visibleCount)} more
+                      </button>
+                    </li>
+                  )}
+                </ul>
+              )}
             </>
           )}
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ShoppingBasket, Trash2, Sparkles } from "lucide-react";
 import {
@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useToast } from "@/components/ui/Toast";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
 import type { IngredientCategory } from "@/lib/types";
@@ -28,6 +30,15 @@ export default function GroceryListPage() {
     clearGrocery,
     addStapleToGrocery,
   } = useAppStore();
+
+  const toast = useToast();
+  const [confirmClear, setConfirmClear] = useState(false);
+
+  function performClear() {
+    const count = grocery.length;
+    clearGrocery();
+    toast.info(`Cleared ${count} item${count === 1 ? "" : "s"} from your list.`);
+  }
 
   const grouped = useMemo(() => {
     const map = new Map<
@@ -72,7 +83,7 @@ export default function GroceryListPage() {
               variant="ghost"
               size="sm"
               leftIcon={<Trash2 size={14} />}
-              onClick={clearGrocery}
+              onClick={() => setConfirmClear(true)}
             >
               Clear all
             </Button>
@@ -266,6 +277,23 @@ export default function GroceryListPage() {
           </div>
         </ScrollReveal>
       )}
+
+      <ConfirmDialog
+        open={confirmClear}
+        title="Clear your grocery list?"
+        body={
+          <>
+            This removes all{" "}
+            <span className="font-semibold text-stone-900">{grocery.length}</span>{" "}
+            item{grocery.length === 1 ? "" : "s"} from your list. Your pantry
+            and saved recipes aren&apos;t affected.
+          </>
+        }
+        confirmLabel="Clear list"
+        destructive
+        onConfirm={performClear}
+        onClose={() => setConfirmClear(false)}
+      />
     </div>
   );
 }

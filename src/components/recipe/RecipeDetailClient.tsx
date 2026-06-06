@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   Bookmark,
@@ -41,7 +42,26 @@ import {
 import { LogRecipeButton } from "@/components/nourish/LogRecipeButton";
 import type { Recipe } from "@/lib/types";
 
+// Sources users can come from. Anything else (or no param) falls back to
+// "back to recipes" + cheap-recipes.
+const BACK_LINKS: Record<string, { label: string; href: string }> = {
+  "nourish-recipes": { label: "Back to Nourish recipes", href: "/nourish/recipes" },
+  cheap: { label: "Back to cheap recipes", href: "/cheap-recipes" },
+  saved: { label: "Back to saved", href: "/saved" },
+  pantry: { label: "Back to pantry", href: "/pantry" },
+  explore: { label: "Back to explore", href: "/explore" },
+  home: { label: "Back to home", href: "/" },
+};
+
 export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
+  return (
+    <Suspense fallback={<div className="h-6 w-32 animate-pulse rounded bg-stone-100" />}>
+      <RecipeDetailBody recipe={recipe} />
+    </Suspense>
+  );
+}
+
+function RecipeDetailBody({ recipe }: { recipe: Recipe }) {
   const { isSaved, toggleSaved, pantry, addGroceryItems } = useAppStore();
   const saved = isSaved(recipe.id);
   // bump when the user edits a price so the breakdown re-quotes
@@ -58,6 +78,13 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
 
   const [cookingMode, setCookingMode] = useState(false);
 
+  const params = useSearchParams();
+  const fromKey = params.get("from") ?? "";
+  const back = BACK_LINKS[fromKey] ?? {
+    label: "Back to recipes",
+    href: "/cheap-recipes",
+  };
+
   if (cookingMode) {
     return <CookingMode recipe={recipe} onExit={() => setCookingMode(false)} />;
   }
@@ -65,14 +92,14 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
   return (
     <div className="space-y-6">
       <Link
-        href="/cheap-recipes"
+        href={back.href}
         className="group inline-flex items-center gap-1.5 text-sm font-medium text-stone-600 hover:text-emerald-700"
       >
         <ArrowLeft
           size={14}
           className="transition-transform motion-safe:group-hover:-translate-x-0.5"
         />{" "}
-        Back to recipes
+        {back.label}
       </Link>
 
       {/* Identity first: title, description, key facts, primary actions */}

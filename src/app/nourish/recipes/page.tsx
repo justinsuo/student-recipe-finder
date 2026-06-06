@@ -138,7 +138,7 @@ export default function NourishRecipesPage() {
               >
                 <div className="flex items-start justify-between gap-2">
                   <Link
-                    href={`/recipes/${r.id}`}
+                    href={`/recipes/${r.id}?from=nourish-recipes`}
                     className="min-w-0 flex-1"
                   >
                     <p className="truncate text-sm font-semibold text-stone-900 hover:text-emerald-700">
@@ -149,7 +149,7 @@ export default function NourishRecipesPage() {
                     </p>
                   </Link>
                   <Link
-                    href={`/recipes/${r.id}`}
+                    href={`/recipes/${r.id}?from=nourish-recipes`}
                     className="rounded-full bg-stone-100 p-1.5 text-stone-500 transition-colors hover:bg-emerald-100 hover:text-emerald-700"
                     aria-label={`Open ${r.name}`}
                   >

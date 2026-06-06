@@ -569,6 +569,7 @@ export default function CheapRecipesPage() {
           />
         ) : (
           <RecipeGrid
+            from="cheap"
             results={visible}
             emptyTitle="No recipes match these filters"
             emptyDescription="Try raising your budget, allowing more equipment, or removing a diet restriction."

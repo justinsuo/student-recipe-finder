@@ -118,7 +118,7 @@ export default function SavedPage() {
                 tone="emerald"
               />
               <div className="mt-5">
-                <RecipeGrid recipes={databaseSaved} />
+                <RecipeGrid recipes={databaseSaved} from="saved" />
               </div>
             </ScrollReveal>
           )}

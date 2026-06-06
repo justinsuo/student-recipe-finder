@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { clsx } from "clsx";
 import {
   X,
@@ -479,6 +479,25 @@ interface Props {
 export function AddFoodModal({ onClose, onLogged, defaultMeal = "lunch" }: Props) {
   const [mode, setMode] = useState<Mode>("search");
   const [flash, setFlash] = useState(false);
+  const closeRef = useRef<HTMLButtonElement | null>(null);
+  const previouslyFocused = useRef<HTMLElement | null>(null);
+
+  // Escape closes + focus-return to whatever opened the modal.
+  useEffect(() => {
+    previouslyFocused.current = document.activeElement as HTMLElement | null;
+    closeRef.current?.focus();
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      previouslyFocused.current?.focus();
+    };
+  }, [onClose]);
 
   function handleLog(food: FoodItem, servings: number, meal: MealSlot) {
     pushRecentFood(food);
@@ -504,10 +523,10 @@ export function AddFoodModal({ onClose, onLogged, defaultMeal = "lunch" }: Props
 
   return (
     <>
-      {/* Backdrop */}
-      <button
-        type="button"
-        aria-label="Close"
+      {/* Backdrop — click-to-close but aria-hidden so screen readers
+          announce only the single header close button below. */}
+      <div
+        aria-hidden
         onClick={onClose}
         className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
       />
@@ -523,6 +542,7 @@ export function AddFoodModal({ onClose, onLogged, defaultMeal = "lunch" }: Props
         <div className="flex shrink-0 items-center justify-between border-b border-stone-100 px-5 py-4">
           <h2 className="text-base font-bold text-stone-900">Add food</h2>
           <button
+            ref={closeRef}
             type="button"
             onClick={onClose}
             aria-label="Close"

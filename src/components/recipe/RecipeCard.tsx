@@ -14,9 +14,15 @@ interface Props {
   result?: RecipeScoreResult;
   recipe?: Recipe;
   highlight?: string;
+  /**
+   * Source slug used by RecipeDetailClient's back-link so users return to
+   * the right catalog (cheap, nourish-recipes, saved, pantry, explore).
+   * When omitted the detail page falls back to "Back to recipes".
+   */
+  from?: string;
 }
 
-export function RecipeCard({ result, recipe, highlight }: Props) {
+export function RecipeCard({ result, recipe, highlight, from }: Props) {
   const { isSaved, toggleSaved } = useAppStore();
   const r = result?.recipe ?? recipe;
   if (!r) return null;
@@ -25,10 +31,11 @@ export function RecipeCard({ result, recipe, highlight }: Props) {
   const costPerServing = Number.isFinite(rawCost) && rawCost > 0 ? rawCost : null;
   const nutrition = bestEffortNutrition(r).estimate;
   const hasNutrition = nutrition.calories > 0 || nutrition.protein > 0;
+  const href = from ? `/recipes/${r.id}?from=${from}` : `/recipes/${r.id}`;
 
   return (
     <Link
-      href={`/recipes/${r.id}`}
+      href={href}
       className="group flex flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm transition-all duration-300 motion-safe:hover:-translate-y-1 hover:border-emerald-300 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
     >
       <div className="relative">
