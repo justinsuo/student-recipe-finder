@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { clsx } from "clsx";
-import { ScanBarcode, Loader2, AlertCircle, CheckCircle2, X, Plus } from "lucide-react";
+import { ScanBarcode, Loader2, AlertCircle, CheckCircle2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { SelectablePill } from "@/components/ui/SelectablePill";
 import { lookupBarcode } from "@/lib/nourish/openFoodFacts";
@@ -235,9 +235,9 @@ export function BarcodeScanner({ onLogged }: Props) {
             <Button variant="primary" size="sm" leftIcon={<Plus size={13} />} onClick={handleLog} className="flex-1">
               Add to {MEAL_LABELS[meal]}
             </Button>
-            <button type="button" aria-label="Reset scanner" onClick={reset}
-              className={clsx("grid h-8 w-8 place-items-center rounded-full border border-stone-200 text-stone-500 hover:bg-stone-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400")}>
-              <X size={14} />
+            <button type="button" onClick={reset}
+              className={clsx("rounded-full border border-stone-200 px-3 text-xs font-medium text-stone-600 hover:bg-stone-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400")}>
+              Reset
             </button>
           </div>
         </div>

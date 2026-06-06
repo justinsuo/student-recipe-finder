@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
@@ -18,6 +18,12 @@ const SLOTS: { value: MealSlot; label: string }[] = [
  * Quick-add macros sheet. For when the user knows the numbers from a
  * nutrition label and doesn't want to search for an exact food. Creates a
  * one-shot FoodItem with source: "custom" and pushes it to today's diary.
+ *
+ * UX rule: all numeric fields start empty and the meal slot starts
+ * untouched. "Log to today" stays disabled until the user picks a slot
+ * AND types at least one positive macro value — otherwise a stray tap
+ * would log fake default numbers (200 kcal / 10 P / 25 C / 5 F) into
+ * the diary and corrupt the day's totals.
  */
 export function QuickAddMacrosModal({
   defaultSlot = "snack",
@@ -30,23 +36,53 @@ export function QuickAddMacrosModal({
 }) {
   const toast = useToast();
   const [slot, setSlot] = useState<MealSlot>(defaultSlot);
+  const [slotTouched, setSlotTouched] = useState(false);
   const [name, setName] = useState("");
-  const [calories, setCalories] = useState(200);
-  const [protein, setProtein] = useState(10);
-  const [carbs, setCarbs] = useState(25);
-  const [fat, setFat] = useState(5);
+  // String-backed so empty is a real state, not "0". Save coerces.
+  const [calories, setCalories] = useState("");
+  const [protein, setProtein] = useState("");
+  const [carbs, setCarbs] = useState("");
+  const [fat, setFat] = useState("");
+
+  function pickSlot(next: MealSlot) {
+    setSlot(next);
+    setSlotTouched(true);
+  }
+
+  // Escape closes — matches AddFoodModal so the close path is the same
+  // everywhere in /nourish/log-food.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const parsed = {
+    kcal: Math.max(0, Math.round(Number(calories) || 0)),
+    protein: Math.max(0, Number(protein) || 0),
+    carbs: Math.max(0, Number(carbs) || 0),
+    fat: Math.max(0, Number(fat) || 0),
+  };
+  const hasAnyValue = parsed.kcal + parsed.protein + parsed.carbs + parsed.fat > 0;
+  const canSubmit = slotTouched && hasAnyValue;
 
   function save() {
+    if (!canSubmit) return;
     const cleanName = name.trim() || "Quick add";
     const food: FoodItem = {
       id: `qa-${newId()}`,
       source: "custom",
       name: cleanName,
       servingDescription: "1 portion",
-      kcal: Math.max(0, Math.round(calories)),
-      proteinG: Math.max(0, protein),
-      carbG: Math.max(0, carbs),
-      fatG: Math.max(0, fat),
+      kcal: parsed.kcal,
+      proteinG: parsed.protein,
+      carbG: parsed.carbs,
+      fatG: parsed.fat,
     };
     const entry: DiaryEntry = {
       id: newId(),
@@ -67,6 +103,13 @@ export function QuickAddMacrosModal({
     );
     onClose();
   }
+
+  // Tell the user what's missing instead of just disabling the button.
+  const blockReason = !slotTouched
+    ? "Pick a meal slot first."
+    : !hasAnyValue
+      ? "Enter at least one value before logging."
+      : null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4">
@@ -108,12 +151,12 @@ export function QuickAddMacrosModal({
 
           <div className="flex flex-wrap gap-2">
             {SLOTS.map(({ value, label }) => {
-              const active = slot === value;
+              const active = slotTouched && slot === value;
               return (
                 <button
                   key={value}
                   type="button"
-                  onClick={() => setSlot(value)}
+                  onClick={() => pickSlot(value)}
                   aria-pressed={active}
                   className={
                     active
@@ -147,7 +190,14 @@ export function QuickAddMacrosModal({
             <Num label="Fat" unit="g" value={fat} set={setFat} />
           </div>
 
-          <Button onClick={save}>Log to today</Button>
+          <Button onClick={save} disabled={!canSubmit}>
+            Log to today
+          </Button>
+          {blockReason && (
+            <p className="text-[11px] text-stone-500" aria-live="polite">
+              {blockReason}
+            </p>
+          )}
         </div>
       </div>
     </div>
@@ -162,8 +212,9 @@ function Num({
 }: {
   label: string;
   unit: string;
-  value: number;
-  set: (n: number) => void;
+  /** String-backed so the field can be genuinely empty. */
+  value: string;
+  set: (s: string) => void;
 }) {
   return (
     <label className="block">
@@ -177,8 +228,9 @@ function Num({
           step="0.5"
           min={0}
           value={value}
-          onChange={(e) => set(parseFloat(e.target.value) || 0)}
-          className="w-full bg-transparent text-lg font-semibold tabular-nums text-stone-900 outline-none"
+          placeholder="0"
+          onChange={(e) => set(e.target.value)}
+          className="w-full bg-transparent text-lg font-semibold tabular-nums text-stone-900 outline-none placeholder:text-stone-300"
         />
         <span className="text-[10px] font-semibold uppercase tracking-wide text-stone-500">
           {unit}

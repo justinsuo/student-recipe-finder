@@ -492,8 +492,8 @@ export function PhotoMealLogger({ onLogged }: Props) {
                   Log to {MEAL_LABELS[meal]}
                 </Button>
                 <button type="button" onClick={reset}
-                  className="grid h-8 w-8 place-items-center rounded-full border border-stone-200 text-stone-500 hover:bg-stone-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400">
-                  <X size={14} />
+                  className="rounded-full border border-stone-200 px-3 text-xs font-medium text-stone-600 hover:bg-stone-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400">
+                  Reset
                 </button>
               </>
             )}
