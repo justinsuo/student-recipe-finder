@@ -17,6 +17,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
+import { ThreeDLink } from "@/components/ui/ThreeDButton";
 
 export default function SavedPage() {
   const { saved, hydrated } = useAppStore();
@@ -55,22 +56,16 @@ export default function SavedPage() {
       {hydrated && totalCount === 0 ? (
         <EmptyState
           emoji="🔖"
-          title="Your recipe box is empty"
-          description="Save recipes you want to cook later, or have AI Chef invent one from what you have."
+          title="Your recipe box is empty."
+          description="Bookmark recipes you want to cook later — they show up here, grouped by where they came from."
           action={
-            <div className="flex flex-wrap justify-center gap-2">
-              <Link
-                href="/cheap-recipes"
-                className="rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
-              >
+            <div className="flex flex-wrap justify-center gap-3">
+              <ThreeDLink href="/cheap-recipes" variant="primary" size="md">
                 Find cheap recipes
-              </Link>
-              <Link
-                href="/ai-chef"
-                className="rounded-full border border-stone-300 bg-white px-5 py-2.5 text-sm font-semibold text-stone-800 hover:bg-stone-50"
-              >
+              </ThreeDLink>
+              <ThreeDLink href="/ai-chef" variant="secondary" size="md">
                 Ask AI Chef
-              </Link>
+              </ThreeDLink>
             </div>
           }
         />

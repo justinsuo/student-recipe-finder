@@ -18,6 +18,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/components/ui/Toast";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
+import { ThreeDLink } from "@/components/ui/ThreeDButton";
 import type { IngredientCategory } from "@/lib/types";
 import { RECIPE_MAP } from "@/data/recipes";
 
@@ -94,15 +95,17 @@ export default function GroceryListPage() {
       {grocery.length === 0 ? (
         <EmptyState
           emoji="🛒"
-          title="Your grocery list is empty"
-          description="Add missing ingredients from recipes you want to make, or grab a smart-buy below to unlock more recipes."
+          title="Your grocery list is clear."
+          description="Add missing ingredients from a recipe to start shopping smarter — totals, region pricing, and smart-buy picks land here."
           action={
-            <Link
-              href="/pantry"
-              className="rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
-            >
-              Browse recipes
-            </Link>
+            <div className="flex flex-wrap justify-center gap-3">
+              <ThreeDLink href="/cheap-recipes" variant="primary" size="md">
+                Browse cheap recipes
+              </ThreeDLink>
+              <ThreeDLink href="/pantry" variant="secondary" size="md">
+                Open my pantry
+              </ThreeDLink>
+            </div>
           }
         />
       ) : (

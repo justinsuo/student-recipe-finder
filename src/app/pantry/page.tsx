@@ -348,8 +348,8 @@ export default function PantryPage() {
       {pantry.length === 0 ? (
         <EmptyState
           emoji="🥕"
-          title="Your pantry is empty"
-          description="Add a few ingredients above and we'll start suggesting meals you can make right now."
+          title="Your pantry is empty."
+          description="Tell Waivy what you already have so AI Chef can cook from your real ingredients — not a stock photo. Tap a quick-add staple above, or paste a list and let smart paste sort it out."
         />
       ) : (
         <div className="space-y-10">

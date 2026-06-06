@@ -17,6 +17,9 @@ import {
   setCachedResolution,
 } from "@/lib/customIngredientStorage";
 import { INGREDIENTS } from "@/data/ingredients";
+import { useToast } from "@/components/ui/Toast";
+import { hapticLight, hapticSuccess } from "@/lib/haptics";
+import { bumpProgress, milestoneMessage } from "@/lib/userProgress";
 
 /**
  * Type or paste a messy ingredient list. The AI groups multi-word
@@ -25,6 +28,7 @@ import { INGREDIENTS } from "@/data/ingredients";
  */
 export function PantrySmartAdd() {
   const { addPantryItem, pantry } = useAppStore();
+  const toast = useToast();
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [resolved, setResolved] = useState<ResolvedIngredient[] | null>(null);
@@ -58,7 +62,7 @@ export function PantrySmartAdd() {
     }
   }
 
-  function addOne(r: ResolvedIngredient) {
+  function addOne(r: ResolvedIngredient): boolean {
     const existing = findExistingByName(
       r.canonicalName,
       INGREDIENTS.map((i) => ({ name: i.name, id: i.id })),
@@ -71,15 +75,38 @@ export function PantrySmartAdd() {
       saveCustomIngredient(custom);
       id = custom.id;
     }
+    let added = false;
     if (!pantry.some((p) => p.ingredientId === id)) {
       addPantryItem({ ingredientId: id, useSoon: r.useSoon });
+      added = true;
     }
     setAddedKeys((prev) => new Set([...prev, r.canonicalName.toLowerCase()]));
+    return added;
+  }
+
+  function celebratePantryAdds(addedCount: number) {
+    if (addedCount <= 0) return;
+    const count = bumpProgress("pantryItemsAdded", addedCount);
+    const milestone = milestoneMessage("pantryItemsAdded", count);
+    if (milestone) toast.reward(milestone);
+  }
+
+  function handleAddOne(r: ResolvedIngredient) {
+    hapticLight();
+    const added = addOne(r);
+    if (added) celebratePantryAdds(1);
   }
 
   function addAll() {
     if (!resolved) return;
-    for (const r of resolved) addOne(r);
+    let addedCount = 0;
+    for (const r of resolved) {
+      if (addOne(r)) addedCount += 1;
+    }
+    if (addedCount > 0) {
+      hapticSuccess();
+      celebratePantryAdds(addedCount);
+    }
   }
 
   return (
@@ -166,7 +193,7 @@ export function PantrySmartAdd() {
                   <button
                     key={`${key}-${idx}`}
                     disabled={already}
-                    onClick={() => addOne(r)}
+                    onClick={() => handleAddOne(r)}
                     title={`${r.category} · ${r.ingredientRole}`}
                     className={
                       already

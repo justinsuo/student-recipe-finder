@@ -33,6 +33,9 @@ import { RECIPES } from "@/data/recipes";
 import { MACRO_RECIPES } from "@/data/macroRecipes";
 import { recipeToDiaryFood } from "@/lib/nourish/recipeIntegration";
 import type { FoodItem, MealSlot } from "@/lib/nourish/types";
+import { useToast } from "@/components/ui/Toast";
+import { hapticSuccess } from "@/lib/haptics";
+import { bumpProgress, milestoneMessage } from "@/lib/userProgress";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -481,6 +484,7 @@ export function AddFoodModal({ onClose, onLogged, defaultMeal = "lunch" }: Props
   const [flash, setFlash] = useState(false);
   const closeRef = useRef<HTMLButtonElement | null>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
+  const toast = useToast();
 
   // Escape closes + focus-return to whatever opened the modal.
   useEffect(() => {
@@ -513,6 +517,10 @@ export function AddFoodModal({ onClose, onLogged, defaultMeal = "lunch" }: Props
       snapshotFatG: food.fatG,
       loggedAt: new Date().toISOString(),
     });
+    hapticSuccess();
+    const count = bumpProgress("mealsLogged");
+    const milestone = milestoneMessage("mealsLogged", count);
+    if (milestone) toast.reward(milestone);
     setFlash(true);
     setTimeout(() => {
       setFlash(false);

@@ -23,6 +23,10 @@ import {
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { ThreeDButton } from "@/components/ui/ThreeDButton";
+import { useToast } from "@/components/ui/Toast";
+import { hapticSuccess } from "@/lib/haptics";
+import { bumpProgress, milestoneMessage } from "@/lib/userProgress";
 import { RecipeImage } from "@/components/recipe/RecipeImage";
 import { CookingMethodCard } from "@/components/recipe/CookingMethodCard";
 import { EquipmentBadges } from "@/components/recipe/EquipmentBadge";
@@ -63,6 +67,29 @@ export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
 
 function RecipeDetailBody({ recipe }: { recipe: Recipe }) {
   const { isSaved, toggleSaved, pantry, addGroceryItems } = useAppStore();
+  const toast = useToast();
+
+  function handleToggleSaved() {
+    const wasSaved = isSaved(recipe.id);
+    toggleSaved(recipe.id);
+    if (!wasSaved) {
+      const count = bumpProgress("recipesSaved");
+      const milestone = milestoneMessage("recipesSaved", count);
+      if (milestone) toast.reward(milestone);
+    }
+  }
+
+  function handleAddMissingToGrocery(missingIds: string[]) {
+    if (missingIds.length === 0) return;
+    addGroceryItems(recipe, missingIds);
+    hapticSuccess();
+    const count = bumpProgress("groceryItemsAdded", missingIds.length);
+    const milestone = milestoneMessage("groceryItemsAdded", count);
+    if (milestone) toast.reward(milestone);
+    else toast.success(
+      `Added ${missingIds.length} item${missingIds.length === 1 ? "" : "s"} to your grocery list.`,
+    );
+  }
   const saved = isSaved(recipe.id);
   // bump when the user edits a price so the breakdown re-quotes
   const [priceRev, setPriceRev] = useState(0);
@@ -149,15 +176,21 @@ function RecipeDetailBody({ recipe }: { recipe: Recipe }) {
         <EquipmentBadges recipe={recipe} />
 
         <div
-          className="flex flex-wrap gap-2 pt-1 motion-safe:animate-[fadeUp_720ms_ease-out_both]"
+          className="flex flex-wrap gap-3 pt-1 motion-safe:animate-[fadeUp_720ms_ease-out_both]"
           style={{ animationDelay: "260ms" }}
         >
-          <Button onClick={() => setCookingMode(true)} leftIcon={<Play size={16} />}>
+          <ThreeDButton
+            variant="success"
+            size="lg"
+            onClick={() => setCookingMode(true)}
+            leftIcon={<Play size={16} />}
+          >
             Start cooking
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => toggleSaved(recipe.id)}
+          </ThreeDButton>
+          <ThreeDButton
+            variant="secondary"
+            size="lg"
+            onClick={handleToggleSaved}
             leftIcon={
               saved ? (
                 <BookmarkCheck
@@ -170,21 +203,19 @@ function RecipeDetailBody({ recipe }: { recipe: Recipe }) {
             }
           >
             {saved ? "Saved" : "Save recipe"}
-          </Button>
+          </ThreeDButton>
           {missing.length > 0 && (
-            <Button
-              variant="secondary"
+            <ThreeDButton
+              variant="warning"
+              size="lg"
               onClick={() =>
-                addGroceryItems(
-                  recipe,
-                  missing.map((m) => m.ingredientId),
-                )
+                handleAddMissingToGrocery(missing.map((m) => m.ingredientId))
               }
               leftIcon={<ShoppingBasket size={16} />}
               title={`Missing: ${missing.map((m) => m.ingredientId).slice(0, 5).join(", ")}${missing.length > 5 ? "…" : ""}`}
             >
-              Add {missing.length} missing {missing.length === 1 ? "item" : "items"} to grocery list
-            </Button>
+              Add {missing.length} missing {missing.length === 1 ? "item" : "items"} to grocery
+            </ThreeDButton>
           )}
         </div>
       </header>
