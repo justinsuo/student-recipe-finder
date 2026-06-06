@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { clsx } from "clsx";
 import {
   Camera,
@@ -169,6 +169,14 @@ export function PhotoMealLogger({ onLogged }: Props) {
   const [showExtras, setShowExtras] = useState(false);
   const [logged, setLogged] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const logTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clear the post-log auto-reset timer on unmount.
+  useEffect(() => {
+    return () => {
+      if (logTimeoutRef.current) clearTimeout(logTimeoutRef.current);
+    };
+  }, []);
 
   const aiEnabled = isAiLoggingEnabled();
   const totals = sumGroundedMacros(components);
@@ -257,7 +265,8 @@ export function PhotoMealLogger({ onLogged }: Props) {
       loggedAt: new Date().toISOString(),
     });
     setLogged(true);
-    setTimeout(() => {
+    if (logTimeoutRef.current) clearTimeout(logTimeoutRef.current);
+    logTimeoutRef.current = setTimeout(() => {
       setLogged(false);
       setState("idle");
       setComponents([]);

@@ -27,6 +27,14 @@ export function BarcodeScanner({ onLogged }: Props) {
   const [food, setFood] = useState<FoodItem | null>(null);
   const [meal, setMeal] = useState<MealSlot>("snack");
   const [servings, setServings] = useState(1);
+  const logTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clear the post-log auto-reset timer on unmount.
+  useEffect(() => {
+    return () => {
+      if (logTimeoutRef.current) clearTimeout(logTimeoutRef.current);
+    };
+  }, []);
   const [error, setError] = useState<string | null>(null);
   const [manualBarcode, setManualBarcode] = useState("");
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -117,7 +125,8 @@ export function BarcodeScanner({ onLogged }: Props) {
       loggedAt: new Date().toISOString(),
     });
     setScanState("logged");
-    setTimeout(() => {
+    if (logTimeoutRef.current) clearTimeout(logTimeoutRef.current);
+    logTimeoutRef.current = setTimeout(() => {
       setScanState("idle");
       setFood(null);
       setServings(1);

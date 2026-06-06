@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { clsx } from "clsx";
 import { Plus, Trash2, Pencil, ChevronLeft, ChevronRight, Check, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -67,6 +67,13 @@ function EntryRow({
   const [editing, setEditing] = useState(false);
   const [qty, setQty] = useState(entry.quantityServings);
   const [loggedAgain, setLoggedAgain] = useState(false);
+  const loggedAgainTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (loggedAgainTimeoutRef.current) clearTimeout(loggedAgainTimeoutRef.current);
+    };
+  }, []);
   const totals = entryTotals({ ...entry, quantityServings: qty });
 
   function handleSave() {
@@ -90,7 +97,8 @@ function EntryRow({
       loggedAt: new Date().toISOString(),
     });
     setLoggedAgain(true);
-    setTimeout(() => {
+    if (loggedAgainTimeoutRef.current) clearTimeout(loggedAgainTimeoutRef.current);
+    loggedAgainTimeoutRef.current = setTimeout(() => {
       setLoggedAgain(false);
       onChange();
     }, 900);

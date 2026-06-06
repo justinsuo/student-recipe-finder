@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { clsx } from "clsx";
 import { Apple, CheckCircle2, ChevronDown, ChevronUp, Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -38,6 +38,13 @@ export function LogGeneratedRecipeButton({ recipe, savedId }: Props) {
   const [servings, setServings] = useState(1);
   const [meal, setMeal] = useState<MealSlot>("lunch");
   const [done, setDone] = useState(false);
+  const doneTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (doneTimeoutRef.current) clearTimeout(doneTimeoutRef.current);
+    };
+  }, []);
 
   const kcal = num(recipe.estimatedNutrition?.calories);
   const proteinG = num(recipe.estimatedNutrition?.protein);
@@ -70,7 +77,8 @@ export function LogGeneratedRecipeButton({ recipe, savedId }: Props) {
       loggedAt: new Date().toISOString(),
     });
     setDone(true);
-    setTimeout(() => {
+    if (doneTimeoutRef.current) clearTimeout(doneTimeoutRef.current);
+    doneTimeoutRef.current = setTimeout(() => {
       setDone(false);
       setOpen(false);
     }, 1500);
