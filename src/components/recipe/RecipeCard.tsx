@@ -156,11 +156,18 @@ export function RecipeCard({ result, recipe, highlight, from }: Props) {
         )}
 
         <div className="mt-auto border-t border-stone-100 pt-3">
-          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#16834A]">
+          {/* Tactile basil pill replaces the old text-link. Renders as
+              part of the parent Link so the whole card is still one
+              click target — just visually obvious. */}
+          <span
+            aria-hidden
+            className="inline-flex items-center gap-1.5 rounded-full border-b-[3px] border-[#16834A] bg-gradient-to-b from-[#3AD081] to-[#2FBF71] px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-wide text-white shadow-sm transition-all motion-safe:group-hover:-translate-y-px"
+          >
             Cook this
             <ArrowRight
-              size={14}
-              className="transition-transform motion-safe:group-hover:translate-x-1"
+              size={12}
+              strokeWidth={2.6}
+              className="transition-transform motion-safe:group-hover:translate-x-0.5"
             />
           </span>
         </div>
