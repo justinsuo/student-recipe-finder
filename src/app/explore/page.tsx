@@ -356,6 +356,11 @@ export default function ExplorePage() {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined,
   );
+  // Race guard: each in-flight load gets a monotonic request id. When a
+  // result returns, we only apply it if its id is still the latest. Without
+  // this, fast typing can let an older response overwrite a newer one
+  // (e.g. "ch" results land after the user has already typed "chicken").
+  const loadReqRef = useRef(0);
   // Demo banner shows only if the live result set actually came back as
   // "mock" (a fallback path). The configured source from env isn't enough
   // because TheMealDB is keyless and is used by default.
@@ -363,9 +368,12 @@ export default function ExplorePage() {
 
   const load = useCallback(
     async (f: ExploreFilters, append: boolean) => {
+      const myReq = ++loadReqRef.current;
       if (append) setLoadingMore(true);
       else setLoading(true);
       const result = await searchExternalRecipes(f);
+      // Drop stale responses.
+      if (myReq !== loadReqRef.current) return;
       setRecipes((prev) =>
         append ? [...prev, ...result.recipes] : result.recipes,
       );
