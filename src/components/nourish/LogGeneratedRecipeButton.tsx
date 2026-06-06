@@ -169,23 +169,25 @@ export function LogGeneratedRecipeButton({ recipe, savedId }: Props) {
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <span className="w-16 text-xs font-medium text-stone-600">
+                <span className="w-16 text-xs font-medium text-stone-600" id="log-gen-recipe-meal-label">
                   Meal
                 </span>
-                {(
-                  Object.entries(MEAL_LABELS) as [MealSlot, string][]
-                ).map(([id, label]) => (
-                  <SelectablePill
-                    key={id}
-                    active={meal === id}
-                    onClick={() => setMeal(id)}
-                    ariaSemantics="checked"
-                    showCheck={false}
-                    size="sm"
-                  >
-                    {label}
-                  </SelectablePill>
-                ))}
+                <div role="radiogroup" aria-labelledby="log-gen-recipe-meal-label" className="flex flex-wrap items-center gap-2">
+                  {(
+                    Object.entries(MEAL_LABELS) as [MealSlot, string][]
+                  ).map(([id, label]) => (
+                    <SelectablePill
+                      key={id}
+                      active={meal === id}
+                      onClick={() => setMeal(id)}
+                      ariaSemantics="checked"
+                      showCheck={false}
+                      size="sm"
+                    >
+                      {label}
+                    </SelectablePill>
+                  ))}
+                </div>
               </div>
 
               <Button

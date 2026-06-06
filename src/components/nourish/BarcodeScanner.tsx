@@ -232,12 +232,14 @@ export function BarcodeScanner({ onLogged }: Props) {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-medium text-stone-600">Meal:</span>
-            {(Object.entries(MEAL_LABELS) as [MealSlot, string][]).map(([id, label]) => (
-              <SelectablePill key={id} active={meal === id} onClick={() => setMeal(id)} ariaSemantics="checked" showCheck={false} size="sm">
-                {label}
-              </SelectablePill>
-            ))}
+            <span className="text-xs font-medium text-stone-600" id="barcode-meal-label">Meal:</span>
+            <div role="radiogroup" aria-labelledby="barcode-meal-label" className="flex flex-wrap items-center gap-2">
+              {(Object.entries(MEAL_LABELS) as [MealSlot, string][]).map(([id, label]) => (
+                <SelectablePill key={id} active={meal === id} onClick={() => setMeal(id)} ariaSemantics="checked" showCheck={false} size="sm">
+                  {label}
+                </SelectablePill>
+              ))}
+            </div>
           </div>
 
           <div className="flex gap-2">

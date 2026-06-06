@@ -108,12 +108,14 @@ export function LogRecipeButton({ recipe }: Props) {
 
               {/* Meal picker */}
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-medium text-stone-600 w-16">Meal</span>
-                {(Object.entries(MEAL_LABELS) as [MealSlot, string][]).map(([id, label]) => (
-                  <SelectablePill key={id} active={meal === id} onClick={() => setMeal(id)} ariaSemantics="checked" showCheck={false} size="sm">
-                    {label}
-                  </SelectablePill>
-                ))}
+                <span className="text-xs font-medium text-stone-600 w-16" id="log-recipe-meal-label">Meal</span>
+                <div role="radiogroup" aria-labelledby="log-recipe-meal-label" className="flex flex-wrap items-center gap-2">
+                  {(Object.entries(MEAL_LABELS) as [MealSlot, string][]).map(([id, label]) => (
+                    <SelectablePill key={id} active={meal === id} onClick={() => setMeal(id)} ariaSemantics="checked" showCheck={false} size="sm">
+                      {label}
+                    </SelectablePill>
+                  ))}
+                </div>
               </div>
 
               <Button variant="primary" size="sm" leftIcon={<Plus size={13} />} onClick={handleLog} className="w-full">
