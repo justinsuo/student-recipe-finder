@@ -3,7 +3,6 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { AlertTriangle, X } from "lucide-react";
 import { clsx } from "clsx";
-import { Button } from "@/components/ui/Button";
 
 /**
  * Shared confirm/destructive-action dialog. Bottom-sheet on mobile,
@@ -39,13 +38,22 @@ export function ConfirmDialog({
   onClose: () => void;
 }) {
   const confirmRef = useRef<HTMLButtonElement | null>(null);
+  const cancelRef = useRef<HTMLButtonElement | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!open) return;
     previouslyFocused.current = document.activeElement as HTMLElement | null;
-    confirmRef.current?.focus();
+    // Autofocus convention: for destructive dialogs, default to Cancel so
+    // a stray Enter doesn't immediately delete the user's data. For
+    // non-destructive confirms, default to Confirm so keyboard users can
+    // proceed quickly.
+    if (destructive) {
+      cancelRef.current?.focus();
+    } else {
+      confirmRef.current?.focus();
+    }
 
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") {
@@ -73,7 +81,7 @@ export function ConfirmDialog({
       document.removeEventListener("keydown", onKey);
       previouslyFocused.current?.focus();
     };
-  }, [open, onClose]);
+  }, [open, onClose, destructive]);
 
   if (!open) return null;
 
@@ -134,9 +142,14 @@ export function ConfirmDialog({
         </div>
 
         <div className="flex flex-wrap justify-end gap-2 border-t border-stone-100 bg-stone-50/60 px-5 py-3">
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <button
+            ref={cancelRef}
+            type="button"
+            onClick={onClose}
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full px-3.5 text-sm font-semibold text-stone-700 transition-colors hover:bg-stone-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 focus-visible:ring-offset-2"
+          >
             {cancelLabel}
-          </Button>
+          </button>
           <button
             ref={confirmRef}
             type="button"
