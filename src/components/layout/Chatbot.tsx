@@ -37,6 +37,7 @@ export function Chatbot() {
   ]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef(0);
+  const inputRef = useRef<HTMLInputElement>(null);
   // Hide the floating button while the user is typing in a form field
   // so it doesn't overlap inputs / the mobile keyboard.
   const [hiddenByInput, setHiddenByInput] = useState(false);
@@ -205,9 +206,13 @@ export function Chatbot() {
             onSubmit={(e) => {
               e.preventDefault();
               send(input);
+              // Refocus so keyboard users don't have to click back into
+              // the input after every message.
+              inputRef.current?.focus();
             }}
           >
             <input
+              ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask about a recipe, budget, or pantry…"

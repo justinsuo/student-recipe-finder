@@ -15,17 +15,35 @@ export function workerUrl(): string {
   return WORKER_URL;
 }
 
+const WORKER_TIMEOUT_MS = 60_000;
+
 async function postJson<T>(path: string, body: unknown): Promise<T> {
   if (!WORKER_URL) {
     throw new Error(
       "AI is not configured. NEXT_PUBLIC_WORKER_URL is not set on this build.",
     );
   }
-  const res = await fetch(`${WORKER_URL}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  // Cap the request so a hung worker (cold start that overran) doesn't
+  // leave the UI spinning forever. The recipe-generation flow is slow,
+  // so the cap here is more generous than the direct Anthropic one.
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), WORKER_TIMEOUT_MS);
+  let res: Response;
+  try {
+    res = await fetch(`${WORKER_URL}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    if ((err as { name?: string }).name === "AbortError") {
+      throw new Error("AI request timed out — try again");
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeout);
+  }
   if (!res.ok) {
     let detail = "";
     try {
@@ -33,6 +51,9 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
       detail = j.error ?? "";
     } catch {
       detail = await res.text();
+    }
+    if (res.status === 429) {
+      throw new Error("AI is rate-limited — try again in a moment");
     }
     throw new Error(`AI request failed (${res.status}): ${detail.slice(0, 200)}`);
   }

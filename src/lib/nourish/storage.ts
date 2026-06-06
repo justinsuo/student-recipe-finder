@@ -269,7 +269,13 @@ export function getProteinStreak(targetProteinG: number, threshold = 0.85): numb
   for (let daysBack = 1; daysBack <= 365; daysBack++) {
     const d = new Date(today);
     d.setDate(today.getDate() - daysBack);
-    const dateStr = d.toISOString().split("T")[0];
+    // Format LOCAL date — diary entries use todayString() which is local.
+    // Using d.toISOString() would shift the comparison by one day for any
+    // user east of UTC and silently break their streak.
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    const dateStr = `${yyyy}-${mm}-${dd}`;
 
     const dayEntries = allEntries.filter((e) => e.date === dateStr);
     if (dayEntries.length === 0) break;

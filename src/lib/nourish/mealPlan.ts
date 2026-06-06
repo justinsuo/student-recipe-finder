@@ -75,12 +75,19 @@ export function removePlanItem(date: string, slot: MealSlot): void {
  * (YYYY-MM-DD).
  */
 export function nextSevenDays(today: string): string[] {
+  // Build dates in LOCAL time. Using `toISOString().slice(0,10)` here
+  // would shift every output back by one day for users east of UTC
+  // because toISOString converts to UTC first. The diary writes dates
+  // via `todayString()` (local) so the planner must match.
   const base = new Date(today + "T00:00:00");
   const out: string[] = [];
   for (let i = 0; i < 7; i++) {
     const d = new Date(base);
     d.setDate(d.getDate() + i);
-    out.push(d.toISOString().slice(0, 10));
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    out.push(`${yyyy}-${mm}-${dd}`);
   }
   return out;
 }

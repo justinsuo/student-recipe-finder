@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Camera,
   Image as ImageIcon,
@@ -71,11 +71,19 @@ export function PantryPhotoUpload() {
   const { addPantryItem, pantry } = useAppStore();
   const inputRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
+  const previewUrlRef = useRef<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<VisionResult | null>(null);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
+
+  // Free any outstanding fridge-photo blob URL on unmount.
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    };
+  }, []);
 
   // Don't render if AI isn't configured for this deployment.
   if (!isAiEnabled()) return null;
@@ -85,7 +93,10 @@ export function PantryPhotoUpload() {
     setResult(null);
     setAddedIds(new Set());
 
-    setPreviewUrl(URL.createObjectURL(file));
+    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    const nextUrl = URL.createObjectURL(file);
+    previewUrlRef.current = nextUrl;
+    setPreviewUrl(nextUrl);
     setLoading(true);
     try {
       const { base64, mediaType } = await fileToBase64Resized(file);
@@ -124,6 +135,10 @@ export function PantryPhotoUpload() {
   }
 
   function reset() {
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
     setPreviewUrl(null);
     setResult(null);
     setError(null);

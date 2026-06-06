@@ -483,10 +483,11 @@ export function AddFoodModal({ onClose, onLogged, defaultMeal = "lunch" }: Props
   const [mode, setMode] = useState<Mode>("search");
   const [flash, setFlash] = useState(false);
   const closeRef = useRef<HTMLButtonElement | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
   const toast = useToast();
 
-  // Escape closes + focus-return to whatever opened the modal.
+  // Escape closes + Tab cycles inside the dialog + focus-return on close.
   useEffect(() => {
     previouslyFocused.current = document.activeElement as HTMLElement | null;
     closeRef.current?.focus();
@@ -494,6 +495,25 @@ export function AddFoodModal({ onClose, onLogged, defaultMeal = "lunch" }: Props
       if (e.key === "Escape") {
         e.preventDefault();
         onClose();
+        return;
+      }
+      if (e.key === "Tab" && dialogRef.current) {
+        const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        );
+        const visible = Array.from(focusable).filter(
+          (el) => !el.hasAttribute("disabled") && el.offsetParent !== null,
+        );
+        if (visible.length === 0) return;
+        const first = visible[0];
+        const last = visible[visible.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
     }
     document.addEventListener("keydown", onKey);
@@ -541,6 +561,7 @@ export function AddFoodModal({ onClose, onLogged, defaultMeal = "lunch" }: Props
 
       {/* Panel */}
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="Add food"

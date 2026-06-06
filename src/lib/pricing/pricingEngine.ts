@@ -26,8 +26,14 @@ export function quoteIngredient(
   const override = getOverride(ingredientId);
   const builtIn = INGREDIENT_MAP.get(ingredientId);
 
-  // Priority: user override > cached AI estimate > catalog × regional multiplier
-  if (override && builtIn) {
+  // Priority: user override > cached AI estimate > catalog × regional multiplier.
+  // An override is only safe to apply when its unit matches the catalog
+  // unit — recipes carry quantities in the catalog unit, so multiplying
+  // by an override priced per-different-unit would produce wildly wrong
+  // recipe cost (e.g. $/oz × cup). When the units mismatch, fall through
+  // to the AI cache / catalog × region path. We surface the override
+  // intent via `note` so the user still sees their input acknowledged.
+  if (override && builtIn && override.unit === builtIn.unit) {
     const applied = override.unitCost;
     return {
       ingredientId,
@@ -35,7 +41,7 @@ export function quoteIngredient(
       baseUnitCost: builtIn.estimatedUnitCost,
       appliedUnitCost: applied,
       quantity,
-      unit: override.unit || builtIn.unit,
+      unit: builtIn.unit,
       totalCost: applied * quantity,
       regionLabel: region.shortLabel ?? region.label,
       multiplier: region.multiplier,

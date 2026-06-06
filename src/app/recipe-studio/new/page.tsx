@@ -51,6 +51,16 @@ interface StepRow {
   timerMinutes?: number;
 }
 
+// Coerce a number input string to a finite, non-negative integer with a
+// safe fallback. parseInt("", 10) returns NaN; so do parseInt(".", 10)
+// and parseInt("-", 10). Letting NaN propagate into the cost-per-serving
+// math caused .toFixed() to crash the builder.
+function coerceNumberInput(raw: string, fallback: number, min = 0): number {
+  const n = parseInt(raw, 10);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(min, n);
+}
+
 export default function ManualRecipeBuilderPage() {
   const router = useRouter();
   const [name, setName] = useState("");
@@ -290,7 +300,7 @@ export default function ManualRecipeBuilderPage() {
               type="number"
               min={1}
               value={servings}
-              onChange={(e) => setServings(parseInt(e.target.value || "1", 10))}
+              onChange={(e) => setServings(coerceNumberInput(e.target.value, 1, 1))}
               className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-3 py-2 text-sm focus:border-emerald-400 focus:bg-white focus:outline-none"
             />
           </Field>
@@ -299,7 +309,7 @@ export default function ManualRecipeBuilderPage() {
               type="number"
               min={0}
               value={prepTime}
-              onChange={(e) => setPrepTime(parseInt(e.target.value || "0", 10))}
+              onChange={(e) => setPrepTime(coerceNumberInput(e.target.value, 0, 0))}
               className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-3 py-2 text-sm focus:border-emerald-400 focus:bg-white focus:outline-none"
             />
           </Field>
@@ -308,7 +318,7 @@ export default function ManualRecipeBuilderPage() {
               type="number"
               min={0}
               value={cookTime}
-              onChange={(e) => setCookTime(parseInt(e.target.value || "0", 10))}
+              onChange={(e) => setCookTime(coerceNumberInput(e.target.value, 0, 0))}
               className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-3 py-2 text-sm focus:border-emerald-400 focus:bg-white focus:outline-none"
             />
           </Field>

@@ -37,6 +37,8 @@ interface AnthropicResponse {
   usage: { input_tokens: number; output_tokens: number };
 }
 
+const ANTHROPIC_TIMEOUT_MS = 30_000;
+
 async function callAnthropic(opts: {
   system: string;
   messages: MessageInput[];
@@ -46,25 +48,43 @@ async function callAnthropic(opts: {
   if (!API_KEY) {
     throw new Error("AI is not configured");
   }
-  const res = await fetch(API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": API_KEY,
-      "anthropic-version": API_VERSION,
-      "anthropic-dangerous-direct-browser-access": "true",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: opts.maxTokens ?? 1024,
-      temperature: opts.temperature ?? 0.4,
-      system: opts.system,
-      messages: opts.messages,
-    }),
-  });
+  // Cap the request so a hung connection doesn't leave the UI spinning
+  // forever. 30s matches the Worker timeout we use elsewhere.
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), ANTHROPIC_TIMEOUT_MS);
+  let res: Response;
+  try {
+    res = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": API_KEY,
+        "anthropic-version": API_VERSION,
+        "anthropic-dangerous-direct-browser-access": "true",
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: opts.maxTokens ?? 1024,
+        temperature: opts.temperature ?? 0.4,
+        system: opts.system,
+        messages: opts.messages,
+      }),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    if ((err as { name?: string }).name === "AbortError") {
+      throw new Error("AI request timed out — try again");
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeout);
+  }
 
   if (!res.ok) {
     const errText = await res.text();
+    if (res.status === 429) {
+      throw new Error("AI is rate-limited — try again in a moment");
+    }
     throw new Error(
       `Request failed (${res.status}): ${errText.slice(0, 200)}`,
     );
@@ -393,7 +413,15 @@ function parseHaikuJson(raw: string): SlimHaikuRecipe {
   const start = body.indexOf("{");
   const end = body.lastIndexOf("}");
   if (start !== -1 && end !== -1) body = body.slice(start, end + 1);
-  return JSON.parse(body) as SlimHaikuRecipe;
+  try {
+    return JSON.parse(body) as SlimHaikuRecipe;
+  } catch (err) {
+    // A raw SyntaxError bubbling up to /ai-chef looks like a hard crash
+    // ("Unexpected token …"). Re-throw with a user-friendly message so
+    // the calling UI can show "AI returned unparseable output" instead.
+    console.warn("[anthropic.parseHaikuJson] could not parse Haiku JSON", err, raw.slice(0, 200));
+    throw new Error("AI returned unparseable output");
+  }
 }
 
 import type { GeneratedRecipe } from "@/lib/workerClient";
