@@ -35,7 +35,7 @@ import { IngredientPriceRow } from "@/components/pricing/IngredientPriceRow";
 import { RecipeAIRepriceButton } from "@/components/pricing/RecipeAIRepriceButton";
 import { quoteRecipe } from "@/lib/pricing/pricingEngine";
 import { bestEffortNutrition, isHighProtein } from "@/lib/nutritionEngine";
-import { useAppStore } from "@/lib/AppStore";
+import { useAppStore, ingredientName } from "@/lib/AppStore";
 import {
   calculateCostPerServing,
   calculateRecipeCost,
@@ -222,7 +222,7 @@ function RecipeDetailBody({ recipe }: { recipe: Recipe }) {
                 handleAddMissingToGrocery(missing.map((m) => m.ingredientId))
               }
               leftIcon={<ShoppingBasket size={16} />}
-              title={`Missing: ${missing.map((m) => m.ingredientId).slice(0, 5).join(", ")}${missing.length > 5 ? "…" : ""}`}
+              title={`Missing: ${missing.map((m) => ingredientName(m.ingredientId)).slice(0, 5).join(", ")}${missing.length > 5 ? "…" : ""}`}
             >
               Add {missing.length} missing {missing.length === 1 ? "item" : "items"} to grocery
             </ThreeDButton>
