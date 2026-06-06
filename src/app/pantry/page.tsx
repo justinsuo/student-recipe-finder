@@ -25,7 +25,7 @@ import {
 } from "@/lib/recipeScoring";
 import { RecipeCard } from "@/components/recipe/RecipeCard";
 import { Button } from "@/components/ui/Button";
-import { EmptyState } from "@/components/ui/EmptyState";
+import { VisualEmptyState } from "@/components/ui/VisualEmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -346,10 +346,11 @@ export default function PantryPage() {
       </ScrollReveal>
 
       {pantry.length === 0 ? (
-        <EmptyState
-          emoji="🥕"
+        <VisualEmptyState
+          icon={<Refrigerator size={28} strokeWidth={2.4} />}
+          tone="basil"
           title="Your pantry is empty."
-          description="Tell Waivy what you already have so AI Chef can cook from your real ingredients — not a stock photo. Tap a quick-add staple above, or paste a list and let smart paste sort it out."
+          body="Tell Waivy what you have so AI Chef cooks from real ingredients."
         />
       ) : (
         <div className="space-y-10">

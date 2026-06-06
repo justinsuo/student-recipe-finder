@@ -12,12 +12,13 @@ import {
   imageDataUrl,
 } from "@/lib/customRecipeStorage";
 import type { CustomRecipe } from "@/lib/customRecipeTypes";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
 import { ThreeDLink } from "@/components/ui/ThreeDButton";
+import { VisualEmptyState } from "@/components/ui/VisualEmptyState";
+import { Bookmark } from "lucide-react";
 
 export default function SavedPage() {
   const { saved, hydrated } = useAppStore();
@@ -54,19 +55,20 @@ export default function SavedPage() {
       />
 
       {hydrated && totalCount === 0 ? (
-        <EmptyState
-          emoji="🔖"
+        <VisualEmptyState
+          icon={<Bookmark size={28} strokeWidth={2.4} />}
+          tone="pink"
           title="Your recipe box is empty."
-          description="Bookmark recipes you want to cook later — they show up here, grouped by where they came from."
-          action={
-            <div className="flex flex-wrap justify-center gap-3">
+          body="Bookmark recipes you want to cook later — they land here."
+          actions={
+            <>
               <ThreeDLink href="/cheap-recipes" variant="primary" size="md">
-                Find cheap recipes
+                Find cheap
               </ThreeDLink>
               <ThreeDLink href="/ai-chef" variant="secondary" size="md">
                 Ask AI Chef
               </ThreeDLink>
-            </div>
+            </>
           }
         />
       ) : (

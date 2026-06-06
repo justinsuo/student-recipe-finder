@@ -11,7 +11,6 @@ import { useAppStore } from "@/lib/AppStore";
 import { recommendSmartBuys } from "@/lib/recipeScoring";
 import { quoteIngredient } from "@/lib/pricing/pricingEngine";
 import { Button } from "@/components/ui/Button";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -19,6 +18,7 @@ import { useToast } from "@/components/ui/Toast";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
 import { ThreeDLink } from "@/components/ui/ThreeDButton";
+import { VisualEmptyState } from "@/components/ui/VisualEmptyState";
 import type { IngredientCategory } from "@/lib/types";
 import { RECIPE_MAP } from "@/data/recipes";
 
@@ -93,19 +93,20 @@ export default function GroceryListPage() {
       />
 
       {grocery.length === 0 ? (
-        <EmptyState
-          emoji="🛒"
+        <VisualEmptyState
+          icon={<ShoppingBasket size={28} strokeWidth={2.4} />}
+          tone="teal"
           title="Your grocery list is clear."
-          description="Add missing ingredients from a recipe to start shopping smarter — totals, region pricing, and smart-buy picks land here."
-          action={
-            <div className="flex flex-wrap justify-center gap-3">
+          body="Add missing ingredients from a recipe — totals + region pricing land here."
+          actions={
+            <>
               <ThreeDLink href="/cheap-recipes" variant="primary" size="md">
-                Browse cheap recipes
+                Browse cheap
               </ThreeDLink>
               <ThreeDLink href="/pantry" variant="secondary" size="md">
-                Open my pantry
+                Open pantry
               </ThreeDLink>
-            </div>
+            </>
           }
         />
       ) : (
