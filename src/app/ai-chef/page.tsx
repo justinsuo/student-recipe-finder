@@ -56,7 +56,13 @@ import { AIChefSteppedLoader } from "@/components/ai/AIChefSteppedLoader";
 import { RecipeStatsRow } from "@/components/recipe/RecipeStatsRow";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { LogGeneratedRecipeButton } from "@/components/nourish/LogGeneratedRecipeButton";
-import { ThreeDButton } from "@/components/ui/ThreeDButton";
+import { ThreeDButton, ThreeDLink } from "@/components/ui/ThreeDButton";
+import { CategoryChip } from "@/components/ui/CategoryChip";
+import { StatCard } from "@/components/ui/StatCard";
+import { BentoGrid, BentoItem } from "@/components/ui/BentoGrid";
+import { LiquidGlassPanel } from "@/components/visual-effects/LiquidGlassPanel";
+import { VisualEmptyState } from "@/components/ui/VisualEmptyState";
+import { Coins, Beef, Clock } from "lucide-react";
 import { hapticMedium } from "@/lib/haptics";
 
 // If the AI's ingredient list maps cleanly to our catalog, replace its
@@ -1245,8 +1251,10 @@ function AIChefPage() {
 
       {selectedOption && selectedOptionId && (
         <article className="space-y-5">
-          {/* Option bubbles strip */}
-          <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm">
+          {/* Option bubbles strip — floating liquid-glass tray. Single
+              primary CTA (Generate more, basil 3D) + ghost Replace all
+              so the choice hierarchy is obvious. */}
+          <LiquidGlassPanel tone="grape" rounded="3xl" className="p-5">
             <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
               <SectionHeading
                 eyebrow={
@@ -1256,36 +1264,29 @@ function AIChefPage() {
                   </span>
                 }
                 title="Pick your favorite."
-                description="Switch between options to compare cost, time, and approach."
                 tone="violet"
                 className="flex-1"
               />
-              <div className="flex flex-wrap gap-2">
-                <Button
+              <div className="flex flex-wrap items-center gap-2">
+                <ThreeDButton
                   size="sm"
-                  variant="outline"
+                  variant="primary"
                   onClick={() => runOptions(true)}
                   disabled={loading || !isWorkerConfigured()}
                   title={!isWorkerConfigured() ? "AI Chef is offline — NEXT_PUBLIC_WORKER_URL not configured" : undefined}
-                  leftIcon={
-                    appending && loading ? (
-                      <Loader2 size={14} className="animate-spin" />
-                    ) : (
-                      <Sparkles size={14} />
-                    )
-                  }
+                  loading={appending && loading}
+                  leftIcon={<Sparkles size={14} />}
                 >
-                  {appending && loading ? "Generating…" : "Generate more options"}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
+                  {appending && loading ? "Generating…" : "Generate more"}
+                </ThreeDButton>
+                <button
+                  type="button"
                   onClick={() => runOptions(false)}
                   disabled={loading || !isWorkerConfigured()}
-                  leftIcon={<RefreshCw size={14} />}
+                  className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold text-[#6B5A4A] hover:bg-white/60 disabled:opacity-50"
                 >
-                  Replace all
-                </Button>
+                  <RefreshCw size={12} /> Replace all
+                </button>
               </div>
             </div>
             <GeneratedRecipeOptionBubbles
@@ -1295,19 +1296,10 @@ function AIChefPage() {
               images={optionImages}
               generatingImageIds={generatingImageIds}
             />
-          </div>
+          </LiquidGlassPanel>
 
-          {/* Notes influence summary */}
-          {selectedOption.notesInfluenceSummary && (
-            <Card className="border-violet-200 bg-violet-50">
-              <p className="text-xs font-semibold uppercase tracking-wide text-violet-800">
-                How your notes influenced this recipe
-              </p>
-              <p className="mt-1 text-sm text-violet-900">
-                {selectedOption.notesInfluenceSummary}
-              </p>
-            </Card>
-          )}
+          {/* Note: notesInfluenceSummary and whyThisFits are surfaced
+              together as a BentoGrid further down — no standalone card. */}
 
           {/* Main recipe hero — image + overlay */}
           <div className="group overflow-hidden rounded-3xl shadow-md">
@@ -1325,14 +1317,23 @@ function AIChefPage() {
                   <span className="text-sm">Painting your dish…</span>
                 </div>
               ) : (
-                <div className="flex h-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-violet-100 via-emerald-50 to-amber-50 text-stone-500">
-                  <ChefHat size={48} />
-                  <button
-                    onClick={() => generateImageForOption(selectedOption)}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm shadow-emerald-200 hover:bg-emerald-700"
-                  >
-                    <Sparkles size={11} /> Generate image
-                  </button>
+                <div className="absolute inset-0 grid place-items-center p-4">
+                  <VisualEmptyState
+                    icon={<ChefHat size={28} strokeWidth={2.4} />}
+                    tone="grape"
+                    title="Ready when you are."
+                    body="Generate a food image for this recipe in a tap."
+                    actions={
+                      <ThreeDButton
+                        variant="primary"
+                        size="sm"
+                        leftIcon={<Sparkles size={12} />}
+                        onClick={() => generateImageForOption(selectedOption)}
+                      >
+                        Generate image
+                      </ThreeDButton>
+                    }
+                  />
                 </div>
               )}
               {/* Top-right overlay: AI badge + regenerate */}
@@ -1382,15 +1383,34 @@ function AIChefPage() {
             )}
           </div>
 
-          {/* Stat strip (cost, time, calories, protein, servings) */}
-          <RecipeStatsRow
-            costPerServing={Number(selectedOption.recipe.estimatedCostPerServing)}
-            totalTimeMinutes={selectedOption.recipe.totalTimeMinutes}
-            calories={selectedOption.recipe.estimatedNutrition?.calories}
-            protein={selectedOption.recipe.estimatedNutrition?.protein}
-            carbs={selectedOption.recipe.estimatedNutrition?.carbs}
-            servings={selectedOption.recipe.servings}
-          />
+          {/* 4-up StatCard dashboard replaces the flat stat strip —
+              cost, time, calories, protein read like a recipe report card. */}
+          <BentoGrid cols={4}>
+            <StatCard
+              icon={<Coins size={16} strokeWidth={2.4} />}
+              tone="basil"
+              value={`$${Number(selectedOption.recipe.estimatedCostPerServing).toFixed(2)}`}
+              label="Per serving"
+            />
+            <StatCard
+              icon={<Clock size={16} strokeWidth={2.4} />}
+              tone="butter"
+              value={selectedOption.recipe.totalTimeMinutes ?? "—"}
+              label="Minutes"
+            />
+            <StatCard
+              icon={<Flame size={16} strokeWidth={2.4} />}
+              tone="carrot"
+              value={Math.round(selectedOption.recipe.estimatedNutrition?.calories ?? 0)}
+              label="Calories"
+            />
+            <StatCard
+              icon={<Beef size={16} strokeWidth={2.4} />}
+              tone="grape"
+              value={`${Math.round(selectedOption.recipe.estimatedNutrition?.protein ?? 0)}g`}
+              label="Protein"
+            />
+          </BentoGrid>
 
           <header className="space-y-3">
             {/* Title shows here only when there's no hero image — otherwise
@@ -1400,54 +1420,75 @@ function AIChefPage() {
                 {selectedOption.recipe.name}
               </h2>
             )}
+            {/* Color-coded chip row: difficulty (auto-tone) + up to 3
+                equipment categories, each in its own palette via
+                CategoryChip's MAP. */}
             <div className="flex flex-wrap gap-2">
-              <Badge tone="stone" icon={<Flame size={12} />}>
+              <CategoryChip category={selectedOption.recipe.difficulty}>
                 {selectedOption.recipe.difficulty}
-              </Badge>
+              </CategoryChip>
               {selectedOption.recipe.equipment?.slice(0, 3).map((eq) => (
-                <Badge key={eq} tone="sky">
-                  {eq}
-                </Badge>
+                <CategoryChip key={eq} category={eq} />
               ))}
             </div>
             <p className="max-w-3xl text-base leading-relaxed text-stone-700">
               {selectedOption.recipe.description}
             </p>
-            {selectedOption.recipe.whyThisFits && (
-              <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-                <p className="text-xs font-semibold uppercase tracking-wide">
-                  Why this fits your request
-                </p>
-                <p className="mt-1">{selectedOption.recipe.whyThisFits}</p>
-              </div>
-            )}
-            <div className="flex flex-wrap gap-2 pt-1">
+            {/* Why-this-fits + notes-influence callouts converted to a
+                2-up BentoGrid when both exist; single tile when only one
+                — so we never ship an empty cell. */}
+            {(() => {
+              const why = selectedOption.recipe.whyThisFits;
+              const notes = selectedOption.notesInfluenceSummary;
+              const has = [
+                why ? { icon: <Sparkles size={14} />, title: "Why this fits", body: why, tone: "basil" as const } : null,
+                notes ? { icon: <ChefHat size={14} />, title: "Your notes shaped this", body: notes, tone: "grape" as const } : null,
+              ].filter(Boolean) as Array<{ icon: React.ReactNode; title: string; body: string; tone: "basil" | "grape" }>;
+              if (has.length === 0) return null;
+              return (
+                <BentoGrid cols={has.length === 1 ? 3 : 4}>
+                  {has.map((c, i) => (
+                    <BentoItem key={i} colSpan={has.length === 1 ? 3 : 2}>
+                      <div className={`flex h-full gap-3 rounded-2xl border p-4 shadow-sm ${c.tone === "basil" ? "border-[#B6E8CD] bg-[#F4FCF8]" : "border-[#CDBEFF] bg-[#F6F3FF]"}`}>
+                        <span aria-hidden className={`grid h-9 w-9 flex-none place-items-center rounded-xl text-white ${c.tone === "basil" ? "bg-[#2FBF71]" : "bg-[#7C5CFF]"}`}>{c.icon}</span>
+                        <div className="min-w-0">
+                          <p className={`text-[11px] font-bold uppercase tracking-[0.14em] ${c.tone === "basil" ? "text-[#16834A]" : "text-[#3F2BB8]"}`}>{c.title}</p>
+                          <p className={`mt-1 text-sm leading-relaxed ${c.tone === "basil" ? "text-[#0F5E33]" : "text-[#2A1B8A]"}`}>{c.body}</p>
+                        </div>
+                      </div>
+                    </BentoItem>
+                  ))}
+                </BentoGrid>
+              );
+            })()}
+            <div className="flex flex-wrap items-center gap-2 pt-1">
               {optionSavedIds[selectedOption.id] && (
                 <>
-                  <Button
+                  <ThreeDLink
+                    href={`/recipes/custom?id=${optionSavedIds[selectedOption.id]}`}
+                    variant="primary"
+                    size="md"
+                    rightIcon={<ArrowRight size={14} />}
+                  >
+                    Open full page
+                  </ThreeDLink>
+                  <button
+                    type="button"
                     onClick={() =>
                       toggleSaved(optionSavedIds[selectedOption.id])
                     }
-                    variant="outline"
-                    size="sm"
-                    leftIcon={
-                      isSaved(optionSavedIds[selectedOption.id]) ? (
-                        <BookmarkCheck size={14} className="text-emerald-600" />
-                      ) : (
-                        <Bookmark size={14} />
-                      )
-                    }
+                    className="inline-flex items-center gap-1.5 rounded-full border border-[#E8D8C4] bg-white px-3.5 py-1.5 text-xs font-semibold text-[#241A12] transition-all hover:-translate-y-px hover:border-[#B6E8CD] hover:text-[#16834A]"
                   >
-                    {isSaved(optionSavedIds[selectedOption.id])
-                      ? "Saved"
-                      : "Save recipe"}
-                  </Button>
-                  <Link
-                    href={`/recipes/custom?id=${optionSavedIds[selectedOption.id]}`}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-800 hover:bg-stone-50"
-                  >
-                    Open full page <ArrowRight size={14} />
-                  </Link>
+                    {isSaved(optionSavedIds[selectedOption.id]) ? (
+                      <>
+                        <BookmarkCheck size={14} className="text-[#2FBF71]" /> Saved
+                      </>
+                    ) : (
+                      <>
+                        <Bookmark size={14} /> Save recipe
+                      </>
+                    )}
+                  </button>
                 </>
               )}
             </div>

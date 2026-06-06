@@ -10,7 +10,13 @@ import {
   ArrowRight,
   Beef,
   Plus,
+  Target,
+  LineChart,
 } from "lucide-react";
+import { IconTile } from "@/components/ui/IconTile";
+import { HorizontalCarousel, CarouselItem } from "@/components/ui/HorizontalCarousel";
+import { RecipeImage } from "@/components/recipe/RecipeImage";
+import { CategoryChip } from "@/components/ui/CategoryChip";
 import { useToast } from "@/components/ui/Toast";
 import {
   getTargets,
@@ -206,32 +212,29 @@ export function NourishInsights() {
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        <Link
+      {/* Visual IconTile triplet — primary 'Cook to fit' on the left,
+          secondary pantry + grocery actions on the right. Replaces the
+          three flat pill links. */}
+      <div className="mt-4 grid grid-cols-3 gap-2">
+        <IconTile
           href={`/ai-chef?${aiChefQuery}`}
-          className="group inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm shadow-emerald-200 hover:bg-emerald-700"
-        >
-          <ChefHat size={12} />
-          Cook from pantry to fit
-          <ArrowRight
-            size={12}
-            className="transition-transform motion-safe:group-hover:translate-x-0.5"
-          />
-        </Link>
-        <Link
+          icon={<ChefHat size={18} strokeWidth={2.4} />}
+          label="Cook to fit"
+          meta={`${Math.round(remaining.kcal)} kcal left`}
+          tone="basil"
+        />
+        <IconTile
           href="/pantry"
-          className="inline-flex items-center gap-1.5 rounded-full border border-stone-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-stone-800 hover:bg-stone-50"
-        >
-          <Refrigerator size={12} />
-          Edit pantry
-        </Link>
-        <Link
+          icon={<Refrigerator size={18} strokeWidth={2.4} />}
+          label="Pantry"
+          tone="grape"
+        />
+        <IconTile
           href="/grocery-list"
-          className="inline-flex items-center gap-1.5 rounded-full border border-stone-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-stone-800 hover:bg-stone-50"
-        >
-          <ShoppingBasket size={12} />
-          Grocery list
-        </Link>
+          icon={<ShoppingBasket size={18} strokeWidth={2.4} />}
+          label="Grocery"
+          tone="teal"
+        />
       </div>
 
       {showProteinNudge && (
@@ -272,61 +275,74 @@ export function NourishInsights() {
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-500">
             Database picks that fit
           </p>
-          <ul className="mt-2 space-y-2">
+          <HorizontalCarousel className="mt-2" ariaLabel="Recipe suggestions">
             {suggestions.map(({ r, n, cps, matchPct }) => (
-              <li
-                key={r.id}
-                className="flex items-center justify-between gap-3 rounded-xl border border-stone-200 bg-white p-3 transition-shadow hover:shadow-sm"
-              >
-                <Link href={`/recipes/${r.id}`} className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-stone-900 hover:text-emerald-700">
-                    {r.name}
-                  </p>
-                  <p className="mt-0.5 text-[11px] text-stone-500">
-                    {Math.round(n.calories)} kcal · {Math.round(n.protein)} g protein
-                    {matchPct > 0 && ` · ${matchPct}% pantry match`}
-                  </p>
+              <CarouselItem key={r.id} className="w-48 sm:w-56">
+                <Link
+                  href={`/recipes/${r.id}`}
+                  className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[#E8D8C4] bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#B6E8CD] hover:shadow-md"
+                >
+                  <div className="relative">
+                    <RecipeImage recipe={r} variant="card" />
+                    <span className="absolute right-2 top-2 inline-flex items-center rounded-full bg-white/95 px-2 py-0.5 text-[10px] font-bold text-[#16834A] shadow-sm">
+                      ${cps.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex flex-1 flex-col gap-1.5 p-3">
+                    <p className="line-clamp-2 text-sm font-bold text-[#241A12] group-hover:text-[#16834A]">
+                      {r.name}
+                    </p>
+                    <p className="text-[11px] text-[#6B5A4A]">
+                      {Math.round(n.calories)} kcal · {Math.round(n.protein)} g protein
+                    </p>
+                    {matchPct > 0 && (
+                      <CategoryChip category="pantry" size="xs">
+                        {matchPct}% pantry match
+                      </CategoryChip>
+                    )}
+                  </div>
                 </Link>
-                <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
-                  ${cps.toFixed(2)}
-                </span>
-              </li>
+              </CarouselItem>
             ))}
-          </ul>
+          </HorizontalCarousel>
         </div>
       )}
 
       <div className="mt-5 border-t border-emerald-100 pt-4">
         <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-500">
-          Quick questions
+          Jump to
         </p>
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          {[
-            {
-              q: "Am I on track today?",
-              href: "/nourish/progress",
-            },
-            {
-              q: "What can I cook from my pantry?",
-              href: `/ai-chef?${aiChefQuery}`,
-            },
-            {
-              q: "Find high-protein recipes",
-              href: "/nourish/recipes",
-            },
-            {
-              q: "How's my week looking?",
-              href: "/nourish/progress",
-            },
-          ].map(({ q, href }) => (
-            <Link
-              key={q}
-              href={href}
-              className="rounded-full border border-stone-200 bg-white px-3 py-1.5 text-[11px] font-medium text-stone-700 transition-all hover:-translate-y-px hover:border-emerald-300 hover:bg-emerald-50"
-            >
-              {q}
-            </Link>
-          ))}
+        {/* 4-tile IconTile row replaces the sentence-form quick-question
+            pills. Hrefs preserved. */}
+        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <IconTile
+            href="/nourish/progress"
+            icon={<Target size={16} strokeWidth={2.4} />}
+            label="On track?"
+            tone="basil"
+            size="sm"
+          />
+          <IconTile
+            href={`/ai-chef?${aiChefQuery}`}
+            icon={<ChefHat size={16} strokeWidth={2.4} />}
+            label="Cook pantry"
+            tone="grape"
+            size="sm"
+          />
+          <IconTile
+            href="/nourish/recipes"
+            icon={<Beef size={16} strokeWidth={2.4} />}
+            label="High-protein"
+            tone="carrot"
+            size="sm"
+          />
+          <IconTile
+            href="/nourish/progress"
+            icon={<LineChart size={16} strokeWidth={2.4} />}
+            label="Week view"
+            tone="teal"
+            size="sm"
+          />
         </div>
       </div>
 

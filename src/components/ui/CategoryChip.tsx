@@ -21,9 +21,24 @@ const MAP: Record<string, string> = {
   "grocery":         "bg-[#DCFAF1] text-[#0B6E55] ring-[#A4ECD8]",
   "saved":           "bg-[#FFE3EC] text-[#A23163] ring-[#F9B6CD]",
 
+  // Ingredient categories (matches IngredientCategory union in lib/types)
+  "grain":           "bg-[#FFF3CC] text-[#7A4A00] ring-[#FFE08A]",
+  "protein":         "bg-[#EFE8FF] text-[#3F2BB8] ring-[#CDBEFF]",
+  "vegetable":       "bg-[#E8FAF0] text-[#16834A] ring-[#B6E8CD]",
+  "fruit":           "bg-[#FFE3EC] text-[#A23163] ring-[#F9B6CD]",
+  "dairy":           "bg-[#E0F2FE] text-[#1F6FA8] ring-[#BAE6FD]",
+  "canned":          "bg-[#FFE8D6] text-[#9B3F0A] ring-[#FFC79A]",
+  "condiment":       "bg-[#DCFAF1] text-[#0B6E55] ring-[#A4ECD8]",
+  "spice":           "bg-[#FDE4E4] text-[#9B1C1C] ring-[#F8B4B4]",
+  "frozen":          "bg-[#E0F2FE] text-[#1F6FA8] ring-[#BAE6FD]",
+
   // Equipment
   "microwave":       "bg-[#E0F2FE] text-[#1F6FA8] ring-[#BAE6FD]",
   "air-fryer":       "bg-[#FFE8D6] text-[#9B3F0A] ring-[#FFC79A]",
+  "stovetop":        "bg-[#FFE08A] text-[#5C3700] ring-[#FFC93D]",
+  "oven":            "bg-[#FFE8D6] text-[#9B3F0A] ring-[#FFC79A]",
+  "rice-cooker":     "bg-[#DCFAF1] text-[#0B6E55] ring-[#A4ECD8]",
+  "no-kitchen":      "bg-[#FFF1D9] text-[#3A2A12] ring-[#E8D8C4]",
   "no-stove":        "bg-[#E8FAF0] text-[#16834A] ring-[#B6E8CD]",
   "one-pot":         "bg-[#FFF3CC] text-[#7A4A00] ring-[#FFE08A]",
 
@@ -37,6 +52,8 @@ const MAP: Record<string, string> = {
   // Inventory / heat
   "use-soon":        "bg-[#FFF3CC] text-[#5C3700] ring-[#FFE08A]",
   "spicy":           "bg-[#FDE4E4] text-[#9B1C1C] ring-[#F8B4B4]",
+  "staple":          "bg-[#FFF1D9] text-[#3A2A12] ring-[#E8D8C4]",
+  "cheap-tag":       "bg-[#FFF3CC] text-[#7A4A00] ring-[#FFE08A]",
 
   // Meal context
   "meal-prep":       "bg-[#DCFAF1] text-[#0B6E55] ring-[#A4ECD8]",
@@ -45,6 +62,11 @@ const MAP: Record<string, string> = {
   "lunch":           "bg-[#E8FAF0] text-[#16834A] ring-[#B6E8CD]",
   "dinner":          "bg-[#E0F2FE] text-[#1F6FA8] ring-[#BAE6FD]",
   "snack":           "bg-[#FFE3EC] text-[#A23163] ring-[#F9B6CD]",
+
+  // Difficulty
+  "easy":            "bg-[#E8FAF0] text-[#16834A] ring-[#B6E8CD]",
+  "medium":          "bg-[#FFF3CC] text-[#7A4A00] ring-[#FFE08A]",
+  "hard":            "bg-[#FDE4E4] text-[#9B1C1C] ring-[#F8B4B4]",
 };
 
 const FALLBACK = "bg-[#FFF1D9] text-[#3A2A12] ring-[#E8D8C4]";
