@@ -60,7 +60,7 @@ export function Navbar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-stone-200/80 bg-stone-50/85 backdrop-blur-md supports-[backdrop-filter]:bg-stone-50/70">
+    <header className="sticky top-0 z-40 border-b border-[#E8D8C4] bg-[#FFF8ED]/90 backdrop-blur-md supports-[backdrop-filter]:bg-[#FFF8ED]/75">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link
           href="/"

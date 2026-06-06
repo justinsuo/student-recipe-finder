@@ -46,7 +46,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${nunito.variable} ${inter.variable} ${geistMono.variable}`}>
-      <body className="min-h-screen bg-stone-50 text-stone-900 antialiased">
+      <body className="min-h-screen bg-[#FFF8ED] text-[#241A12] antialiased">
         <AppStoreProvider>
           <ToastProvider>
             <Navbar />

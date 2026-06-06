@@ -54,7 +54,7 @@ export function BottomNav() {
     <nav
       aria-label="Quick navigation"
       className={clsx(
-        "fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-white/95 backdrop-blur transition-transform duration-200 md:hidden",
+        "fixed inset-x-0 bottom-0 z-40 border-t border-[#E8D8C4] bg-[#FFF8ED]/95 backdrop-blur transition-transform duration-200 md:hidden",
         "pb-[env(safe-area-inset-bottom)]",
         hiddenByInput && "translate-y-full",
       )}
