@@ -41,6 +41,8 @@ import { Stagger } from "@/components/motion/Stagger";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
 import { ThreeDLink } from "@/components/ui/ThreeDButton";
+import { ShaderGradientBackground } from "@/components/visual-effects/ShaderGradientBackground";
+import { LiquidGlassPanel } from "@/components/visual-effects/LiquidGlassPanel";
 
 export default function HomePage() {
   // Hero collage prefers recipes with curated photos.
@@ -66,10 +68,17 @@ export default function HomePage() {
   return (
     <div className="space-y-20">
       {/* ─── 1. Hero ───────────────────────────────────────────────────── */}
-      <section className="relative -mt-2 overflow-hidden rounded-[2rem] border border-stone-200 bg-gradient-to-br from-emerald-50/60 via-white to-amber-50/40 px-5 pb-10 pt-10 sm:px-10 sm:pb-14 sm:pt-14">
+      <section className="relative -mt-2 overflow-hidden rounded-[2rem] border border-[#E8D8C4] bg-gradient-to-br from-[#FFF1D9] via-white to-[#FFE8D6] px-5 pb-10 pt-10 sm:px-10 sm:pb-14 sm:pt-14">
+        {/* Animated shader-gradient background — CSS only, soft tint,
+            masked off the content area so text stays legible. Auto-
+            disables under prefers-reduced-motion. */}
+        <ShaderGradientBackground
+          intensity="soft"
+          className="[mask-image:radial-gradient(circle_at_70%_30%,black,transparent_75%)]"
+        />
         <div
           aria-hidden
-          className="dot-grid pointer-events-none absolute inset-0 opacity-60 [mask-image:radial-gradient(circle_at_30%_30%,black,transparent_60%)]"
+          className="dot-grid pointer-events-none absolute inset-0 opacity-50 [mask-image:radial-gradient(circle_at_30%_30%,black,transparent_60%)]"
         />
         <div className="relative grid items-center gap-10 md:grid-cols-[1.05fr_1fr]">
           <Stagger className="space-y-5" startDelay={40} step={80}>
@@ -138,28 +147,32 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* Inline stats — gives the hero a "real product" feel */}
-            <dl className="grid grid-cols-3 gap-4 pt-4 sm:max-w-md">
-              <HeroStat
-                value={<AnimatedNumber value={RECIPES.length} />}
-                label="recipes"
-              />
-              <HeroStat
-                value={
-                  <AnimatedNumber
-                    value={cheapestCps ?? 0}
-                    duration={1300}
-                    decimals={2}
-                    prefix="$"
-                  />
-                }
-                label="cheapest / serving"
-              />
-              <HeroStat
-                value={<AnimatedNumber value={noStoveCount} />}
-                label="no-stove"
-              />
-            </dl>
+            {/* Inline stats — wrapped in a liquid-glass panel for the
+                hero "preview card" moment. Falls back to the cream
+                surface where backdrop-filter isn't supported. */}
+            <LiquidGlassPanel tone="cream" rounded="2xl" className="px-4 py-3 pt-4 sm:max-w-md">
+              <dl className="grid grid-cols-3 gap-4">
+                <HeroStat
+                  value={<AnimatedNumber value={RECIPES.length} />}
+                  label="recipes"
+                />
+                <HeroStat
+                  value={
+                    <AnimatedNumber
+                      value={cheapestCps ?? 0}
+                      duration={1300}
+                      decimals={2}
+                      prefix="$"
+                    />
+                  }
+                  label="cheapest / serving"
+                />
+                <HeroStat
+                  value={<AnimatedNumber value={noStoveCount} />}
+                  label="no-stove"
+                />
+              </dl>
+            </LiquidGlassPanel>
           </Stagger>
 
           {/* Hero collage */}

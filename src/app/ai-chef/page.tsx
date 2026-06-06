@@ -678,7 +678,7 @@ function AIChefPage() {
               className="text-3xl font-bold leading-[1.05] tracking-tight text-stone-900 motion-safe:animate-[fadeUp_580ms_ease-out_both] sm:text-[2.5rem]"
               style={{ animationDelay: "60ms" }}
             >
-              What should we cook tonight?
+              What do we cook tonight?
             </h1>
             <p
               className="text-sm leading-relaxed text-stone-600 motion-safe:animate-[fadeUp_640ms_ease-out_both] sm:text-base"

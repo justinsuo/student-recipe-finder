@@ -137,6 +137,26 @@ body {
   50%      { transform: translateY(-2px) rotate(2deg); }
 }
 
+/* Visual-effects layer — slow conic gradient rotation for the hero
+   shader-gradient background. GPU-composited transform only, so it
+   does not invalidate layout. Gated behind motion-safe at the consumer
+   site. */
+@keyframes shaderSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes shaderDrift {
+  0%   { transform: translate(0%, 0%) scale(1); }
+  100% { transform: translate(8%, -6%) scale(1.08); }
+}
+
+/* Chrome wordmark shimmer — pans the metallic gradient across the
+   text via background-position. Honors motion-safe. */
+@keyframes chromeShimmer {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
 /* Decorative dotted background used behind the home hero. Tinted with
    Pantry Pop basil-green at low alpha so it reads as a calm texture on
    the cream surface, not noise. */
