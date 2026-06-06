@@ -169,12 +169,14 @@ export function ProfileView({ onResetProfile }: Props) {
 
         {/* Units */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-stone-600">Units:</span>
-          {(["metric", "imperial"] as PreferredUnits[]).map((u) => (
-            <SelectablePill key={u} active={units === u} onClick={() => handleUnitsChange(u)} ariaSemantics="checked" showCheck={false}>
-              {u === "metric" ? "kg / cm" : "lbs / ft"}
-            </SelectablePill>
-          ))}
+          <span className="text-xs font-medium text-stone-600" id="profile-units-label">Units:</span>
+          <div role="radiogroup" aria-labelledby="profile-units-label" className="flex items-center gap-2">
+            {(["metric", "imperial"] as PreferredUnits[]).map((u) => (
+              <SelectablePill key={u} active={units === u} onClick={() => handleUnitsChange(u)} ariaSemantics="checked" showCheck={false}>
+                {u === "metric" ? "kg / cm" : "lbs / ft"}
+              </SelectablePill>
+            ))}
+          </div>
         </div>
 
         {/* Weight */}
@@ -244,8 +246,8 @@ export function ProfileView({ onResetProfile }: Props) {
 
         {/* Sex */}
         <div className="space-y-1.5">
-          <span className="text-sm font-medium text-stone-700">Sex <span className="font-normal text-stone-400">(optional)</span></span>
-          <div className="flex gap-2 flex-wrap">
+          <span className="text-sm font-medium text-stone-700" id="profile-sex-label">Sex <span className="font-normal text-stone-400">(optional)</span></span>
+          <div role="radiogroup" aria-labelledby="profile-sex-label" className="flex gap-2 flex-wrap">
             {([["male", "Male"], ["female", "Female"], [undefined, "Prefer not to say"]] as const).map(([v, label]) => (
               <SelectablePill key={label} active={sex === v} onClick={() => setSex(v)} ariaSemantics="checked" showCheck={false}>{label}</SelectablePill>
             ))}
@@ -255,8 +257,8 @@ export function ProfileView({ onResetProfile }: Props) {
 
       {/* Activity */}
       <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm space-y-3">
-        <h2 className="text-lg font-bold text-stone-900">Activity level</h2>
-        <div className="flex flex-wrap gap-2">
+        <h2 className="text-lg font-bold text-stone-900" id="profile-activity-label">Activity level</h2>
+        <div role="radiogroup" aria-labelledby="profile-activity-label" className="flex flex-wrap gap-2">
           {ACTIVITY_OPTIONS.map((opt) => (
             <SelectablePill key={opt.id} active={activity === opt.id} onClick={() => setActivity(opt.id)} ariaSemantics="checked" showCheck={false}>
               {opt.label}
