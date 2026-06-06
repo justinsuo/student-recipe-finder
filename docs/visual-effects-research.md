@@ -22,18 +22,12 @@ the honest log for that pass.
   chrome — are common web platform techniques. The implementations
   here are original Tailwind + CSS keyframes, not lifted from any of
   the referenced repos.
-- **No new dependencies.** I deliberately did NOT add `@react-three/fiber`,
-  `@react-three/drei`, `shadergradient`, `paper-design/shaders`, or any
-  liquid-glass package this pass. Reasoning:
-  - The site is statically exported (`output: "export"`); shipping a
-    React Three Fiber renderer to every visitor adds ~150 KB gz to the
-    bundle for what's currently a CSS-equivalent decorative effect.
-  - The user's own rules: "Do not install abandoned or huge packages
-    without a clear reason" and "Use WebGL only for hero/feature
-    moments". A CSS-only hero is the cheaper, more accessible first cut.
-  - When a future surface genuinely needs WebGL (an animated 3D recipe
-    orb on /ai-chef while generating), the right move will be a single
-    dynamically-imported lazy island, not a bundle-wide dep.
+- **Dependencies added in pass 2:** `three@0.169` + `@react-three/fiber@9`
+  + `@react-three/drei@10` + `framer-motion@11`. All MIT-licensed. The
+  three.js bundle ships behind `next/dynamic` so non-/ai-chef visitors
+  who hit the cached path don't download it; framer-motion is small
+  enough (~28 KB gz) to be a baseline dep. drei@10 was required to
+  match R3F@9's React 19 peer — drei@9 only supports R3F@8.
 
 ## Repos referenced by the spec
 
@@ -55,7 +49,14 @@ If a future pass actually adapts code from one of these repos, append an
 entry with the exact files copied, the commit that brought them in, and
 the license header preserved in each adapted file.
 
-## What landed this pass
+## Pass 2 — dramatic visual upgrades (this commit)
+
+| Effect | Implementation | Where |
+| --- | --- | --- |
+| WebGL "food orb" | `src/components/visual-effects/AnimatedFoodOrb.tsx` — drei `Sphere` + `MeshDistortMaterial` with carrot rim light and grape backlight. Wrapped by `LazyFoodOrb` (next/dynamic + CSS fallback) so the three.js bundle only loads when the surface mounts. | Home hero (right column, hidden < md) + AI Chef stepped loader |
+| Spring-loaded recipe cards | `framer-motion` `motion.div` with `whileHover` + `whileTap` and a tuned spring (`stiffness 320, damping 24, mass 0.6`). Every RecipeCard now has a tactile lift + scale + click bounce. | Every RecipeCard call site — home, /cheap-recipes, /saved, /explore, /pantry. |
+
+## Pass 1 — foundation (earlier commit)
 
 | Effect | Implementation | Where |
 | --- | --- | --- |

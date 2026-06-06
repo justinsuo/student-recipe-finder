@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { Bookmark, BookmarkCheck, Clock, Coins, ListChecks, Flame, ArrowRight } from "lucide-react";
 import { useAppStore } from "@/lib/AppStore";
 import type { Recipe, RecipeScoreResult } from "@/lib/types";
@@ -9,6 +10,10 @@ import { bestEffortNutrition } from "@/lib/nutritionEngine";
 import { RecipeImage } from "./RecipeImage";
 import { EquipmentBadges } from "./EquipmentBadge";
 import { TagChip } from "@/components/ui/TagChip";
+
+// Spring config tuned for "premium app" feel — fast enough that hover
+// doesn't lag, soft enough that the card settles rather than snapping.
+const CARD_SPRING = { type: "spring", stiffness: 320, damping: 24, mass: 0.6 } as const;
 
 interface Props {
   result?: RecipeScoreResult;
@@ -34,9 +39,15 @@ export function RecipeCard({ result, recipe, highlight, from }: Props) {
   const href = from ? `/recipes/${r.id}?from=${from}` : `/recipes/${r.id}`;
 
   return (
+    <motion.div
+      whileHover={{ y: -6, scale: 1.012 }}
+      whileTap={{ scale: 0.985 }}
+      transition={CARD_SPRING}
+      className="h-full"
+    >
     <Link
       href={href}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm transition-all duration-300 motion-safe:hover:-translate-y-1 hover:border-emerald-300 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[#E8D8C4] bg-white shadow-sm transition-shadow duration-300 hover:border-[#B6E8CD] hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2FBF71]"
     >
       <div className="relative">
         <RecipeImage recipe={r} variant="card" />
@@ -145,7 +156,7 @@ export function RecipeCard({ result, recipe, highlight, from }: Props) {
         )}
 
         <div className="mt-auto border-t border-stone-100 pt-3">
-          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700">
+          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#16834A]">
             Cook this
             <ArrowRight
               size={14}
@@ -155,5 +166,6 @@ export function RecipeCard({ result, recipe, highlight, from }: Props) {
         </div>
       </div>
     </Link>
+    </motion.div>
   );
 }
