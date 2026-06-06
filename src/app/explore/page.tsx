@@ -177,9 +177,23 @@ function DetailPanel({
 }) {
   const [step, setStep] = useState<number | null>(null);
 
+  // Escape closes — matches the other modals in the app so users learn
+  // one close model.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4">
       <div
+        aria-hidden
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
