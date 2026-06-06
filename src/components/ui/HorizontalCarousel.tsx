@@ -12,11 +12,18 @@ export function HorizontalCarousel({
   children,
   className,
   ariaLabel,
+  /** Hex color the right-edge fade originates from. Default = Pantry
+   *  Pop cream. Pass `transparent` to disable the fade, or any solid
+   *  hex matching the surrounding surface (e.g. the white center of a
+   *  Nourish dashboard gradient). */
+  fadeFrom = "#FFF8ED",
 }: {
   children: ReactNode;
   className?: string;
   ariaLabel?: string;
+  fadeFrom?: string;
 }) {
+  const hideFade = fadeFrom === "transparent" || fadeFrom === "none";
   return (
     <div className={clsx("relative", className)}>
       <div
@@ -26,10 +33,13 @@ export function HorizontalCarousel({
       >
         {children}
       </div>
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-[#FFF8ED] to-transparent"
-      />
+      {!hideFade && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 right-0 w-10"
+          style={{ background: `linear-gradient(to left, ${fadeFrom}, transparent)` }}
+        />
+      )}
     </div>
   );
 }

@@ -59,7 +59,7 @@ import { LogGeneratedRecipeButton } from "@/components/nourish/LogGeneratedRecip
 import { ThreeDButton, ThreeDLink } from "@/components/ui/ThreeDButton";
 import { CategoryChip } from "@/components/ui/CategoryChip";
 import { StatCard } from "@/components/ui/StatCard";
-import { BentoGrid, BentoItem } from "@/components/ui/BentoGrid";
+import { BentoGrid } from "@/components/ui/BentoGrid";
 import { LiquidGlassPanel } from "@/components/visual-effects/LiquidGlassPanel";
 import { VisualEmptyState } from "@/components/ui/VisualEmptyState";
 import { Coins, Beef, Clock } from "lucide-react";
@@ -1269,7 +1269,7 @@ function AIChefPage() {
               />
               <div className="flex flex-wrap items-center gap-2">
                 <ThreeDButton
-                  size="sm"
+                  size="md"
                   variant="primary"
                   onClick={() => runOptions(true)}
                   disabled={loading || !isWorkerConfigured()}
@@ -1279,14 +1279,15 @@ function AIChefPage() {
                 >
                   {appending && loading ? "Generating…" : "Generate more"}
                 </ThreeDButton>
-                <button
-                  type="button"
+                <Button
+                  size="sm"
+                  variant="ghost"
                   onClick={() => runOptions(false)}
                   disabled={loading || !isWorkerConfigured()}
-                  className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold text-[#6B5A4A] hover:bg-white/60 disabled:opacity-50"
+                  leftIcon={<RefreshCw size={12} />}
                 >
-                  <RefreshCw size={12} /> Replace all
-                </button>
+                  Replace all
+                </Button>
               </div>
             </div>
             <GeneratedRecipeOptionBubbles
@@ -1301,52 +1302,31 @@ function AIChefPage() {
           {/* Note: notesInfluenceSummary and whyThisFits are surfaced
               together as a BentoGrid further down — no standalone card. */}
 
-          {/* Main recipe hero — image + overlay */}
+          {/* Main recipe hero — image + overlay.
+              Note: the empty / no-image state needs vertical room for the
+              VisualEmptyState chip scene + body + CTA, so it renders as a
+              normal-flow sibling (min-height instead of aspect-ratio).
+              Only the image + "painting" loader keep the fixed 16:9. */}
           <div className="group overflow-hidden rounded-3xl shadow-md">
-            <div className="relative aspect-[16/9] bg-stone-100">
-              {optionImages[selectedOptionId] ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
+            {optionImages[selectedOptionId] ? (
+              <div className="relative aspect-[16/9] bg-stone-100">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={optionImages[selectedOptionId]}
                   alt={selectedOption.recipe.name}
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.02]"
                 />
-              ) : generatingImageIds.has(selectedOptionId) ? (
-                <div className="flex h-full items-center justify-center text-stone-600">
-                  <Loader2 size={20} className="mr-2 animate-spin" />
-                  <span className="text-sm">Painting your dish…</span>
-                </div>
-              ) : (
-                <div className="absolute inset-0 grid place-items-center p-4">
-                  <VisualEmptyState
-                    icon={<ChefHat size={28} strokeWidth={2.4} />}
-                    tone="grape"
-                    title="Ready when you are."
-                    body="Generate a food image for this recipe in a tap."
-                    actions={
-                      <ThreeDButton
-                        variant="primary"
-                        size="sm"
-                        leftIcon={<Sparkles size={12} />}
-                        onClick={() => generateImageForOption(selectedOption)}
-                      >
-                        Generate image
-                      </ThreeDButton>
-                    }
-                  />
-                </div>
-              )}
-              {/* Top-right overlay: AI badge + regenerate */}
-              <div className="absolute right-3 top-3 flex gap-2">
-                <span className="inline-flex items-center gap-1 rounded-full bg-violet-600/95 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm backdrop-blur">
-                  <Sparkles size={11} /> AI Generated
-                </span>
-                {optionImages[selectedOptionId] && (
+                {/* Top-right overlay: AI badge + regenerate (image-only) */}
+                <div className="absolute right-3 top-3 flex gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-violet-600/95 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm backdrop-blur">
+                    <Sparkles size={11} /> AI Generated
+                  </span>
                   <button
                     onClick={() => generateImageForOption(selectedOption)}
                     disabled={generatingImageIds.has(selectedOptionId)}
-                    className="inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold text-stone-800 shadow-sm backdrop-blur transition-colors hover:bg-white"
+                    className="inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold text-stone-800 shadow-sm backdrop-blur transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
                     title="Regenerate image"
+                    aria-label="Regenerate image"
                   >
                     {generatingImageIds.has(selectedOptionId) ? (
                       <Loader2 size={10} className="animate-spin" />
@@ -1356,26 +1336,48 @@ function AIChefPage() {
                       </>
                     )}
                   </button>
-                )}
+                </div>
+                {/* Bottom gradient + title (image-only) */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/75 via-black/15 to-transparent"
+                />
+                <div className="absolute inset-x-4 bottom-4 text-white">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/80">
+                    {selectedOption.optionLabel.replace(/-/g, " ")}
+                  </p>
+                  <h2 className="mt-1 text-2xl font-bold leading-tight sm:text-3xl">
+                    {selectedOption.recipe.name}
+                  </h2>
+                </div>
               </div>
-              {/* Bottom gradient + title */}
-              {optionImages[selectedOptionId] && (
-                <>
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/75 via-black/15 to-transparent"
-                  />
-                  <div className="absolute inset-x-4 bottom-4 text-white">
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/80">
-                      {selectedOption.optionLabel.replace(/-/g, " ")}
-                    </p>
-                    <h2 className="mt-1 text-2xl font-bold leading-tight sm:text-3xl">
-                      {selectedOption.recipe.name}
-                    </h2>
-                  </div>
-                </>
-              )}
-            </div>
+            ) : generatingImageIds.has(selectedOptionId) ? (
+              <div className="relative aspect-[16/9] bg-stone-100">
+                <div className="flex h-full items-center justify-center text-stone-600">
+                  <Loader2 size={20} className="mr-2 animate-spin" />
+                  <span className="text-sm">Painting your dish…</span>
+                </div>
+              </div>
+            ) : (
+              <div className="p-2 sm:p-4">
+                <VisualEmptyState
+                  icon={<ChefHat size={28} strokeWidth={2.4} />}
+                  tone="grape"
+                  title="Ready when you are."
+                  body="Generate a food image for this recipe in a tap."
+                  actions={
+                    <ThreeDButton
+                      variant="primary"
+                      size="md"
+                      leftIcon={<Sparkles size={12} />}
+                      onClick={() => generateImageForOption(selectedOption)}
+                    >
+                      Generate image
+                    </ThreeDButton>
+                  }
+                />
+              </div>
+            )}
             {imageError && (
               <div className="border-t border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-900">
                 ⚠ {imageError}
@@ -1445,20 +1447,48 @@ function AIChefPage() {
                 notes ? { icon: <ChefHat size={14} />, title: "Your notes shaped this", body: notes, tone: "grape" as const } : null,
               ].filter(Boolean) as Array<{ icon: React.ReactNode; title: string; body: string; tone: "basil" | "grape" }>;
               if (has.length === 0) return null;
+              const renderTile = (c: typeof has[number], key: number) => (
+                <div
+                  key={key}
+                  className={`flex h-full gap-3 rounded-2xl border p-4 shadow-sm ${
+                    c.tone === "basil"
+                      ? "border-[#B6E8CD] bg-[#F4FCF8]"
+                      : "border-[#CDBEFF] bg-[#F6F3FF]"
+                  }`}
+                >
+                  <span
+                    aria-hidden
+                    className={`grid h-9 w-9 flex-none place-items-center rounded-xl text-white ${
+                      c.tone === "basil" ? "bg-[#2FBF71]" : "bg-[#7C5CFF]"
+                    }`}
+                  >
+                    {c.icon}
+                  </span>
+                  <div className="min-w-0">
+                    <p
+                      className={`text-[11px] font-bold uppercase tracking-[0.14em] ${
+                        c.tone === "basil" ? "text-[#16834A]" : "text-[#3F2BB8]"
+                      }`}
+                    >
+                      {c.title}
+                    </p>
+                    <p
+                      className={`mt-1 text-sm leading-relaxed ${
+                        c.tone === "basil" ? "text-[#0F5E33]" : "text-[#2A1B8A]"
+                      }`}
+                    >
+                      {c.body}
+                    </p>
+                  </div>
+                </div>
+              );
+              // Single tile → render directly so the layout doesn't ship
+              // an empty grid cell next to it on mobile.
+              if (has.length === 1) return renderTile(has[0], 0);
               return (
-                <BentoGrid cols={has.length === 1 ? 3 : 4}>
-                  {has.map((c, i) => (
-                    <BentoItem key={i} colSpan={has.length === 1 ? 3 : 2}>
-                      <div className={`flex h-full gap-3 rounded-2xl border p-4 shadow-sm ${c.tone === "basil" ? "border-[#B6E8CD] bg-[#F4FCF8]" : "border-[#CDBEFF] bg-[#F6F3FF]"}`}>
-                        <span aria-hidden className={`grid h-9 w-9 flex-none place-items-center rounded-xl text-white ${c.tone === "basil" ? "bg-[#2FBF71]" : "bg-[#7C5CFF]"}`}>{c.icon}</span>
-                        <div className="min-w-0">
-                          <p className={`text-[11px] font-bold uppercase tracking-[0.14em] ${c.tone === "basil" ? "text-[#16834A]" : "text-[#3F2BB8]"}`}>{c.title}</p>
-                          <p className={`mt-1 text-sm leading-relaxed ${c.tone === "basil" ? "text-[#0F5E33]" : "text-[#2A1B8A]"}`}>{c.body}</p>
-                        </div>
-                      </div>
-                    </BentoItem>
-                  ))}
-                </BentoGrid>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {has.map((c, i) => renderTile(c, i))}
+                </div>
               );
             })()}
             <div className="flex flex-wrap items-center gap-2 pt-1">

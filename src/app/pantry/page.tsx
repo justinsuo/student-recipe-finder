@@ -351,7 +351,7 @@ export default function PantryPage() {
           </div>
         </div>
 
-        {pantry.length > 0 ? (
+        {pantry.length > 0 && (
           <div className="mt-6 space-y-4">
             {Array.from(grouped.entries()).map(([category, items]) => (
               <div key={category}>
@@ -395,13 +395,6 @@ export default function PantryPage() {
                 </div>
               </div>
             ))}
-          </div>
-        ) : (
-          // Empty-inventory inline copy. The canonical empty state is the
-          // VisualEmptyState below (which handles the "no pantry at all"
-          // case); this is just the "you cleared inventory" hint.
-          <div className="mt-6 rounded-2xl bg-[#FFF1D9] p-4 text-center text-sm text-[#9B3F0A]">
-            Inventory is empty — tap a quick-add staple to refill.
           </div>
         )}
       </ScrollReveal>

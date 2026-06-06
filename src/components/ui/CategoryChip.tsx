@@ -21,31 +21,36 @@ const MAP: Record<string, string> = {
   "grocery":         "bg-[#DCFAF1] text-[#0B6E55] ring-[#A4ECD8]",
   "saved":           "bg-[#FFE3EC] text-[#A23163] ring-[#F9B6CD]",
 
-  // Ingredient categories (matches IngredientCategory union in lib/types)
+  // Ingredient categories (matches IngredientCategory union in lib/types).
+  // Darker text on basil tones (#0F5E33 instead of #16834A) so 11-12px
+  // chip text clears WCAG AA 4.5:1 against the soft basil surface.
   "grain":           "bg-[#FFF3CC] text-[#7A4A00] ring-[#FFE08A]",
   "protein":         "bg-[#EFE8FF] text-[#3F2BB8] ring-[#CDBEFF]",
-  "vegetable":       "bg-[#E8FAF0] text-[#16834A] ring-[#B6E8CD]",
+  "vegetable":       "bg-[#E8FAF0] text-[#0F5E33] ring-[#B6E8CD]",
   "fruit":           "bg-[#FFE3EC] text-[#A23163] ring-[#F9B6CD]",
   "dairy":           "bg-[#E0F2FE] text-[#1F6FA8] ring-[#BAE6FD]",
   "canned":          "bg-[#FFE8D6] text-[#9B3F0A] ring-[#FFC79A]",
   "condiment":       "bg-[#DCFAF1] text-[#0B6E55] ring-[#A4ECD8]",
   "spice":           "bg-[#FDE4E4] text-[#9B1C1C] ring-[#F8B4B4]",
-  "frozen":          "bg-[#E0F2FE] text-[#1F6FA8] ring-[#BAE6FD]",
+  "frozen":          "bg-[#E0F7FE] text-[#055160] ring-[#A8E0F0]",
 
-  // Equipment
+  // Equipment — given a distinct sub-palette so an Equipment chip never
+  // visually collides with an IngredientCategory chip on the same row.
+  // Sky stays unique to microwave; oven moves to a deep rust;
+  // rice-cooker takes a mint that doesn't share with condiment teal.
   "microwave":       "bg-[#E0F2FE] text-[#1F6FA8] ring-[#BAE6FD]",
-  "air-fryer":       "bg-[#FFE8D6] text-[#9B3F0A] ring-[#FFC79A]",
+  "air-fryer":       "bg-[#FFEFD6] text-[#7C3309] ring-[#FFCC99]",
   "stovetop":        "bg-[#FFE08A] text-[#5C3700] ring-[#FFC93D]",
-  "oven":            "bg-[#FFE8D6] text-[#9B3F0A] ring-[#FFC79A]",
-  "rice-cooker":     "bg-[#DCFAF1] text-[#0B6E55] ring-[#A4ECD8]",
+  "oven":            "bg-[#FFD9B3] text-[#6E2E08] ring-[#FFB070]",
+  "rice-cooker":     "bg-[#E5FBE9] text-[#1A6A2E] ring-[#B4ECC4]",
   "no-kitchen":      "bg-[#FFF1D9] text-[#3A2A12] ring-[#E8D8C4]",
-  "no-stove":        "bg-[#E8FAF0] text-[#16834A] ring-[#B6E8CD]",
+  "no-stove":        "bg-[#E8FAF0] text-[#0F5E33] ring-[#B6E8CD]",
   "one-pot":         "bg-[#FFF3CC] text-[#7A4A00] ring-[#FFE08A]",
 
-  // Diet
+  // Diet — same basil-text deepening as above.
   "high-protein":    "bg-[#EFE8FF] text-[#3F2BB8] ring-[#CDBEFF]",
-  "vegetarian":      "bg-[#E8FAF0] text-[#16834A] ring-[#B6E8CD]",
-  "vegan":           "bg-[#E8FAF0] text-[#16834A] ring-[#B6E8CD]",
+  "vegetarian":      "bg-[#E8FAF0] text-[#0F5E33] ring-[#B6E8CD]",
+  "vegan":           "bg-[#E8FAF0] text-[#0F5E33] ring-[#B6E8CD]",
   "gluten-free":     "bg-[#FFF3CC] text-[#7A4A00] ring-[#FFE08A]",
   "dairy-free":      "bg-[#E0F2FE] text-[#1F6FA8] ring-[#BAE6FD]",
 
@@ -57,14 +62,16 @@ const MAP: Record<string, string> = {
 
   // Meal context
   "meal-prep":       "bg-[#DCFAF1] text-[#0B6E55] ring-[#A4ECD8]",
-  "dorm-friendly":   "bg-[#E8FAF0] text-[#16834A] ring-[#B6E8CD]",
+  "dorm-friendly":   "bg-[#E8FAF0] text-[#0F5E33] ring-[#B6E8CD]",
   "breakfast":       "bg-[#FFE08A] text-[#5C3700] ring-[#FFC93D]",
-  "lunch":           "bg-[#E8FAF0] text-[#16834A] ring-[#B6E8CD]",
+  "lunch":           "bg-[#E8FAF0] text-[#0F5E33] ring-[#B6E8CD]",
   "dinner":          "bg-[#E0F2FE] text-[#1F6FA8] ring-[#BAE6FD]",
+  // Note: "snack" doubles as IngredientCategory + meal context — same
+  // tone is intentional (it's the same product surface).
   "snack":           "bg-[#FFE3EC] text-[#A23163] ring-[#F9B6CD]",
 
   // Difficulty
-  "easy":            "bg-[#E8FAF0] text-[#16834A] ring-[#B6E8CD]",
+  "easy":            "bg-[#E8FAF0] text-[#0F5E33] ring-[#B6E8CD]",
   "medium":          "bg-[#FFF3CC] text-[#7A4A00] ring-[#FFE08A]",
   "hard":            "bg-[#FDE4E4] text-[#9B1C1C] ring-[#F8B4B4]",
 };

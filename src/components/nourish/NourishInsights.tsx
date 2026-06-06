@@ -275,7 +275,11 @@ export function NourishInsights() {
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-500">
             Database picks that fit
           </p>
-          <HorizontalCarousel className="mt-2" ariaLabel="Recipe suggestions">
+          <HorizontalCarousel
+            className="mt-2"
+            ariaLabel="Recipe suggestions"
+            fadeFrom="#FFFFFF"
+          >
             {suggestions.map(({ r, n, cps, matchPct }) => (
               <CarouselItem key={r.id} className="w-48 sm:w-56">
                 <Link
@@ -326,7 +330,7 @@ export function NourishInsights() {
             href={`/ai-chef?${aiChefQuery}`}
             icon={<ChefHat size={16} strokeWidth={2.4} />}
             label="Cook pantry"
-            tone="grape"
+            tone="basil"
             size="sm"
           />
           <IconTile
