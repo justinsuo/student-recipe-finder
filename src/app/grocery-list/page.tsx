@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ShoppingBasket, Trash2, Sparkles } from "lucide-react";
 import {
@@ -10,6 +10,7 @@ import {
 import { useAppStore } from "@/lib/AppStore";
 import { recommendSmartBuys } from "@/lib/recipeScoring";
 import { quoteIngredient } from "@/lib/pricing/pricingEngine";
+import { getCustomIngredients } from "@/lib/customIngredientStorage";
 import { Button } from "@/components/ui/Button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -34,6 +35,16 @@ export default function GroceryListPage() {
 
   const toast = useToast();
   const [confirmClear, setConfirmClear] = useState(false);
+  // Custom ingredients live in localStorage and aren't in INGREDIENT_MAP.
+  // Hydrate once on mount + on grocery change so AI Chef custom items
+  // actually show up here (the old code silently dropped them).
+  const [customById, setCustomById] = useState<Record<string, { id: string; displayName?: string; canonicalName?: string; estimatedUnitCost?: number | null; unit?: string }>>({});
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCustomById(
+      Object.fromEntries(getCustomIngredients().map((c) => [c.id, c])),
+    );
+  }, [grocery]);
 
   function performClear() {
     const count = grocery.length;
@@ -43,31 +54,50 @@ export default function GroceryListPage() {
 
   const grouped = useMemo(() => {
     const map = new Map<
-      IngredientCategory,
+      IngredientCategory | "custom",
       { id: string; name: string; cost: number; quantity: number; recipeIds: string[]; checked: boolean }[]
     >();
     let total = 0;
     let unchecked = 0;
     for (const item of grocery) {
       const ing = INGREDIENT_MAP.get(item.ingredientId);
-      if (!ing) continue;
-      const quote = quoteIngredient(item.ingredientId, item.quantity);
-      const cost = quote?.totalCost ?? 0;
-      total += cost;
-      if (!item.checked) unchecked += cost;
-      const list = map.get(ing.category) ?? [];
+      if (ing) {
+        const quote = quoteIngredient(item.ingredientId, item.quantity);
+        const cost = quote?.totalCost ?? 0;
+        total += cost;
+        if (!item.checked) unchecked += cost;
+        const list = map.get(ing.category) ?? [];
+        list.push({
+          id: ing.id,
+          name: ing.name,
+          cost,
+          quantity: item.quantity,
+          recipeIds: item.recipeIds,
+          checked: item.checked,
+        });
+        map.set(ing.category, list);
+        continue;
+      }
+      // Custom ingredient — show under a "custom" bucket so AI Chef
+      // items aren't silently dropped from the list.
+      const custom = customById[item.ingredientId];
+      if (!custom) continue;
+      const customCost = (custom.estimatedUnitCost ?? 0) * item.quantity;
+      total += customCost;
+      if (!item.checked) unchecked += customCost;
+      const list = map.get("custom") ?? [];
       list.push({
-        id: ing.id,
-        name: ing.name,
-        cost,
+        id: item.ingredientId,
+        name: custom.displayName ?? custom.canonicalName ?? item.ingredientId,
+        cost: customCost,
         quantity: item.quantity,
         recipeIds: item.recipeIds,
         checked: item.checked,
       });
-      map.set(ing.category, list);
+      map.set("custom", list);
     }
     return { map, total, unchecked };
-  }, [grocery]);
+  }, [grocery, customById]);
 
   const smartBuys = useMemo(() => recommendSmartBuys(pantry), [pantry]);
 
@@ -159,7 +189,9 @@ export default function GroceryListPage() {
             {Array.from(grouped.map.entries()).map(([cat, items]) => (
               <div key={cat}>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-stone-500">
-                  {CATEGORY_LABEL[cat]}
+                  {cat === "custom"
+                    ? "Custom / AI-recognized"
+                    : CATEGORY_LABEL[cat]}
                 </p>
                 <ul className="divide-y divide-stone-100 rounded-2xl border border-stone-100">
                   {items.map((item) => (
