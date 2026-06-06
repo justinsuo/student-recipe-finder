@@ -9,7 +9,7 @@ import { calculateCostPerServing } from "@/lib/recipeScoring";
 import { bestEffortNutrition } from "@/lib/nutritionEngine";
 import { RecipeImage } from "./RecipeImage";
 import { EquipmentBadges } from "./EquipmentBadge";
-import { TagChip } from "@/components/ui/TagChip";
+import { CategoryChip } from "@/components/ui/CategoryChip";
 
 // Spring config tuned for "premium app" feel — fast enough that hover
 // doesn't lag, soft enough that the card settles rather than snapping.
@@ -122,7 +122,7 @@ export function RecipeCard({ result, recipe, highlight, from }: Props) {
         {(r.tags?.length ?? 0) > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {r.tags!.slice(0, 3).map((t) => (
-              <TagChip key={t}>{t}</TagChip>
+              <CategoryChip key={t} category={t} />
             ))}
           </div>
         )}

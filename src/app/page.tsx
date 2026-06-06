@@ -44,6 +44,7 @@ import { ThreeDLink } from "@/components/ui/ThreeDButton";
 import { ShaderGradientBackground } from "@/components/visual-effects/ShaderGradientBackground";
 import { LiquidGlassPanel } from "@/components/visual-effects/LiquidGlassPanel";
 import { LazyFoodOrb } from "@/components/visual-effects/LazyFoodOrb";
+import { PantryToRecipePreview } from "@/components/home/PantryToRecipePreview";
 
 export default function HomePage() {
   // Hero collage prefers recipes with curated photos.
@@ -113,11 +114,14 @@ export default function HomePage() {
                 />
               </span>
             </h1>
-            <p className="max-w-lg text-base leading-relaxed text-stone-600 sm:text-lg">
-              Use what you already have, set a budget, and let AI Chef turn
-              your pantry into real recipes — with cost, macros, and a
-              grocery list built in.
+            <p className="max-w-lg text-base leading-relaxed text-[#6B5A4A] sm:text-lg">
+              Turn your pantry into cheap meals with AI.
             </p>
+
+            {/* Visible "how it works" preview — three pantry chips → a
+                real recipe card with live numbers. Stays compact so the
+                hero CTAs don't get pushed below the fold. */}
+            <PantryToRecipePreview />
             <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap sm:items-center">
               <ThreeDLink
                 href="/ai-chef"
