@@ -197,7 +197,12 @@ function DetailPanel({
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative z-10 max-h-[92dvh] w-full overflow-y-auto rounded-t-3xl bg-white shadow-2xl sm:max-w-2xl sm:rounded-3xl">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={recipe.title}
+        className="relative z-10 max-h-[92dvh] w-full overflow-y-auto rounded-t-3xl bg-white shadow-2xl sm:max-w-2xl sm:rounded-3xl"
+      >
         <div className="relative aspect-[3/1] overflow-hidden rounded-t-3xl">
           {resolveRecipeImage(recipe) ? (
             // eslint-disable-next-line @next/next/no-img-element
