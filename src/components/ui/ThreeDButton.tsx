@@ -20,15 +20,19 @@ type Variant =
   | "soft";
 type Size = "sm" | "md" | "lg";
 
+// Pantry Pop face palette. Primary uses basil (#2FBF71) with the deeper
+// basil-shadow (#16834A) as the bottom border that simulates 3D depth.
+// Secondary uses the warm cream surface tint so the button reads as
+// "raised paper" instead of cold stone.
 const FACE: Record<Variant, string> = {
   primary:
-    "bg-gradient-to-b from-emerald-500 to-emerald-600 text-white border-emerald-700",
+    "bg-gradient-to-b from-[#3AD081] to-[#2FBF71] text-white border-[#16834A]",
   secondary:
-    "bg-gradient-to-b from-stone-50 to-white text-stone-900 border-stone-300",
+    "bg-gradient-to-b from-white to-[#FFF8ED] text-stone-900 border-[#E8D8C4]",
   success:
-    "bg-gradient-to-b from-emerald-500 to-emerald-600 text-white border-emerald-700",
+    "bg-gradient-to-b from-[#3AD081] to-[#2FBF71] text-white border-[#16834A]",
   warning:
-    "bg-gradient-to-b from-amber-400 to-amber-500 text-amber-950 border-amber-600",
+    "bg-gradient-to-b from-[#FFD166] to-[#FFB347] text-[#3A2A0F] border-[#B97A12]",
   danger:
     "bg-gradient-to-b from-rose-500 to-rose-600 text-white border-rose-700",
   ghost:

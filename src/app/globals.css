@@ -1,8 +1,36 @@
 @import "tailwindcss";
 
+/* ─── Pantry Pop theme tokens ────────────────────────────────────────────
+   Canonical palette lives in `src/lib/design/tokens.ts` (PANTRY_POP).
+   These CSS variables expose the same values to global styles, third-
+   party components, and any place a Tailwind utility class isn't enough.
+   Do not scatter hex values across components — reach for these.
+─────────────────────────────────────────────────────────────────────── */
 :root {
-  --background: #fafaf7;
-  --foreground: #1c1917;
+  /* Surfaces */
+  --background: #fff8ed; /* warm cream */
+  --surface: #ffffff;
+  --surface-soft: #fff1d9; /* soft card tint */
+  --oat: #f6e7cf;
+  --border-soft: #e8d8c4;
+
+  /* Text */
+  --text-main: #241a12; /* espresso */
+  --text-muted: #6b5a4a;
+  --foreground: var(--text-main);
+
+  /* Primary action — basil green + deeper 3D shadow */
+  --primary: #2fbf71;
+  --primary-shadow: #16834a;
+
+  /* Food accents */
+  --accent-orange: #ff8a3d; /* carrot */
+  --accent-yellow: #ffd166; /* butter */
+  --accent-red: #ef4444; /* tomato */
+  --accent-violet: #7c5cff; /* grape */
+  --accent-teal: #20c7a5;
+  --accent-sky: #3ba7ff;
+  --accent-pink: #ff6b9e;
 
   /* Motion tokens. Use these durations / easings so animations feel like one
      designer made them. Consumers reference via inline style or arbitrary
@@ -109,10 +137,12 @@ body {
   50%      { transform: translateY(-2px) rotate(2deg); }
 }
 
-/* Decorative dotted background used behind the home hero. */
+/* Decorative dotted background used behind the home hero. Tinted with
+   Pantry Pop basil-green at low alpha so it reads as a calm texture on
+   the cream surface, not noise. */
 .dot-grid {
   background-image:
-    radial-gradient(circle, rgba(16, 185, 129, 0.18) 1px, transparent 1.4px);
+    radial-gradient(circle, rgba(47, 191, 113, 0.18) 1px, transparent 1.4px);
   background-size: 22px 22px;
   background-position: 0 0;
 }

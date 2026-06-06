@@ -10,7 +10,6 @@ import {
   ShoppingBasket,
   Bookmark,
   Info,
-  Sparkles,
   Globe,
   ChefHat,
   Wand2,
@@ -65,26 +64,28 @@ export function Navbar() {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link
           href="/"
-          className="group flex items-center gap-2.5 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+          aria-label="Waivy — home"
+          className="group flex items-center gap-2.5 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2FBF71]"
         >
-          <div className="relative grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-sm shadow-emerald-300/40 transition-transform motion-safe:group-hover:scale-105">
-            <ChefHat size={18} />
-            <span
-              aria-hidden
-              className="absolute -right-1 -top-1 grid h-4 w-4 place-items-center rounded-full bg-amber-400 text-[8px] text-amber-900 shadow"
-            >
-              <Sparkles size={9} />
+          {/* Pantry Pop brand mark — basil squircle, raised face, deep
+              basil shadow band, carrot "AI" pip. The bottom-border trick
+              is the same 3D depth used by ThreeDButton so the mark feels
+              like a small button you could press. */}
+          <span
+            aria-hidden
+            className="relative grid h-9 w-9 place-items-center rounded-[14px] border-b-[3px] border-[#16834A] bg-gradient-to-b from-[#3AD081] to-[#2FBF71] text-white shadow-[0_2px_8px_-2px_rgba(22,131,74,0.35)] transition-transform motion-safe:group-hover:-translate-y-px"
+          >
+            <ChefHat size={18} strokeWidth={2.4} />
+            <span className="absolute -right-1.5 -top-1.5 grid h-[18px] min-w-[18px] place-items-center rounded-full border-b-2 border-[#B85A1A] bg-gradient-to-b from-[#FFB07A] to-[#FF8A3D] px-1 text-[8px] font-extrabold uppercase tracking-wide text-white shadow-sm">
+              AI
             </span>
-          </div>
+          </span>
           <div className="flex flex-col leading-tight">
-            <span className="inline-flex items-baseline gap-1.5 text-base font-bold tracking-tight text-stone-900 transition-colors group-hover:text-emerald-700">
+            <span className="text-base font-extrabold tracking-tight text-[#241A12] transition-colors group-hover:text-[#16834A]">
               Waivy
-              <span className="hidden text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-600 sm:inline">
-                AI
-              </span>
             </span>
             {/* Tagline only on larger screens so it never crowds the nav. */}
-            <span className="hidden text-[11px] text-stone-500 lg:inline">
+            <span className="hidden text-[11px] text-[#6B5A4A] lg:inline">
               Cook smart on a student budget.
             </span>
           </div>

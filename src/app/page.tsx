@@ -73,10 +73,25 @@ export default function HomePage() {
         />
         <div className="relative grid items-center gap-10 md:grid-cols-[1.05fr_1fr]">
           <Stagger className="space-y-5" startDelay={40} step={80}>
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-3 py-1 text-xs font-medium text-emerald-700 backdrop-blur">
-              <Sparkles size={14} />
-              <AnimatedNumber value={RECIPES.length} duration={1100} />+
-              student-friendly recipes
+            {/* Pantry Pop hero pill — cream surface, biscuit border, basil
+                count, carrot sparkle. Bigger, friendlier hit than the old
+                emerald outline bubble. */}
+            <span className="inline-flex items-center gap-2.5 rounded-full border border-[#E8D8C4] bg-[#FFF8ED]/95 px-4 py-1.5 text-sm font-semibold text-[#16834A] shadow-[0_1px_0_#E8D8C4] backdrop-blur">
+              <span
+                aria-hidden
+                className="grid h-6 w-6 place-items-center rounded-full bg-gradient-to-b from-[#FFB07A] to-[#FF8A3D] text-white shadow-sm"
+              >
+                <Sparkles size={12} strokeWidth={2.6} />
+              </span>
+              <span className="inline-flex items-baseline gap-1">
+                <AnimatedNumber
+                  value={RECIPES.length}
+                  duration={1100}
+                  className="text-[#241A12]"
+                />
+                <span className="text-[#241A12]">+</span>
+                <span className="text-[#6B5A4A]">student-friendly recipes</span>
+              </span>
             </span>
             <h1 className="text-4xl font-bold leading-[1.02] tracking-tight text-stone-900 sm:text-5xl md:text-[3.5rem]">
               Eat well on a{" "}
