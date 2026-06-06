@@ -17,11 +17,13 @@ import {
 import { useToast } from "@/components/ui/Toast";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import type { CustomRecipe } from "@/lib/customRecipeTypes";
 
 export default function RecipeStudioPage() {
   const [recipes, setRecipes] = useState<CustomRecipe[]>([]);
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
   const toast = useToast();
 
   useEffect(() => {
@@ -32,7 +34,12 @@ export default function RecipeStudioPage() {
   function remove(id: string) {
     const target = recipes.find((r) => r.id === id);
     const name = target?.name ?? "this recipe";
-    if (!window.confirm(`Delete "${name}"? This can't be undone.`)) return;
+    setPendingDelete({ id, name });
+  }
+
+  function performDelete() {
+    if (!pendingDelete) return;
+    const { id, name } = pendingDelete;
     deleteCustomRecipe(id);
     setRecipes(getCustomRecipes());
     toast.info(`Deleted "${name}"`);
@@ -108,6 +115,24 @@ export default function RecipeStudioPage() {
         tone="emerald"
         recipes={userOnes}
         onRemove={remove}
+      />
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        title="Delete this recipe?"
+        body={
+          <>
+            <span className="font-semibold text-stone-900">
+              &ldquo;{pendingDelete?.name}&rdquo;
+            </span>{" "}
+            and any generated image will be removed from this device. This
+            can&apos;t be undone.
+          </>
+        }
+        confirmLabel="Delete recipe"
+        destructive
+        onConfirm={performDelete}
+        onClose={() => setPendingDelete(null)}
       />
     </div>
   );
