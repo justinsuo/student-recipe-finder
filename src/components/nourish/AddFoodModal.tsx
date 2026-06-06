@@ -114,19 +114,21 @@ function FoodResultCard({
 
           {/* Meal picker */}
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-medium text-stone-600 w-16 shrink-0">Meal</span>
-            {(Object.entries(MEAL_LABELS) as [MealSlot, string][]).map(([id, label]) => (
-              <SelectablePill
-                key={id}
-                active={meal === id}
-                onClick={() => setMeal(id)}
-                ariaSemantics="checked"
-                showCheck={false}
-                size="sm"
-              >
-                {label}
-              </SelectablePill>
-            ))}
+            <span className="text-xs font-medium text-stone-600 w-16 shrink-0" id="add-food-search-meal-label">Meal</span>
+            <div role="radiogroup" aria-labelledby="add-food-search-meal-label" className="flex flex-wrap items-center gap-2">
+              {(Object.entries(MEAL_LABELS) as [MealSlot, string][]).map(([id, label]) => (
+                <SelectablePill
+                  key={id}
+                  active={meal === id}
+                  onClick={() => setMeal(id)}
+                  ariaSemantics="checked"
+                  showCheck={false}
+                  size="sm"
+                >
+                  {label}
+                </SelectablePill>
+              ))}
+            </div>
           </div>
 
           <Button
@@ -381,12 +383,14 @@ function CustomFoodTab({
       </div>
 
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-xs font-medium text-stone-600">Meal:</span>
-        {(Object.entries(MEAL_LABELS) as [MealSlot, string][]).map(([id, label]) => (
-          <SelectablePill key={id} active={meal === id} onClick={() => setMeal(id)} ariaSemantics="checked" showCheck={false} size="sm">
-            {label}
-          </SelectablePill>
-        ))}
+        <span className="text-xs font-medium text-stone-600" id="custom-food-meal-label">Meal:</span>
+        <div role="radiogroup" aria-labelledby="custom-food-meal-label" className="flex flex-wrap items-center gap-2">
+          {(Object.entries(MEAL_LABELS) as [MealSlot, string][]).map(([id, label]) => (
+            <SelectablePill key={id} active={meal === id} onClick={() => setMeal(id)} ariaSemantics="checked" showCheck={false} size="sm">
+              {label}
+            </SelectablePill>
+          ))}
+        </div>
       </div>
 
       <Button
@@ -459,12 +463,14 @@ function QuickAddTab({
       </div>
 
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-xs font-medium text-stone-600">Meal:</span>
-        {(Object.entries(MEAL_LABELS) as [MealSlot, string][]).map(([id, label]) => (
-          <SelectablePill key={id} active={meal === id} onClick={() => setMeal(id)} ariaSemantics="checked" showCheck={false} size="sm">
-            {label}
-          </SelectablePill>
-        ))}
+        <span className="text-xs font-medium text-stone-600" id="quick-add-meal-label">Meal:</span>
+        <div role="radiogroup" aria-labelledby="quick-add-meal-label" className="flex flex-wrap items-center gap-2">
+          {(Object.entries(MEAL_LABELS) as [MealSlot, string][]).map(([id, label]) => (
+            <SelectablePill key={id} active={meal === id} onClick={() => setMeal(id)} ariaSemantics="checked" showCheck={false} size="sm">
+              {label}
+            </SelectablePill>
+          ))}
+        </div>
       </div>
 
       <Button
