@@ -48,6 +48,17 @@ export function Chatbot() {
     }
   }, [messages, open]);
 
+  // Escape closes the panel — gives keyboard users an exit that doesn't
+  // require finding the close X.
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+
   useEffect(() => {
     function isEditable(t: EventTarget | null): boolean {
       if (!(t instanceof HTMLElement)) return false;
