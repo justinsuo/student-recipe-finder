@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { clsx } from "clsx";
 import { getRecipeImage } from "@/data/recipeImages";
 import type { Recipe } from "@/lib/types";
@@ -33,6 +33,13 @@ export function RecipeImage({
 }: Props) {
   const img = getRecipeImage(recipe.id);
   const [errored, setErrored] = useState(false);
+  // Reset errored state when the recipe changes so a previous recipe's
+  // failed image doesn't force the fallback for an unrelated recipe
+  // when this component instance is reused (e.g. a virtualized list).
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setErrored(false);
+  }, [recipe.id]);
   const useFallback = !img || errored;
 
   const aspect = variant === "hero" ? "aspect-[16/9]" : "aspect-[4/3]";
