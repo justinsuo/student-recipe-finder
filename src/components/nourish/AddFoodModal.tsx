@@ -15,6 +15,7 @@ import {
   Clock,
   Camera,
   BookOpen,
+  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { SelectablePill } from "@/components/ui/SelectablePill";
@@ -592,7 +593,7 @@ export function AddFoodModal({ onClose, onLogged, defaultMeal = "lunch" }: Props
               ["barcode", "Barcode",  ScanBarcode],
               ["custom",  "Custom",   Plus],
               ["quick",   "Quick",    Zap],
-            ] as [Mode, string, React.ElementType][]
+            ] as [Mode, string, LucideIcon][]
           ).map(([id, label, Icon]) => (
             <button
               key={id}

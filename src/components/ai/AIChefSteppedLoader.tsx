@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Sparkles, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import { clsx } from "clsx";
+import { LazyFoodOrb } from "@/components/visual-effects/LazyFoodOrb";
 
 /**
  * Staged "AI is thinking" panel. Shows what's happening so a 4-5s wait
@@ -50,27 +51,23 @@ export function AIChefSteppedLoader({
   /* eslint-enable react-hooks/set-state-in-effect */
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-violet-200/80 bg-gradient-to-br from-violet-50 via-white to-emerald-50/50 p-5 shadow-sm sm:p-7">
+    <div className="relative overflow-hidden rounded-3xl border border-[#CDBEFF]/80 bg-gradient-to-br from-[#EFE8FF] via-white to-[#E8FAF0]/60 p-5 shadow-sm sm:p-7">
       <div
         aria-hidden
         className="dot-grid pointer-events-none absolute inset-0 opacity-40 [mask-image:radial-gradient(circle_at_70%_30%,black,transparent_60%)]"
       />
       <div className="relative">
-        <div className="flex items-center gap-2.5">
-          <div className="relative grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 text-white shadow-sm">
-            <Sparkles
-              size={18}
-              className="motion-safe:animate-[brandBob_2.6s_ease-in-out_infinite]"
-            />
-            <span
-              aria-hidden
-              className="absolute inset-0 rounded-xl motion-safe:animate-[pulseGlow_2.6s_ease-in-out_infinite]"
-              style={{ animationName: "pulseGlow" }}
-            />
+        <div className="flex items-center gap-3">
+          {/* Lazy WebGL "food orb" — the visible signature for AI Chef
+              while it's thinking. Lazy-loaded behind a CSS fallback so
+              first paint is instant + no-WebGL / reduced-motion users
+              still see a polished basil sphere. */}
+          <div className="relative h-16 w-16 flex-none sm:h-20 sm:w-20">
+            <LazyFoodOrb />
           </div>
           <div>
-            <p className="text-sm font-semibold text-stone-900">{label}</p>
-            <p className="text-[11px] text-stone-500" aria-live="polite">
+            <p className="text-sm font-semibold text-[#241A12]">{label}</p>
+            <p className="text-[11px] text-[#6B5A4A]" aria-live="polite">
               Step {Math.min(step + 1, stages.length)} of {stages.length}
             </p>
           </div>
