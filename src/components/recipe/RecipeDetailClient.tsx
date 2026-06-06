@@ -546,6 +546,25 @@ function CookingMode({
   const total = recipe.steps.length;
   const isLast = step === total - 1;
 
+  // A custom recipe authored in /recipe-studio/new can legitimately
+  // have zero steps. Guarding here keeps cooking mode from rendering
+  // an undefined heading + a width:Infinity% progress bar.
+  if (total === 0) {
+    return (
+      <div className="space-y-4 rounded-3xl bg-white p-8 text-center shadow-sm">
+        <p className="text-base font-semibold text-stone-900">
+          This recipe doesn&apos;t have any cooking steps yet.
+        </p>
+        <p className="text-sm text-stone-500">
+          Add steps in Recipe Studio, or come back to the recipe page.
+        </p>
+        <Button onClick={onExit} variant="primary">
+          Back to recipe
+        </Button>
+      </div>
+    );
+  }
+
   const detectMinutes = (text: string): number | null => {
     const m = text.match(/(\d+)\s*(min|minute|minutes)/i);
     return m ? parseInt(m[1], 10) : null;
