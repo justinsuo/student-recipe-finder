@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { ArrowRight, Coins, Clock, Flame } from "lucide-react";
 import { calculateCostPerServing } from "@/lib/recipeScoring";
 import { bestEffortNutrition } from "@/lib/nutritionEngine";

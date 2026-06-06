@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Bookmark, BookmarkCheck, Clock, Coins, ListChecks, Flame, ArrowRight } from "lucide-react";
 import { useAppStore } from "@/lib/AppStore";
 import type { Recipe, RecipeScoreResult } from "@/lib/types";

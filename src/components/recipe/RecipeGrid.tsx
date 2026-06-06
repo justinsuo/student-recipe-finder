@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, type Variants } from "framer-motion";
+import { motion, type Variants } from "motion/react";
 import type { Recipe, RecipeScoreResult } from "@/lib/types";
 import { RecipeCard } from "./RecipeCard";
 import { EmptyState } from "@/components/ui/EmptyState";

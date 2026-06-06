@@ -6,6 +6,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Chatbot } from "@/components/layout/Chatbot";
 import { ToastProvider } from "@/components/ui/Toast";
+import { AppMotionProvider } from "@/components/motion/AppMotionProvider";
 
 // Nunito = warm, rounded, app-like — used everywhere the existing code
 // references --font-geist-sans. The variable name is kept for
@@ -49,12 +50,14 @@ export default function RootLayout({
       <body className="min-h-screen bg-[#FFF8ED] text-[#241A12] antialiased">
         <AppStoreProvider>
           <ToastProvider>
-            <Navbar />
-            <main className="app-main mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
-              {children}
-            </main>
-            <BottomNav />
-            <Chatbot />
+            <AppMotionProvider>
+              <Navbar />
+              <main className="app-main mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
+                {children}
+              </main>
+              <BottomNav />
+              <Chatbot />
+            </AppMotionProvider>
           </ToastProvider>
         </AppStoreProvider>
       </body>
