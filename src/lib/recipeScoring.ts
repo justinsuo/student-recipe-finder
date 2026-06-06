@@ -258,8 +258,8 @@ export function groupPantryResults(
     if (usesExpiring) useSoon.push(r);
 
     if (r.missingIngredients.length === 0) canMakeNow.push(r);
-    else if (r.missingIngredients.length <= 2) needFewItems.push(r);
     else if (r.missingIngredients.length === 1) buyOneUnlock.push(r);
+    else if (r.missingIngredients.length <= 2) needFewItems.push(r);
     else if (r.missingCost < 3) buyOneUnlock.push(r);
   }
 

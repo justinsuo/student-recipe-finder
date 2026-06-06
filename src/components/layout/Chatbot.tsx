@@ -272,17 +272,18 @@ function MessageBubble({ message }: { message: ChatMessage }) {
   );
 }
 
-// Very small markdown renderer — supports **bold** and basic line breaks
+// Very small markdown renderer — supports **bold** and basic line breaks.
+// Keys include the match index so two `renderMarkdown` calls in the same
+// parent tree don't collide on `b-0`, `b-1`, ...
 function renderMarkdown(text: string) {
   const parts: React.ReactNode[] = [];
   const regex = /\*\*(.+?)\*\*/g;
   let last = 0;
   let match: RegExpExecArray | null;
-  let key = 0;
   while ((match = regex.exec(text)) !== null) {
     if (match.index > last) parts.push(text.slice(last, match.index));
     parts.push(
-      <strong key={`b-${key++}`} className="font-semibold">
+      <strong key={`b-${match.index}`} className="font-semibold">
         {match[1]}
       </strong>,
     );

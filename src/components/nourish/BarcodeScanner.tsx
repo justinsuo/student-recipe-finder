@@ -213,10 +213,10 @@ export function BarcodeScanner({ onLogged }: Props) {
           <div className="flex items-center gap-3">
             <span className="text-xs font-medium text-stone-600 w-16">Servings</span>
             <div className="flex items-center gap-2">
-              <button type="button" onClick={() => setServings((s) => Math.max(0.5, parseFloat((s - 0.5).toFixed(1))))}
+              <button type="button" aria-label="Decrease servings" onClick={() => setServings((s) => Math.max(0.5, parseFloat((s - 0.5).toFixed(1))))}
                 className="grid h-7 w-7 place-items-center rounded-full border border-stone-200 text-stone-600 hover:bg-stone-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400">−</button>
               <span className="w-8 text-center text-sm font-semibold tabular-nums">{servings}</span>
-              <button type="button" onClick={() => setServings((s) => parseFloat((s + 0.5).toFixed(1)))}
+              <button type="button" aria-label="Increase servings" onClick={() => setServings((s) => parseFloat((s + 0.5).toFixed(1)))}
                 className="grid h-7 w-7 place-items-center rounded-full border border-stone-200 text-stone-600 hover:bg-stone-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400">+</button>
             </div>
             <span className="text-xs text-stone-400">= {Math.round(food.kcal * servings)} kcal</span>
@@ -235,7 +235,7 @@ export function BarcodeScanner({ onLogged }: Props) {
             <Button variant="primary" size="sm" leftIcon={<Plus size={13} />} onClick={handleLog} className="flex-1">
               Add to {MEAL_LABELS[meal]}
             </Button>
-            <button type="button" onClick={reset}
+            <button type="button" aria-label="Reset scanner" onClick={reset}
               className={clsx("grid h-8 w-8 place-items-center rounded-full border border-stone-200 text-stone-500 hover:bg-stone-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400")}>
               <X size={14} />
             </button>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -630,14 +630,31 @@ function CountdownTimer({
   onDone: () => void;
 }) {
   const [remaining, setRemaining] = useState(seconds);
+  // Keep the latest onDone in a ref so the tick effect doesn't re-run
+  // whenever the parent passes a fresh inline arrow.
+  const onDoneRef = useRef(onDone);
+  const firedRef = useRef(false);
+  useEffect(() => {
+    onDoneRef.current = onDone;
+  }, [onDone]);
+  // If the parent reuses this timer for a new step (seconds changes),
+  // restart the countdown cleanly.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setRemaining(seconds);
+    firedRef.current = false;
+  }, [seconds]);
   useEffect(() => {
     if (remaining <= 0) {
-      onDone();
+      if (!firedRef.current) {
+        firedRef.current = true;
+        onDoneRef.current();
+      }
       return;
     }
     const id = setTimeout(() => setRemaining((r) => r - 1), 1000);
     return () => clearTimeout(id);
-  }, [remaining, onDone]);
+  }, [remaining]);
   const mm = Math.floor(remaining / 60);
   const ss = remaining % 60;
   return (
@@ -647,7 +664,11 @@ function CountdownTimer({
         {mm}:{ss.toString().padStart(2, "0")}
       </span>
       <button
-        onClick={onDone}
+        aria-label="Stop timer"
+        onClick={() => {
+          firedRef.current = true;
+          onDoneRef.current();
+        }}
         className="rounded-full bg-stone-800 px-3 py-1 text-xs hover:bg-stone-700"
       >
         Stop

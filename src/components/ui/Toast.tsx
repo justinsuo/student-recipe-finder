@@ -42,15 +42,29 @@ const ToastContext = createContext<ToastApi | null>(null);
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);
   const counter = useRef(0);
+  // Track pending dismiss timeouts so we can clear them if the provider
+  // unmounts mid-toast (route change during SPA hydration, fast remount).
+  // Without this, the timeout fires setItems on a stale provider and React
+  // logs "update on unmounted component" plus a small per-toast leak.
+  const timeoutsRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
 
   const push = useCallback((kind: ToastKind, message: string) => {
     const id = ++counter.current;
     setItems((prev) => [...prev, { id, kind, message }]);
-    // Auto-dismiss; errors stick a bit longer so the user can read them.
     const ttl = kind === "error" ? 5000 : 3000;
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
+      timeoutsRef.current.delete(timeout);
       setItems((prev) => prev.filter((t) => t.id !== id));
     }, ttl);
+    timeoutsRef.current.add(timeout);
+  }, []);
+
+  useEffect(() => {
+    const timeouts = timeoutsRef.current;
+    return () => {
+      for (const t of timeouts) clearTimeout(t);
+      timeouts.clear();
+    };
   }, []);
 
   const api = useMemo<ToastApi>(

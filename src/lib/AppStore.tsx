@@ -200,8 +200,11 @@ export function ingredientName(id: string): string {
       const found = list.find((c) => c.id === id);
       if (found) return found.displayName ?? found.canonicalName ?? id;
     }
-  } catch {
-    /* ignore */
+  } catch (err) {
+    // Corrupted custom-ingredients payload (rare — usually a half-written
+    // value from a quota error). Logging makes the failure debuggable
+    // instead of silently rendering ugly slug-ish IDs in the UI.
+    console.warn("[AppStore.ingredientName] failed to parse custom-ingredients", err);
   }
   return id;
 }

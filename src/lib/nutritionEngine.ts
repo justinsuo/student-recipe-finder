@@ -177,9 +177,20 @@ export function bestEffortNutrition(recipe: Recipe): {
   confidence: "high" | "medium" | "low";
   breakdown?: IngredientMacroLine[];
 } {
+  // A recipe with zero ingredients (custom recipe being authored in
+  // /recipe-studio/new) would compute zero macros and a missingRatio of
+  // 0, which would silently overwrite the hand-entered estimate with
+  // zeros. Short-circuit so the author still sees the macros they
+  // typed in.
+  if (recipe.ingredients.length === 0) {
+    return {
+      estimate: recipe.estimatedNutrition,
+      source: "hand-entered",
+      confidence: "medium",
+    };
+  }
   const calc = calculateRecipeMacros(recipe);
-  const total = recipe.ingredients.length || 1;
-  const missingRatio = calc.missingIngredientIds.length / total;
+  const missingRatio = calc.missingIngredientIds.length / recipe.ingredients.length;
   if (missingRatio > 0.5) {
     return {
       estimate: recipe.estimatedNutrition,

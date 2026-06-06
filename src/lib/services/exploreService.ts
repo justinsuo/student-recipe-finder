@@ -12,7 +12,12 @@ import { EXPLORE_RECIPES } from "@/data/exploreRecipes";
 export function getExploreSource() {
   const src = process.env.NEXT_PUBLIC_EXPLORE_SOURCE;
   if (src === "spoonacular" && process.env.NEXT_PUBLIC_SPOONACULAR_API_KEY) return "spoonacular" as const;
-  if (src === "edamam" && process.env.NEXT_PUBLIC_EDAMAM_APP_ID) return "edamam" as const;
+  if (
+    src === "edamam" &&
+    process.env.NEXT_PUBLIC_EDAMAM_APP_ID &&
+    process.env.NEXT_PUBLIC_EDAMAM_APP_KEY
+  )
+    return "edamam" as const;
   if (src === "themealdb") return "themealdb" as const;
   // Default: serve our local global recipe library — no API key needed
   return "local" as const;
@@ -152,6 +157,7 @@ const mealDetailCache = new Map<string, object>();
 async function mealDBSearch(filters: ExploreFilters): Promise<ExternalSearchResult> {
   if (filters.query.trim()) {
     const res = await fetch(`${MEALDB}/search.php?s=${encodeURIComponent(filters.query)}`);
+    if (!res.ok) throw new Error(`MealDB search ${res.status}`);
     const data = await res.json();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const recipes = (data.meals ?? []).map((m: any) => normalizeMealDB(m));
@@ -170,6 +176,7 @@ async function fetchMealsByArea(area: string): Promise<ExternalRecipe[]> {
   const cacheKey = `area:${area}`;
   if (mealDetailCache.has(cacheKey)) return mealDetailCache.get(cacheKey) as ExternalRecipe[];
   const res = await fetch(`${MEALDB}/filter.php?a=${encodeURIComponent(area)}`);
+  if (!res.ok) throw new Error(`MealDB area ${res.status}`);
   const data = await res.json();
   const meals = await lookupMeals(data.meals ?? []);
   mealDetailCache.set(cacheKey, meals);
@@ -180,6 +187,7 @@ async function fetchMealsByCategory(category: string): Promise<ExternalRecipe[]>
   const cacheKey = `cat:${category}`;
   if (mealDetailCache.has(cacheKey)) return mealDetailCache.get(cacheKey) as ExternalRecipe[];
   const res = await fetch(`${MEALDB}/filter.php?c=${encodeURIComponent(category)}`);
+  if (!res.ok) throw new Error(`MealDB category ${res.status}`);
   const data = await res.json();
   const meals = await lookupMeals(data.meals ?? []);
   mealDetailCache.set(cacheKey, meals);
@@ -194,6 +202,7 @@ async function lookupMeals(filterResults: any[]): Promise<ExternalRecipe[]> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     limited.map(async (m: any) => {
       const res = await fetch(`${MEALDB}/lookup.php?i=${m.idMeal}`);
+      if (!res.ok) return null;
       const data = await res.json();
       return data.meals?.[0] ? normalizeMealDB(data.meals[0]) : null;
     })
@@ -233,7 +242,17 @@ async function spoonacularSearch(f: ExploreFilters): Promise<ExternalSearchResul
   const res = await fetch(`https://api.spoonacular.com/recipes/complexSearch?${params}`);
   if (!res.ok) throw new Error(`Spoonacular ${res.status}`);
   const data = await res.json();
-  return { recipes: (data.results ?? []).map(normalizeSpoonacular), total: data.totalResults ?? 0, page: f.page, hasMore: (data.offset + data.number) < data.totalResults, source: "spoonacular" };
+  const results = data.results ?? [];
+  const offset = Number(data.offset ?? (f.page - 1) * PAGE_SIZE);
+  const number = Number(data.number ?? results.length);
+  const total = Number(data.totalResults ?? 0);
+  return {
+    recipes: results.map(normalizeSpoonacular),
+    total,
+    page: f.page,
+    hasMore: Number.isFinite(offset + number) && offset + number < total,
+    source: "spoonacular",
+  };
 }
 
 // ─── Edamam ──────────────────────────────────────────────────────────────────

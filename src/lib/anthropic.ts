@@ -419,15 +419,25 @@ function expandToFullRecipe(slim: SlimHaikuRecipe): GeneratedRecipe {
     estimatedTotalCost: Number(slim.estimatedTotalCost) || 0,
     estimatedCostPerServing: Number(slim.estimatedCostPerServing) || 0,
     estimatedMissingIngredientCost: 0,
-    ingredients: (slim.ingredients ?? []).map((i) => ({
-      name: i.name,
-      quantity: Number(i.quantity) || 0,
-      unit: i.unit ?? "",
-      estimatedCost: Number(i.estimatedCost) || 0,
-      userAlreadyHas: Boolean(i.userAlreadyHas),
-      optional: Boolean(i.optional),
-      category: i.category ?? "other",
-    })),
+    ingredients: (slim.ingredients ?? []).map((i) => {
+      // A non-finite or non-positive quantity from the model would
+      // propagate zero macros and zero cost downstream — fall back to
+      // 1 so the recipe still costs/scores correctly.
+      const rawQty = Number(i.quantity);
+      const qty = Number.isFinite(rawQty) && rawQty > 0 ? rawQty : 1;
+      if (!Number.isFinite(rawQty) || rawQty <= 0) {
+        console.warn("[anthropic] non-finite ingredient quantity coerced to 1", i);
+      }
+      return {
+        name: i.name,
+        quantity: qty,
+        unit: i.unit ?? "",
+        estimatedCost: Number(i.estimatedCost) || 0,
+        userAlreadyHas: Boolean(i.userAlreadyHas),
+        optional: Boolean(i.optional),
+        category: i.category ?? "other",
+      };
+    }),
     missingIngredients: [],
     steps: slim.steps ?? [],
     guidedCookingSteps: [],
