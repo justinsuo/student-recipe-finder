@@ -4,6 +4,7 @@ import { clsx } from "clsx";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { sumTotals } from "@/lib/nourish/types";
 import type { DiaryEntry, TargetSnapshot, WeightEntry } from "@/lib/nourish/types";
+import { dateToLocalString, todayString } from "@/lib/nourish/storage";
 
 interface Props {
   diary: DiaryEntry[];
@@ -16,7 +17,7 @@ function dateRange(daysAgo: number, dayCount: number): string[] {
   for (let i = daysAgo + dayCount - 1; i >= daysAgo; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
-    result.push(d.toISOString().slice(0, 10));
+    result.push(dateToLocalString(d));
   }
   return result;
 }
@@ -156,7 +157,7 @@ function WeekCard({ stats, targets, label }: { stats: WeekStats; targets: Target
                   className={clsx(
                     "h-2 flex-1 rounded-sm",
                     // mark future days lighter
-                    d > new Date().toISOString().slice(0, 10)
+                    d > todayString()
                       ? "bg-stone-100"
                       : stats.loggedDays > i
                         ? "bg-emerald-400"

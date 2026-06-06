@@ -23,6 +23,7 @@ import {
   getDiaryEntries,
   getTargets,
   todayString,
+  dateToLocalString,
 } from "@/lib/nourish/storage";
 import { ewmaWeight } from "@/lib/nourish/calcEngine";
 import { sumTotals } from "@/lib/nourish/types";
@@ -40,7 +41,7 @@ function dateRange(days: number): string[] {
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
-    result.push(d.toISOString().slice(0, 10));
+    result.push(dateToLocalString(d));
   }
   return result;
 }

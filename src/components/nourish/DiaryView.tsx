@@ -12,6 +12,7 @@ import {
   deleteDiaryEntry,
   addDiaryEntry,
   todayString,
+  dateToLocalString,
   newId,
   pushRecentFood,
 } from "@/lib/nourish/storage";
@@ -37,7 +38,7 @@ const MEAL_EMOJI: Record<MealSlot, string> = {
 function dateOffset(base: string, delta: number): string {
   const d = new Date(base + "T12:00:00");
   d.setDate(d.getDate() + delta);
-  return d.toISOString().slice(0, 10);
+  return dateToLocalString(d);
 }
 
 function formatDate(iso: string): string {

@@ -189,13 +189,22 @@ export function setOnboarded(value: boolean): void {
 
 // ─── Utility ─────────────────────────────────────────────────────────────────
 
-/** Returns today's date in YYYY-MM-DD, local time. */
-export function todayString(): string {
-  const d = new Date();
+/**
+ * Format a Date as YYYY-MM-DD in LOCAL time. Use this everywhere diary /
+ * planner / streak code keys off a date string — d.toISOString().slice(0,10)
+ * silently shifts ±1 day for any user outside UTC, which zeroes out
+ * weekly stats and breaks date stepping.
+ */
+export function dateToLocalString(d: Date): string {
   const yyyy = d.getFullYear();
   const mm = String(d.getMonth() + 1).padStart(2, "0");
   const dd = String(d.getDate()).padStart(2, "0");
   return `${yyyy}-${mm}-${dd}`;
+}
+
+/** Returns today's date in YYYY-MM-DD, local time. */
+export function todayString(): string {
+  return dateToLocalString(new Date());
 }
 
 /** Generates a simple unique ID (timestamp + random suffix). */

@@ -30,6 +30,7 @@ import {
   getDiaryForDate,
   newId,
   todayString,
+  dateToLocalString,
 } from "@/lib/nourish/storage";
 import type { MealSlot } from "@/lib/nourish/types";
 
@@ -57,7 +58,7 @@ function buildDayPickerOptions(today: string): {
   for (let i = 0; i < DAYS_AHEAD; i++) {
     const d = new Date(base);
     d.setDate(d.getDate() + i);
-    const key = d.toISOString().slice(0, 10);
+    const key = dateToLocalString(d);
     const label = i === 0 ? "Today" : i === 1 ? "Tomorrow" : fmt.format(d);
     out.push({ date: key, label });
   }

@@ -2,6 +2,7 @@
 // All inputs in canonical SI units (kg, cm). No I/O, no state.
 // Each exported function can be verified independently.
 
+import { dateToLocalString } from "./storage";
 import type {
   Sex,
   ActivityLevel,
@@ -191,7 +192,7 @@ export function deriveTargets(
   mode: GoalMode,
   weeklyRateKg: number,
   source: TargetSource = "formula",
-  effectiveFrom: string = new Date().toISOString().slice(0, 10),
+  effectiveFrom: string = dateToLocalString(new Date()),
 ): TargetSnapshot {
   const bmr = bestBmr(profile);
   const tdeeKcal = tdee(bmr, profile.activityLevel);
@@ -249,7 +250,7 @@ export function adaptiveTdeeEstimate(
 
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - windowDays);
-  const cutoffStr = cutoff.toISOString().slice(0, 10);
+  const cutoffStr = dateToLocalString(cutoff);
 
   const recentEntries = entries.filter((e) => e.date >= cutoffStr);
   const recentWeights = weights.filter((w) => w.date >= cutoffStr);

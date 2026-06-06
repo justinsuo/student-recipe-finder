@@ -30,6 +30,7 @@ import {
   getDiaryForDate,
   getTargets,
   todayString,
+  dateToLocalString,
   deleteDiaryEntry,
 } from "@/lib/nourish/storage";
 import { currentStreak, bestStreak } from "@/lib/nourish/streak";
@@ -193,7 +194,7 @@ export function TodayDashboard({ onSwitchToDiary }: Props) {
   function stepDate(deltaDays: number) {
     const d = new Date(date + "T00:00:00");
     d.setDate(d.getDate() + deltaDays);
-    setDate(d.toISOString().slice(0, 10));
+    setDate(dateToLocalString(d));
   }
 
   function deleteEntry(entry: DiaryEntry) {
