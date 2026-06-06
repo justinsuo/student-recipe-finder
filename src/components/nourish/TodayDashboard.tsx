@@ -10,6 +10,8 @@ import {
   Target,
   Plus,
   Trash2,
+  Flame,
+  Trophy,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { Button } from "@/components/ui/Button";
@@ -24,11 +26,13 @@ import { ExerciseLogger } from "./ExerciseLogger";
 import { QuickAddMacrosModal } from "./QuickAddMacrosModal";
 import { useToast } from "@/components/ui/Toast";
 import {
+  getDiaryEntries,
   getDiaryForDate,
   getTargets,
   todayString,
   deleteDiaryEntry,
 } from "@/lib/nourish/storage";
+import { currentStreak, bestStreak } from "@/lib/nourish/streak";
 import {
   getExerciseForDate,
   sumExerciseCalories,
@@ -53,6 +57,40 @@ const MEAL_EMOJI: Record<MealSlot, string> = {
   lunch: "🥗",
   dinner: "🍽️",
   snack: "🍎",
+};
+
+// Tone-tinted shells so each meal slot has its own visual identity —
+// sunrise amber for breakfast, fresh emerald for lunch, dusk sky for
+// dinner, treat rose for snacks. Subtle gradients so the day feels
+// rhythmic without screaming.
+const MEAL_TONE: Record<
+  MealSlot,
+  { border: string; bg: string; iconBg: string; eyebrow: string }
+> = {
+  breakfast: {
+    border: "border-amber-200/80",
+    bg: "bg-gradient-to-br from-amber-50/70 via-white to-white",
+    iconBg: "bg-amber-100 text-amber-700",
+    eyebrow: "text-amber-700",
+  },
+  lunch: {
+    border: "border-emerald-200/80",
+    bg: "bg-gradient-to-br from-emerald-50/70 via-white to-white",
+    iconBg: "bg-emerald-100 text-emerald-700",
+    eyebrow: "text-emerald-700",
+  },
+  dinner: {
+    border: "border-sky-200/80",
+    bg: "bg-gradient-to-br from-sky-50/70 via-white to-white",
+    iconBg: "bg-sky-100 text-sky-700",
+    eyebrow: "text-sky-700",
+  },
+  snack: {
+    border: "border-rose-200/80",
+    bg: "bg-gradient-to-br from-rose-50/70 via-white to-white",
+    iconBg: "bg-rose-100 text-rose-700",
+    eyebrow: "text-rose-700",
+  },
 };
 
 interface Props {
@@ -90,11 +128,20 @@ export function TodayDashboard({ onSwitchToDiary }: Props) {
   const [hydrated, setHydrated] = useState(false);
   const waterRef = useRef<HTMLDivElement>(null);
 
+  const [streak, setStreak] = useState(0);
+  const [bestEver, setBestEver] = useState(0);
+
   const load = useCallback(() => {
     setEntries(getDiaryForDate(date));
     setTargets(getTargets());
     setExercise(getExerciseForDate(date));
-  }, [date]);
+    // Streak is always computed against today, not the visible date —
+    // browsing yesterday's diary shouldn't change the "you've logged for
+    // 5 days in a row" number.
+    const all = getDiaryEntries();
+    setStreak(currentStreak(all, today));
+    setBestEver(bestStreak(all));
+  }, [date, today]);
 
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
@@ -200,13 +247,48 @@ export function TodayDashboard({ onSwitchToDiary }: Props) {
             <ChevronRight size={16} />
           </button>
         </div>
-        <Link
-          href="/nourish/goals"
-          className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 shadow-sm transition-all hover:-translate-y-px hover:border-emerald-300 hover:text-emerald-700"
-        >
-          <Target size={12} />
-          Goals
-        </Link>
+        <div className="flex items-center gap-2">
+          {streak > 0 && (
+            <span
+              className={clsx(
+                "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold shadow-sm transition-all motion-safe:animate-[fadeUp_400ms_ease-out]",
+                streak >= 7
+                  ? "border border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100 text-amber-800"
+                  : "border border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50 text-orange-800",
+              )}
+              aria-label={`${streak} day logging streak${streak === bestEver && streak > 1 ? ", personal best" : ""}`}
+              title={
+                streak === bestEver && streak > 1
+                  ? `${streak} day streak — your personal best!`
+                  : bestEver > streak
+                    ? `${streak} day streak · best ${bestEver}`
+                    : `${streak} day streak`
+              }
+            >
+              <Flame
+                size={12}
+                className={clsx(
+                  streak >= 7 ? "text-amber-600" : "text-orange-500",
+                  "motion-safe:animate-[emojiFloat_2.6s_ease-in-out_infinite]",
+                )}
+              />
+              {streak}
+              <span className="text-[10px] font-medium opacity-80">
+                day{streak === 1 ? "" : "s"}
+              </span>
+              {streak === bestEver && streak > 1 && (
+                <Trophy size={10} className="text-amber-600" />
+              )}
+            </span>
+          )}
+          <Link
+            href="/nourish/goals"
+            className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 shadow-sm transition-all hover:-translate-y-px hover:border-emerald-300 hover:text-emerald-700"
+          >
+            <Target size={12} />
+            Goals
+          </Link>
+        </div>
       </div>
 
       {/* ─── Hero: calorie ring ────────────────────────────────────────── */}
@@ -344,18 +426,36 @@ function MealSection({
     { kcal: 0, proteinG: 0, carbG: 0, fatG: 0 },
   );
 
+  const tone = MEAL_TONE[meal];
   return (
-    <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+    <div
+      className={clsx(
+        "overflow-hidden rounded-2xl border shadow-sm transition-shadow hover:shadow-md",
+        tone.border,
+        tone.bg,
+      )}
+    >
       <div className="flex items-center justify-between gap-3 px-4 py-3">
         <div className="flex items-center gap-2.5">
-          <span className="text-xl" aria-hidden>
+          <span
+            className={clsx(
+              "grid h-9 w-9 flex-none place-items-center rounded-xl text-lg",
+              tone.iconBg,
+            )}
+            aria-hidden
+          >
             {MEAL_EMOJI[meal]}
           </span>
           <div>
-            <p className="text-sm font-semibold text-stone-900">
+            <p
+              className={clsx(
+                "text-[10px] font-semibold uppercase tracking-[0.14em]",
+                tone.eyebrow,
+              )}
+            >
               {MEAL_LABELS[meal]}
             </p>
-            <p className="text-[11px] text-stone-500">
+            <p className="text-[11px] font-medium text-stone-600">
               {entries.length > 0
                 ? `${entries.length} item${entries.length === 1 ? "" : "s"} · ${Math.round(totals.kcal)} kcal · ${Math.round(totals.proteinG)} g P`
                 : "Nothing logged"}
@@ -366,7 +466,7 @@ function MealSection({
           type="button"
           onClick={onAdd}
           aria-label={`Add food to ${MEAL_LABELS[meal]}`}
-          className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5 text-xs font-semibold text-stone-700 transition-all hover:-translate-y-px hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
+          className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white/80 px-3 py-1.5 text-xs font-semibold text-stone-700 shadow-sm backdrop-blur transition-all hover:-translate-y-px hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
         >
           <Plus size={12} />
           Add

@@ -1,6 +1,7 @@
 "use client";
 
 import { clsx } from "clsx";
+import { CheckCircle2 } from "lucide-react";
 import type { ReactNode } from "react";
 import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
 
@@ -82,14 +83,21 @@ export function MacroCard({
   const safeTarget = target > 0 ? target : 1;
   const pct = Math.min(100, Math.round((consumed / safeTarget) * 100));
   const over = consumed > safeTarget;
+  const hitGoal = consumed >= safeTarget;
   const remaining = Math.max(0, safeTarget - consumed);
   const t = TONE[tone];
 
   return (
     <div
       className={clsx(
-        "rounded-2xl border bg-gradient-to-br p-4 shadow-sm",
+        "rounded-2xl border bg-gradient-to-br p-4 shadow-sm transition-all",
         t.bg,
+        hitGoal && "ring-2 ring-inset",
+        hitGoal && tone === "protein" && "ring-violet-300/70",
+        hitGoal && tone === "carbs" && "ring-sky-300/70",
+        hitGoal && tone === "fat" && "ring-amber-300/70",
+        hitGoal && tone === "fiber" && "ring-emerald-300/70",
+        hitGoal && tone === "water" && "ring-cyan-300/70",
       )}
     >
       <div className="flex items-center justify-between gap-2">
@@ -104,10 +112,12 @@ export function MacroCard({
         </p>
         <span
           className={clsx(
-            "rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+            "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
             t.chip,
+            hitGoal && "motion-safe:animate-[popIn_320ms_ease-out]",
           )}
         >
+          {hitGoal && <CheckCircle2 size={11} aria-hidden />}
           {pct}%
         </span>
       </div>
@@ -148,6 +158,16 @@ export function MacroCard({
             </span>{" "}
             over goal
           </>
+        ) : hitGoal ? (
+          <span
+            className={clsx(
+              "inline-flex items-center gap-1 font-semibold",
+              t.text,
+            )}
+          >
+            <CheckCircle2 size={12} aria-hidden />
+            Goal hit
+          </span>
         ) : (
           <>
             <span className="font-semibold text-stone-900">
