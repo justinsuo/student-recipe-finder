@@ -114,10 +114,16 @@ export function QuickAddMacrosModal({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4">
       <div
+        aria-hidden
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative z-10 max-h-[90dvh] w-full overflow-y-auto rounded-t-3xl bg-white shadow-2xl motion-safe:animate-[fadeUp_240ms_ease-out] sm:max-w-md sm:rounded-3xl">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Quick add macros"
+        className="relative z-10 max-h-[90dvh] w-full overflow-y-auto rounded-t-3xl bg-white shadow-2xl motion-safe:animate-[fadeUp_240ms_ease-out] sm:max-w-md sm:rounded-3xl"
+      >
         <div className="flex items-center justify-between border-b border-stone-200 px-5 py-4">
           <div className="flex items-center gap-2.5">
             <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-sky-500 to-sky-700 text-white shadow-sm shadow-sky-200">
