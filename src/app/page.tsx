@@ -44,6 +44,7 @@ import { ThreeDLink } from "@/components/ui/ThreeDButton";
 import { ShaderGradientBackground } from "@/components/visual-effects/ShaderGradientBackground";
 import { LiquidGlassPanel } from "@/components/visual-effects/LiquidGlassPanel";
 import { PantryToRecipePreview } from "@/components/home/PantryToRecipePreview";
+import { ExplodedRecipeHero } from "@/components/home/ExplodedRecipeHero";
 
 export default function HomePage() {
   // Hero collage prefers recipes with curated photos.
@@ -68,6 +69,12 @@ export default function HomePage() {
 
   return (
     <div className="space-y-20">
+      {/* ─── 0. Exploded scroll hero — pinned, ~3vh tall, parts fly apart
+              into ingredients + macros, reassemble into the AI Chef CTA.
+              Auto-falls-back to a static stacked layout for users with
+              prefers-reduced-motion. */}
+      <ExplodedRecipeHero />
+
       {/* ─── 1. Hero ───────────────────────────────────────────────────── */}
       <section className="relative -mt-2 overflow-hidden rounded-[2rem] border border-[#E8D8C4] bg-gradient-to-br from-[#FFF1D9] via-white to-[#FFE8D6] px-5 pb-10 pt-10 sm:px-10 sm:pb-14 sm:pt-14">
         {/* Animated shader-gradient background — CSS only, soft tint,
