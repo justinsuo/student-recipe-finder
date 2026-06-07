@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
 import { clsx } from "clsx";
-import { LazyFoodOrb } from "@/components/visual-effects/LazyFoodOrb";
 
 /**
  * Staged "AI is thinking" panel. Shows what's happening so a 4-5s wait
@@ -58,12 +57,22 @@ export function AIChefSteppedLoader({
       />
       <div className="relative">
         <div className="flex items-center gap-3">
-          {/* Lazy WebGL "food orb" — the visible signature for AI Chef
-              while it's thinking. Lazy-loaded behind a CSS fallback so
-              first paint is instant + no-WebGL / reduced-motion users
-              still see a polished basil sphere. */}
-          <div className="relative h-16 w-16 flex-none sm:h-20 sm:w-20">
-            <LazyFoodOrb />
+          {/* Static grape sparkle tile — replaces the earlier WebGL
+              food orb, which read as an unrelated green blob over the
+              recipe imagery. */}
+          <div
+            aria-hidden
+            className="relative grid h-12 w-12 flex-none place-items-center rounded-2xl border-b-[3px] border-[#3F2BB8] bg-gradient-to-b from-[#A18FFF] to-[#7C5CFF] text-white shadow-sm shadow-[#7C5CFF]/30 sm:h-14 sm:w-14"
+          >
+            <Sparkles
+              size={20}
+              strokeWidth={2.4}
+              className="motion-safe:animate-[brandBob_2.6s_ease-in-out_infinite]"
+            />
+            <span
+              aria-hidden
+              className="absolute inset-0 rounded-2xl motion-safe:animate-[pulseGlow_2.6s_ease-in-out_infinite]"
+            />
           </div>
           <div>
             <p className="text-sm font-semibold text-[#241A12]">{label}</p>

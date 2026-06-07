@@ -43,7 +43,6 @@ import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
 import { ThreeDLink } from "@/components/ui/ThreeDButton";
 import { ShaderGradientBackground } from "@/components/visual-effects/ShaderGradientBackground";
 import { LiquidGlassPanel } from "@/components/visual-effects/LiquidGlassPanel";
-import { LazyFoodOrb } from "@/components/visual-effects/LazyFoodOrb";
 import { PantryToRecipePreview } from "@/components/home/PantryToRecipePreview";
 
 export default function HomePage() {
@@ -181,18 +180,7 @@ export default function HomePage() {
           </Stagger>
 
           {/* Hero collage */}
-          <div className="relative">
-            {/* Floating WebGL food orb — lazy-loaded, falls back to a
-                CSS basil sphere under reduced-motion / no-WebGL. Sized
-                large enough to read as the hero's centerpiece on
-                desktop; hidden on mobile so we don't blow scroll perf
-                on phones with weaker GPUs. */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute -right-6 -top-6 z-10 hidden h-44 w-44 md:block lg:-right-10 lg:-top-10 lg:h-56 lg:w-56"
-            >
-              <LazyFoodOrb />
-            </div>
+          <div>
             <div className="grid grid-cols-2 grid-rows-[1fr_1fr] gap-3 sm:gap-4">
               {heroFeatured && (
                 <Link
