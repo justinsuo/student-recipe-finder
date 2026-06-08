@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   motion,
   useScroll,
@@ -98,6 +98,14 @@ const GROCERY_GROUP: Part[] = [
 const STAGES = ["Recipe", "Ingredients", "Costs + macros", "Pantry vs grocery", "Start AI Chef"];
 
 export function ExplodedRecipeHero() {
+  // SSR + first-paint safety: always start with the static fallback so the
+  // server-rendered HTML matches the first client paint exactly. After
+  // mount we know whether the user has prefers-reduced-motion and whether
+  // window APIs are available; then we promote to the animated/pinned
+  // version only when it's safe to do so. This prevents a hydration
+  // mismatch that previously crashed the page with "This page couldn't
+  // load" for any visitor with reduced motion enabled.
+  const [mounted, setMounted] = useState(false);
   const reduce = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -121,9 +129,15 @@ export function ExplodedRecipeHero() {
   const ctaOpacity = useTransform(scrollYProgress, [0.85, 0.97], [0, 1]);
   const ctaScale = useTransform(scrollYProgress, [0.85, 1], [0.9, 1]);
 
-  // Reduced-motion users get a static stacked layout instead of the
-  // pinned/scroll-driven version.
-  if (reduce) {
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
+
+  // Show the static stacked layout when we haven't mounted yet (SSR /
+  // first paint) OR when the user has prefers-reduced-motion. Either way,
+  // they get the same content; only the trip differs.
+  if (!mounted || reduce) {
     return <StaticFallback recipe={recipe} cps={cps} macros={macros} />;
   }
 
