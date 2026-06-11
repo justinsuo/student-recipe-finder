@@ -32,6 +32,7 @@ import {
   type WebRecipeCandidate,
 } from "@/lib/workerClient";
 import { GeneratedRecipeOptionBubbles } from "@/components/ai/GeneratedRecipeOptionBubbles";
+import { AIChefDemoHero } from "@/components/ai/AIChefDemoHero";
 import {
   fallbackImageMeta,
   imageDataUrl,
@@ -66,20 +67,48 @@ import { Coins, Beef, Clock } from "lucide-react";
 import { hapticMedium } from "@/lib/haptics";
 
 // If the AI's ingredient list maps cleanly to our catalog, replace its
-// guessed macros with the deterministic engine result. Falls back to the
-// AI's numbers when matching is weak.
+// guessed macros with the deterministic engine result.
+//
+// IMPORTANT: The earlier version bailed out when confidence was "low",
+// which left the AI's bad numbers in place. That's exactly when the AI
+// is most likely to have returned zeros. New rule:
+//   1. Always compute from ingredients via the engine.
+//   2. Use the calc result when the AI's per-serving calories are <=0
+//      or non-finite (the visible "0 calories" bug). Otherwise prefer
+//      AI's numbers but fall back to calc on any individual zero
+//      field — protein/carbs/fat shouldn't all be 0 either.
 function reconcileNutrition(r: GeneratedRecipe): GeneratedRecipe {
   if (!r.ingredients?.length) return r;
   const calc = calculateNutritionForFreeForm(r.ingredients, r.servings || 1);
-  if (calc.confidence === "low") return r;
+  const aiCals = Number(r.estimatedNutrition?.calories);
+  const aiProtein = Number(r.estimatedNutrition?.protein);
+  const aiCarbs = Number(r.estimatedNutrition?.carbs);
+  const aiFat = Number(r.estimatedNutrition?.fat);
+  const aiAllZeroOrBad =
+    !(Number.isFinite(aiCals) && aiCals > 0) &&
+    !(Number.isFinite(aiProtein) && aiProtein > 0) &&
+    !(Number.isFinite(aiCarbs) && aiCarbs > 0) &&
+    !(Number.isFinite(aiFat) && aiFat > 0);
+  // When AI returned all-zero or non-finite, OR our calc has high/medium
+  // confidence, use the engine result. This catches the "0 calories"
+  // display bug end-to-end.
+  const preferCalc = aiAllZeroOrBad || calc.confidence !== "low";
+  if (!preferCalc) return r;
+  const pick = (calcVal: number, aiVal: number) => {
+    const c = Number(calcVal);
+    const a = Number(aiVal);
+    if (Number.isFinite(c) && c > 0) return c;
+    if (Number.isFinite(a) && a > 0) return a;
+    return 0;
+  };
   return {
     ...r,
     estimatedNutrition: {
-      calories: calc.perServing.calories,
-      protein: calc.perServing.protein,
-      carbs: calc.perServing.carbs,
-      fat: calc.perServing.fat,
-      fiber: calc.perServing.fiber ?? 0,
+      calories: pick(calc.perServing.calories, aiCals),
+      protein: pick(calc.perServing.protein, aiProtein),
+      carbs: pick(calc.perServing.carbs, aiCarbs),
+      fat: pick(calc.perServing.fat, aiFat),
+      fiber: pick(calc.perServing.fiber ?? 0, Number(r.estimatedNutrition?.fiber ?? 0)),
     },
   };
 }
@@ -666,54 +695,7 @@ function AIChefPage() {
 
   return (
     <div className="space-y-10">
-      <header className="relative -mt-2 overflow-hidden rounded-3xl border border-violet-200/70 bg-gradient-to-br from-violet-50 via-white to-emerald-50/50 px-6 py-8 sm:px-10 sm:py-10">
-        <div
-          aria-hidden
-          className="dot-grid pointer-events-none absolute inset-0 opacity-50 [mask-image:radial-gradient(circle_at_70%_30%,black,transparent_60%)]"
-        />
-        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="max-w-2xl space-y-3">
-            <p className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-violet-700 backdrop-blur motion-safe:animate-[fadeUp_500ms_ease-out_both]">
-              <Sparkles
-                size={12}
-                className="motion-safe:animate-[brandBob_2.6s_ease-in-out_infinite]"
-              />
-              AI Chef
-            </p>
-            <h1
-              className="text-3xl font-bold leading-[1.05] tracking-tight text-stone-900 motion-safe:animate-[fadeUp_580ms_ease-out_both] sm:text-[2.5rem]"
-              style={{ animationDelay: "60ms" }}
-            >
-              What do we cook tonight?
-            </h1>
-            <p
-              className="text-sm leading-relaxed text-stone-600 motion-safe:animate-[fadeUp_640ms_ease-out_both] sm:text-base"
-              style={{ animationDelay: "140ms" }}
-            >
-              Drop in pantry items, equipment, and a craving. AI Chef returns
-              an original recipe with cost per serving, macros, missing items,
-              and a step-by-step cooking guide.
-            </p>
-          </div>
-          <ul
-            className="flex flex-wrap gap-2 text-[11px] font-medium text-stone-600 motion-safe:animate-[fadeUp_700ms_ease-out_both] sm:flex-col sm:items-end sm:gap-1 sm:text-xs"
-            style={{ animationDelay: "220ms" }}
-          >
-            <li className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-2.5 py-1 backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              4 options at once
-            </li>
-            <li className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-2.5 py-1 backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-              Re-priced from your region
-            </li>
-            <li className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-2.5 py-1 backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-violet-500" />
-              Macros + grocery list built in
-            </li>
-          </ul>
-        </div>
-      </header>
+      <AIChefDemoHero />
 
       {!isWorkerConfigured() && (
         <Card className="border-amber-200 bg-amber-50">
