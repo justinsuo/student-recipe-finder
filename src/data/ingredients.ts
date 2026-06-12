@@ -457,6 +457,644 @@ export const INGREDIENTS: Ingredient[] = [
 
   // Sweeteners
   { id: "white-sugar", name: "White sugar", category: "spice", estimatedUnitCost: 0.02, unit: "tbsp", commonPackageSize: "4 lb (~$3.50)", shelfLifeDays: 3650 },
+
+  // ==========================================================
+  // ============== Pantry expansion (v2) =====================
+  // ==========================================================
+  // ~305 ingredients added in the pantry-expansion pass: deeper
+  // cuisine coverage, more proteins/produce, baking essentials,
+  // and global specialty staples. Pricing math noted per line.
+  // ==========================================================
+
+  // ===== Grains, breads, noodles =====
+  // 5 lb bag $8, ~11 cups dry, $0.73/cup dry, $0.18 per 1/4 cup dry serving
+  { id: "jasmine-rice", name: "Jasmine rice", category: "grain", estimatedUnitCost: 0.18, unit: "cup-dry", commonPackageSize: "5 lb bag (~$8.00)", shelfLifeDays: 730, tags: ["staple","cheap","vegan","gluten-free"] },
+  // 4 lb bag $9, ~9 cups dry, $1.00/cup dry, $0.22 per 1/4 cup dry serving
+  { id: "basmati-rice", name: "Basmati rice", category: "grain", estimatedUnitCost: 0.22, unit: "cup-dry", commonPackageSize: "4 lb bag (~$9.00)", shelfLifeDays: 730, tags: ["staple","cheap","vegan","gluten-free"] },
+  // 2 lb bag $5.50, ~4.5 cups dry, $1.22/cup dry, $0.28 per 1/4 cup dry serving
+  { id: "sushi-rice", name: "Sushi rice", category: "grain", estimatedUnitCost: 0.28, unit: "cup-dry", commonPackageSize: "2 lb bag (~$5.50)", shelfLifeDays: 730, tags: ["vegan","gluten-free"] },
+  // 1 lb bag $4.50, ~2.25 cups dry, $2.00/cup dry, $0.45 per 1/4 cup dry serving
+  { id: "arborio-rice", name: "Arborio rice", category: "grain", estimatedUnitCost: 0.45, unit: "cup-dry", commonPackageSize: "1 lb bag (~$4.50)", shelfLifeDays: 730, tags: ["vegan","gluten-free"] },
+  // 1 lb bag $5, ~2.25 cups dry, $2.22/cup dry, $0.55 per 1/4 cup dry serving
+  { id: "farro", name: "Farro", category: "grain", estimatedUnitCost: 0.55, unit: "cup-dry", commonPackageSize: "1 lb bag (~$5.00)", shelfLifeDays: 730, tags: ["vegan","high-protein"] },
+  // 16 oz $2.50, ~2.5 cups dry, $1.00/cup dry, $0.25 per 1/4 cup dry serving
+  { id: "barley", name: "Pearl barley", category: "grain", estimatedUnitCost: 0.25, unit: "cup-dry", commonPackageSize: "16 oz bag (~$2.50)", shelfLifeDays: 730, tags: ["cheap","vegan"] },
+  // 1 lb $3.50, ~3 cups dry, $1.17/cup dry, $0.30 per 1/4 cup dry serving
+  { id: "bulgur", name: "Bulgur wheat", category: "grain", estimatedUnitCost: 0.3, unit: "cup-dry", commonPackageSize: "1 lb bag (~$3.50)", shelfLifeDays: 730, tags: ["cheap","vegan","high-protein"] },
+  // 24 oz $3.50, ~5 cups, $0.70/cup, $0.20 per 1/4 cup serving
+  { id: "cornmeal", name: "Cornmeal (polenta)", category: "grain", estimatedUnitCost: 0.2, unit: "cup-dry", commonPackageSize: "24 oz bag (~$3.50)", shelfLifeDays: 365, tags: ["cheap","vegan","gluten-free"] },
+  // 16 oz $4, ~3.5 cups, $1.14/cup, $0.45 per 1/2 cup serving
+  { id: "rice-flour", name: "Rice flour", category: "grain", estimatedUnitCost: 0.45, unit: "cup", commonPackageSize: "16 oz bag (~$4.00)", shelfLifeDays: 365, tags: ["vegan","gluten-free","baking"] },
+  // 16 oz $10, ~4 cups, $2.50/cup, $1.20 per 1/2 cup serving
+  { id: "almond-flour", name: "Almond flour", category: "grain", estimatedUnitCost: 1.2, unit: "cup", commonPackageSize: "16 oz bag (~$10.00)", shelfLifeDays: 180, tags: ["vegan","gluten-free","baking","high-protein"] },
+  // 8 oz box $3, ~5 cups, $0.60/cup, $0.30 per 1/2 cup serving
+  { id: "panko", name: "Panko breadcrumbs", category: "grain", estimatedUnitCost: 0.3, unit: "cup", commonPackageSize: "8 oz box (~$3.00)", shelfLifeDays: 365, tags: ["cheap","vegan"] },
+  // 15 oz $2.50, ~5 cups, $0.50/cup, $0.25 per 1/2 cup serving
+  { id: "breadcrumbs", name: "Italian breadcrumbs", category: "grain", estimatedUnitCost: 0.25, unit: "cup", commonPackageSize: "15 oz canister (~$2.50)", shelfLifeDays: 365, tags: ["cheap","vegan"] },
+  // 17.6 oz pack $3, ~2 servings, $1.50/serving
+  { id: "gnocchi", name: "Potato gnocchi", category: "grain", estimatedUnitCost: 1.5, unit: "serving", commonPackageSize: "17.6 oz pack (~$3.00)", shelfLifeDays: 365, tags: ["vegetarian"] },
+  // $4 / 50 wrappers = $0.08, round to $0.10 per piece
+  { id: "dumpling-wrappers", name: "Dumpling wrappers", category: "grain", estimatedUnitCost: 0.1, unit: "piece", commonPackageSize: "12 oz pack ~50 wrappers (~$4.00)", shelfLifeDays: 30, tags: ["vegan"] },
+  // $3.50 / 60 wrappers = ~$0.06 per piece
+  { id: "wonton-wrappers", name: "Wonton wrappers", category: "grain", estimatedUnitCost: 0.06, unit: "piece", commonPackageSize: "12 oz pack ~60 wrappers (~$3.50)", shelfLifeDays: 30, tags: ["vegan"] },
+  // 16 oz box $2, ~7 servings, $0.29/serving
+  { id: "spaghetti", name: "Spaghetti", category: "grain", estimatedUnitCost: 0.3, unit: "serving", commonPackageSize: "16 oz box (~$2.00)", shelfLifeDays: 730, tags: ["staple","cheap","vegan"] },
+  // 16 oz box $2, ~7 servings, $0.29/serving
+  { id: "penne", name: "Penne", category: "grain", estimatedUnitCost: 0.3, unit: "serving", commonPackageSize: "16 oz box (~$2.00)", shelfLifeDays: 730, tags: ["staple","cheap","vegan"] },
+  // 16 oz box $1.80, ~7 servings, $0.26/serving
+  { id: "macaroni", name: "Elbow macaroni", category: "grain", estimatedUnitCost: 0.28, unit: "serving", commonPackageSize: "16 oz box (~$1.80)", shelfLifeDays: 730, tags: ["staple","cheap","vegan"] },
+  // 16 oz box $2.80, ~7 servings, $0.40/serving
+  { id: "orzo", name: "Orzo", category: "grain", estimatedUnitCost: 0.4, unit: "serving", commonPackageSize: "16 oz box (~$2.80)", shelfLifeDays: 730, tags: ["cheap","vegan"] },
+  // 16 oz box $3.50, ~6 servings, $0.58/serving
+  { id: "lasagna-noodles", name: "Lasagna noodles", category: "grain", estimatedUnitCost: 0.55, unit: "serving", commonPackageSize: "16 oz box (~$3.50)", shelfLifeDays: 730, tags: ["vegan"] },
+  // $5 / 4 pieces = $1.25 each
+  { id: "naan", name: "Naan bread", category: "grain", estimatedUnitCost: 1.25, unit: "piece", commonPackageSize: "4-pack (~$5.00)", shelfLifeDays: 14, tags: ["vegetarian"] },
+  // $6.50 / 16 slices = $0.41/slice
+  { id: "sourdough", name: "Sourdough bread", category: "grain", estimatedUnitCost: 0.4, unit: "slice", commonPackageSize: "24 oz loaf ~16 slices (~$6.50)", shelfLifeDays: 7, tags: ["vegan"] },
+  // $6.50 / 8 buns = $0.81/bun
+  { id: "brioche-buns", name: "Brioche buns", category: "grain", estimatedUnitCost: 0.85, unit: "piece", commonPackageSize: "8-pack (~$6.50)", shelfLifeDays: 7, tags: ["vegetarian"] },
+  // $3 / 8 buns = $0.38/bun
+  { id: "hot-dog-buns", name: "Hot dog buns", category: "grain", estimatedUnitCost: 0.4, unit: "piece", commonPackageSize: "8-pack (~$3.00)", shelfLifeDays: 7, tags: ["cheap","vegan"] },
+  // $3 / 8 buns = $0.38/bun
+  { id: "hamburger-buns", name: "Hamburger buns", category: "grain", estimatedUnitCost: 0.4, unit: "piece", commonPackageSize: "8-pack (~$3.00)", shelfLifeDays: 7, tags: ["cheap","vegan"] },
+  // $2.50 per 16 oz dough ball, makes 1 pizza
+  { id: "pizza-dough", name: "Refrigerated pizza dough", category: "grain", estimatedUnitCost: 2.5, unit: "bag", commonPackageSize: "16 oz ball (~$2.50)", shelfLifeDays: 14, tags: ["vegan"] },
+  // 32 oz box $4, ~12 servings, $0.33/serving
+  { id: "pancake-mix", name: "Pancake mix", category: "grain", estimatedUnitCost: 0.35, unit: "serving", commonPackageSize: "32 oz box (~$4.00)", shelfLifeDays: 365, tags: ["cheap","vegetarian","baking"] },
+  // $3.50 / 30 wrappers = $0.12 each
+  { id: "rice-paper", name: "Rice paper wrappers", category: "grain", estimatedUnitCost: 0.12, unit: "piece", commonPackageSize: "12 oz pack ~30 wrappers (~$3.50)", shelfLifeDays: 730, tags: ["vegan","gluten-free"] },
+  // 16 oz bag $3.50, ~3 cups, $1.17/cup, $0.60 per 1/2 cup serving
+  { id: "glutinous-rice-flour", name: "Glutinous rice flour", category: "grain", estimatedUnitCost: 0.6, unit: "cup", commonPackageSize: "16 oz bag (~$3.50)", shelfLifeDays: 365, tags: ["vegan","gluten-free","baking"] },
+  // 14 oz pack $3, ~6 servings, $0.50/serving
+  { id: "vermicelli-rice-noodles", name: "Rice vermicelli", category: "grain", estimatedUnitCost: 0.5, unit: "serving", commonPackageSize: "14 oz pack (~$3.00)", shelfLifeDays: 730, tags: ["cheap","vegan","gluten-free"] },
+  // 2 lb $5, ~10 cups dry = $0.50/cup-dry
+  { id: "urad-dal", name: "Urad dal", category: "grain", estimatedUnitCost: 0.5, unit: "cup-dry", commonPackageSize: "2 lb bag (~$5)", shelfLifeDays: 730, tags: ["vegan","high-protein","cheap"] },
+  // 2 lb $5, ~10 cups dry = $0.50/cup-dry
+  { id: "chana-dal", name: "Chana dal", category: "grain", estimatedUnitCost: 0.5, unit: "cup-dry", commonPackageSize: "2 lb bag (~$5)", shelfLifeDays: 730, tags: ["vegan","high-protein","cheap"] },
+  // 2 lb $5.50, ~10 cups dry = $0.55/cup-dry
+  { id: "toor-dal", name: "Toor dal", category: "grain", estimatedUnitCost: 0.55, unit: "cup-dry", commonPackageSize: "2 lb bag (~$5.50)", shelfLifeDays: 730, tags: ["vegan","high-protein","cheap"] },
+  // 4.4 lb $6, ~30 cups = $0.20/cup
+  { id: "masa-harina", name: "Masa harina", category: "grain", estimatedUnitCost: 0.2, unit: "cup", commonPackageSize: "4.4 lb bag (~$6)", shelfLifeDays: 365, tags: ["vegan","gluten-free","cheap","staple"] },
+
+  // ===== Proteins (meat, seafood, plant) =====
+  // $7 / 4 chops = $1.75 per chop
+  { id: "pork-chop", name: "Pork chop", category: "protein", estimatedUnitCost: 1.75, unit: "piece", commonPackageSize: "Family pack 4 bone-in chops ~$7", shelfLifeDays: 4, tags: ["high-protein","gluten-free"] },
+  // $11 / 20 oz = $0.55/oz
+  { id: "pork-tenderloin", name: "Pork tenderloin", category: "protein", estimatedUnitCost: 0.55, unit: "oz", commonPackageSize: "1.25 lb tenderloin ~$11", shelfLifeDays: 4, tags: ["high-protein","gluten-free"] },
+  // $16 / 64 oz = $0.25/oz
+  { id: "pork-shoulder", name: "Pork shoulder", category: "protein", estimatedUnitCost: 0.25, unit: "oz", commonPackageSize: "4 lb bone-in shoulder ~$16", shelfLifeDays: 4, tags: ["high-protein","gluten-free","cheap"] },
+  // $6 / 10 servings = $0.60/serving
+  { id: "rotisserie-chicken", name: "Rotisserie chicken", category: "protein", estimatedUnitCost: 0.6, unit: "serving", commonPackageSize: "Whole rotisserie chicken ~$6 (~10 servings)", shelfLifeDays: 4, tags: ["high-protein","gluten-free","cheap"] },
+  // $10 / 30 wings = $0.33/wing rounded
+  { id: "chicken-wings", name: "Chicken wings", category: "protein", estimatedUnitCost: 0.35, unit: "piece", commonPackageSize: "3 lb pack ~$10 (~30 wings)", shelfLifeDays: 4, tags: ["high-protein","gluten-free"] },
+  // $8.50 / 10 = $0.85/drumstick
+  { id: "chicken-drumsticks", name: "Chicken drumsticks", category: "protein", estimatedUnitCost: 0.85, unit: "piece", commonPackageSize: "Family pack 10 drumsticks ~$8.50", shelfLifeDays: 4, tags: ["high-protein","gluten-free","cheap"] },
+  // $6.40 / 16 oz = $0.40/oz
+  { id: "ground-pork", name: "Ground pork", category: "protein", estimatedUnitCost: 0.4, unit: "oz", commonPackageSize: "1 lb pack ~$6.40", shelfLifeDays: 3, tags: ["high-protein","gluten-free"] },
+  // $7 / 16 oz ~ $0.44/oz
+  { id: "ground-chicken", name: "Ground chicken", category: "protein", estimatedUnitCost: 0.45, unit: "oz", commonPackageSize: "1 lb pack ~$7", shelfLifeDays: 3, tags: ["high-protein","gluten-free"] },
+  // $13.60 / 16 oz = $0.85/oz
+  { id: "sirloin-steak", name: "Sirloin steak", category: "protein", estimatedUnitCost: 0.85, unit: "oz", commonPackageSize: "1 lb sirloin ~$13.60", shelfLifeDays: 4, tags: ["high-protein","gluten-free"] },
+  // $24 / 24 oz = $1.00/oz
+  { id: "flank-steak", name: "Flank steak", category: "protein", estimatedUnitCost: 1, unit: "oz", commonPackageSize: "1.5 lb flank ~$24", shelfLifeDays: 4, tags: ["high-protein","gluten-free"] },
+  // $8.80 / 16 oz = $0.55/oz
+  { id: "beef-stew-meat", name: "Beef stew meat", category: "protein", estimatedUnitCost: 0.55, unit: "oz", commonPackageSize: "1 lb stew meat ~$8.80", shelfLifeDays: 4, tags: ["high-protein","gluten-free"] },
+  // $5 / 4 servings = $1.25/serving
+  { id: "chorizo", name: "Chorizo sausage", category: "protein", estimatedUnitCost: 1.25, unit: "serving", commonPackageSize: "12 oz package ~$5 (~4 servings)", shelfLifeDays: 14, tags: ["high-protein","gluten-free"] },
+  // $6 / 4 oz = $1.50/oz
+  { id: "prosciutto", name: "Prosciutto", category: "protein", estimatedUnitCost: 1.5, unit: "oz", commonPackageSize: "4 oz pack ~$6", shelfLifeDays: 21, tags: ["high-protein","gluten-free","umami"] },
+  // $5.40 / 12 = $0.45/slice
+  { id: "ham", name: "Sliced ham", category: "protein", estimatedUnitCost: 0.45, unit: "slice", commonPackageSize: "9 oz deli ham ~$5.40 (~12 slices)", shelfLifeDays: 7, tags: ["high-protein","gluten-free"] },
+  // $14.40 / 16 oz = $0.90/oz
+  { id: "cod", name: "Cod fillet", category: "protein", estimatedUnitCost: 0.9, unit: "oz", commonPackageSize: "1 lb frozen cod ~$14.40", shelfLifeDays: 180, tags: ["high-protein","gluten-free"] },
+  // $8 / 16 oz = $0.50/oz
+  { id: "tilapia", name: "Tilapia fillet", category: "protein", estimatedUnitCost: 0.5, unit: "oz", commonPackageSize: "1 lb frozen tilapia ~$8", shelfLifeDays: 180, tags: ["high-protein","gluten-free","cheap"] },
+  // $14 / 8 oz = $1.75/oz
+  { id: "scallops", name: "Scallops", category: "protein", estimatedUnitCost: 1.75, unit: "oz", commonPackageSize: "8 oz frozen sea scallops ~$14", shelfLifeDays: 180, tags: ["high-protein","gluten-free"] },
+  // $8 / 4 oz = $2.00/oz
+  { id: "smoked-salmon", name: "Smoked salmon", category: "protein", estimatedUnitCost: 2, unit: "oz", commonPackageSize: "4 oz pack ~$8", shelfLifeDays: 14, tags: ["high-protein","gluten-free","umami"] },
+  // $2.40 / 8 oz = $0.30/oz
+  { id: "imitation-crab", name: "Imitation crab", category: "protein", estimatedUnitCost: 0.3, unit: "oz", commonPackageSize: "8 oz pack ~$2.40", shelfLifeDays: 14, tags: ["high-protein","cheap"] },
+  // $2.50 per 12 oz pack
+  { id: "silken-tofu", name: "Silken tofu", category: "protein", estimatedUnitCost: 2.5, unit: "pack", commonPackageSize: "12 oz aseptic pack ~$2.50", shelfLifeDays: 365, tags: ["vegan","vegetarian","high-protein","gluten-free","dairy-free"] },
+  // $5.40 / 12 oz = $0.45/oz
+  { id: "plant-based-ground", name: "Plant-based ground (Beyond/Impossible)", category: "protein", estimatedUnitCost: 0.45, unit: "oz", commonPackageSize: "12 oz pack ~$5.40", shelfLifeDays: 14, tags: ["vegan","vegetarian","high-protein","gluten-free","dairy-free"] },
+  // $3.20 / 16 oz = $0.20/oz
+  { id: "peanuts", name: "Peanuts", category: "protein", estimatedUnitCost: 0.2, unit: "oz", commonPackageSize: "16 oz roasted peanuts ~$3.20", shelfLifeDays: 365, tags: ["cheap","vegan","vegetarian","high-protein","gluten-free","dairy-free"] },
+  // $6 / 8 oz = $0.75/oz
+  { id: "pecans", name: "Pecans", category: "protein", estimatedUnitCost: 0.75, unit: "oz", commonPackageSize: "8 oz bag ~$6", shelfLifeDays: 365, tags: ["vegan","vegetarian","gluten-free","dairy-free","baking"] },
+  // $11.20 / 16 oz = $0.70/oz
+  { id: "pistachios", name: "Pistachios", category: "protein", estimatedUnitCost: 0.7, unit: "oz", commonPackageSize: "16 oz shelled ~$11.20", shelfLifeDays: 365, tags: ["vegan","vegetarian","high-protein","gluten-free","dairy-free"] },
+  // $10 / 4 oz = $2.50/oz
+  { id: "pine-nuts", name: "Pine nuts", category: "protein", estimatedUnitCost: 2.5, unit: "oz", commonPackageSize: "4 oz bag ~$10", shelfLifeDays: 365, tags: ["vegan","vegetarian","gluten-free","dairy-free"] },
+  // $4 / 16 oz = $0.25/oz
+  { id: "sunflower-seeds", name: "Sunflower seeds", category: "protein", estimatedUnitCost: 0.25, unit: "oz", commonPackageSize: "16 oz bag ~$4", shelfLifeDays: 365, tags: ["cheap","vegan","vegetarian","gluten-free","dairy-free"] },
+  // $4 / 8 oz = $0.50/oz
+  { id: "pumpkin-seeds", name: "Pumpkin seeds (pepitas)", category: "protein", estimatedUnitCost: 0.5, unit: "oz", commonPackageSize: "8 oz bag ~$4", shelfLifeDays: 365, tags: ["vegan","vegetarian","high-protein","gluten-free","dairy-free"] },
+  // $4.80 / 12 oz = $0.40/oz
+  { id: "chia-seeds", name: "Chia seeds", category: "protein", estimatedUnitCost: 0.4, unit: "oz", commonPackageSize: "12 oz bag ~$4.80", shelfLifeDays: 730, tags: ["vegan","vegetarian","gluten-free","dairy-free","baking"] },
+  // $6.40 / 8 oz = $0.80/oz
+  { id: "hemp-seeds", name: "Hemp seeds", category: "protein", estimatedUnitCost: 0.8, unit: "oz", commonPackageSize: "8 oz bag ~$6.40", shelfLifeDays: 365, tags: ["vegan","vegetarian","high-protein","gluten-free","dairy-free"] },
+
+  // ===== Vegetables, herbs, aromatics =====
+  // $1.49/lb, ~2 onions per lb, $0.75 each
+  { id: "red-onion", name: "Red onion", category: "vegetable", estimatedUnitCost: 0.75, unit: "piece", commonPackageSize: "1 medium red onion (~$0.75)", shelfLifeDays: 30, tags: ["vegetarian","vegan","gluten-free","dairy-free"] },
+  // $1.29/lb, ~2 onions per lb, $0.65 each
+  { id: "white-onion", name: "White onion", category: "vegetable", estimatedUnitCost: 0.65, unit: "piece", commonPackageSize: "1 medium white onion (~$0.65)", shelfLifeDays: 30, tags: ["vegetarian","vegan","gluten-free","dairy-free"] },
+  // $2.99/lb, ~1.5 leeks per lb, $1.99 each
+  { id: "leek", name: "Leek", category: "vegetable", estimatedUnitCost: 1.99, unit: "piece", commonPackageSize: "1 large leek (~$1.99)", shelfLifeDays: 14, tags: ["vegetarian","vegan","gluten-free","dairy-free"] },
+  // $2.49/lb, ~1.2 lb per bulb, $2.99 each
+  { id: "fennel-bulb", name: "Fennel bulb", category: "vegetable", estimatedUnitCost: 2.99, unit: "piece", commonPackageSize: "1 fennel bulb (~$2.99)", shelfLifeDays: 10, tags: ["vegetarian","vegan","gluten-free","dairy-free"] },
+  // $1.79/lb, ~2 lb per head, $3.49 each
+  { id: "napa-cabbage", name: "Napa cabbage", category: "vegetable", estimatedUnitCost: 3.49, unit: "piece", commonPackageSize: "1 small head (~2 lb, $3.49)", shelfLifeDays: 14, tags: ["vegetarian","vegan","gluten-free","dairy-free","cheap"] },
+  // $1.99/lb, ~1 lb per head, $1.99 each
+  { id: "bok-choy", name: "Bok choy", category: "vegetable", estimatedUnitCost: 1.99, unit: "piece", commonPackageSize: "1 head bok choy (~$1.99)", shelfLifeDays: 7, tags: ["vegetarian","vegan","gluten-free","dairy-free"] },
+  // $3.49 per 8oz bag, ~3 cups, $1.16/cup
+  { id: "snap-peas", name: "Snap peas", category: "vegetable", estimatedUnitCost: 3.49, unit: "cup", commonPackageSize: "8 oz bag (~$3.49, ~3 cups)", shelfLifeDays: 7, tags: ["vegetarian","vegan","gluten-free","dairy-free"] },
+  // $3.99/lb bunch, ~15 spears per bunch
+  { id: "asparagus", name: "Asparagus", category: "vegetable", estimatedUnitCost: 3.99, unit: "bag", commonPackageSize: "1 lb bunch (~$3.99)", shelfLifeDays: 5, tags: ["vegetarian","vegan","gluten-free","dairy-free"] },
+  // $3.49/lb bag, ~4 cups, $0.87/cup
+  { id: "brussels-sprouts", name: "Brussels sprouts", category: "vegetable", estimatedUnitCost: 3.49, unit: "cup", commonPackageSize: "1 lb bag (~$3.49, ~4 cups)", shelfLifeDays: 14, tags: ["vegetarian","vegan","gluten-free","dairy-free"] },
+  // $2.25/lb, ~2 lb per head, $4.49 each
+  { id: "cauliflower", name: "Cauliflower", category: "vegetable", estimatedUnitCost: 4.49, unit: "piece", commonPackageSize: "1 head (~2 lb, $4.49)", shelfLifeDays: 10, tags: ["vegetarian","vegan","gluten-free","dairy-free"] },
+  // $1.99/lb, ~1.25 lb per eggplant, $2.49 each
+  { id: "eggplant", name: "Eggplant", category: "vegetable", estimatedUnitCost: 2.49, unit: "piece", commonPackageSize: "1 globe eggplant (~$2.49)", shelfLifeDays: 7, tags: ["vegetarian","vegan","gluten-free","dairy-free"] },
+  // $1.99/lb, ~2 lb per squash, $3.99 each
+  { id: "butternut-squash", name: "Butternut squash", category: "vegetable", estimatedUnitCost: 3.99, unit: "piece", commonPackageSize: "1 medium squash (~2 lb, $3.99)", shelfLifeDays: 60, tags: ["vegetarian","vegan","gluten-free","dairy-free"] },
+  // $1.49/lb, ~3 lb per squash, $4.49 each
+  { id: "spaghetti-squash", name: "Spaghetti squash", category: "vegetable", estimatedUnitCost: 4.49, unit: "piece", commonPackageSize: "1 medium squash (~3 lb, $4.49)", shelfLifeDays: 60, tags: ["vegetarian","vegan","gluten-free","dairy-free"] },
+  // $1.69/lb, ~1.5 lb per daikon, $2.49 each
+  { id: "daikon", name: "Daikon radish", category: "vegetable", estimatedUnitCost: 2.49, unit: "piece", commonPackageSize: "1 daikon (~1.5 lb, $2.49)", shelfLifeDays: 21, tags: ["vegetarian","vegan","gluten-free","dairy-free"] },
+  // $1.99 per bunch, ~10 radishes per bunch
+  { id: "radish", name: "Radish", category: "vegetable", estimatedUnitCost: 1.99, unit: "bag", commonPackageSize: "1 bunch / 6 oz bag (~$1.99)", shelfLifeDays: 14, tags: ["vegetarian","vegan","gluten-free","dairy-free"] },
+  // $2.49/lb, ~2 beets per lb, $1.25 each
+  { id: "beet", name: "Beet", category: "vegetable", estimatedUnitCost: 1.25, unit: "piece", commonPackageSize: "1 medium beet (~$1.25)", shelfLifeDays: 21, tags: ["vegetarian","vegan","gluten-free","dairy-free"] },
+  // $0.79/lb, ~1.25 lb per plantain, $0.99 each
+  { id: "plantain", name: "Plantain", category: "vegetable", estimatedUnitCost: 0.99, unit: "piece", commonPackageSize: "1 plantain (~$0.99)", shelfLifeDays: 10, tags: ["vegetarian","vegan","gluten-free","dairy-free","cheap"] },
+  // $3.99/lb, ~3.5 cups, $1.14/cup
+  { id: "okra", name: "Okra", category: "vegetable", estimatedUnitCost: 3.99, unit: "cup", commonPackageSize: "1 lb fresh (~$3.99, ~3.5 cups)", shelfLifeDays: 5, tags: ["vegetarian","vegan","gluten-free","dairy-free"] },
+  // $3.99 per 5oz clamshell, ~5 cups
+  { id: "arugula", name: "Arugula", category: "vegetable", estimatedUnitCost: 3.99, unit: "bag", commonPackageSize: "5 oz clamshell (~$3.99)", shelfLifeDays: 5, tags: ["vegetarian","vegan","gluten-free","dairy-free"] },
+  // $4.49 per 5oz clamshell, ~5 cups mixed greens
+  { id: "spring-mix", name: "Spring mix", category: "vegetable", estimatedUnitCost: 4.49, unit: "bag", commonPackageSize: "5 oz clamshell (~$4.49)", shelfLifeDays: 5, tags: ["vegetarian","vegan","gluten-free","dairy-free"] },
+  // $3.49 per 3-pack hearts, $1.16 per heart
+  { id: "romaine", name: "Romaine lettuce", category: "vegetable", estimatedUnitCost: 3.49, unit: "bag", commonPackageSize: "3-pack romaine hearts (~$3.49)", shelfLifeDays: 10, tags: ["vegetarian","vegan","gluten-free","dairy-free"] },
+  // $4.99 per 3.5oz pack, ~3 cups sliced, $1.66/cup
+  { id: "shiitake", name: "Shiitake mushrooms", category: "vegetable", estimatedUnitCost: 4.99, unit: "cup", commonPackageSize: "3.5 oz pack (~$4.99, ~3 cups sliced)", shelfLifeDays: 7, tags: ["vegetarian","vegan","gluten-free","dairy-free","umami"] },
+  // $3.49 per 8oz pack, ~3 cups sliced, $1.16/cup
+  { id: "cremini", name: "Cremini mushrooms", category: "vegetable", estimatedUnitCost: 3.49, unit: "cup", commonPackageSize: "8 oz pack (~$3.49, ~3 cups sliced)", shelfLifeDays: 7, tags: ["vegetarian","vegan","gluten-free","dairy-free","umami"] },
+  // $4.99 per 2-pack, $2.50 per cap
+  { id: "portobello", name: "Portobello mushrooms", category: "vegetable", estimatedUnitCost: 4.99, unit: "piece", commonPackageSize: "2-pack caps (~$4.99)", shelfLifeDays: 7, tags: ["vegetarian","vegan","gluten-free","dairy-free","umami"] },
+  // $2.49 per 0.5oz pack, ~6 tbsp, $0.42/tbsp
+  { id: "chives", name: "Chives", category: "vegetable", estimatedUnitCost: 2.49, unit: "tbsp", commonPackageSize: "0.5 oz pack (~$2.49, ~6 tbsp chopped)", shelfLifeDays: 10, tags: ["vegetarian","vegan","gluten-free","dairy-free"] },
+  // $2.49 per 0.75oz pack, ~1 cup leaves
+  { id: "thai-basil", name: "Thai basil", category: "vegetable", estimatedUnitCost: 2.49, unit: "bag", commonPackageSize: "0.75 oz pack (~$2.49)", shelfLifeDays: 5, tags: ["vegetarian","vegan","gluten-free","dairy-free"] },
+  // $1.49 per stalk, ~1 tbsp minced per stalk
+  { id: "lemongrass", name: "Lemongrass", category: "vegetable", estimatedUnitCost: 1.49, unit: "piece", commonPackageSize: "1 stalk (~$1.49)", shelfLifeDays: 14, tags: ["vegetarian","vegan","gluten-free","dairy-free"] },
+  // $0.79 per ear, ~3/4 cup kernels per ear
+  { id: "sweet-corn", name: "Sweet corn", category: "vegetable", estimatedUnitCost: 0.79, unit: "piece", commonPackageSize: "1 ear corn (~$0.79)", shelfLifeDays: 5, tags: ["vegetarian","vegan","gluten-free","dairy-free","cheap"] },
+
+  // ===== Fruits + juices =====
+  // $1.99/lb, ~0.5 lb per pear = $0.95/piece
+  { id: "pear", name: "Pear", category: "fruit", estimatedUnitCost: 0.95, unit: "piece", commonPackageSize: "Single pear ~6 oz (~$0.95)", shelfLifeDays: 10, tags: ["vegan","vegetarian","gluten-free","dairy-free"] },
+  // $2.49/lb, ~0.33 lb per peach = $0.85/piece
+  { id: "peach", name: "Peach", category: "fruit", estimatedUnitCost: 0.85, unit: "piece", commonPackageSize: "Single peach ~5 oz (~$0.85)", shelfLifeDays: 7, tags: ["vegan","vegetarian","gluten-free","dairy-free"] },
+  // $5.99/lb, ~4 half-cups per lb = $1.50/cup, $0.75/half-cup
+  { id: "cherry-fresh", name: "Fresh cherries", category: "fruit", estimatedUnitCost: 0.75, unit: "1/2 cup", commonPackageSize: "1 lb bag (~$5.99)", shelfLifeDays: 7, tags: ["vegan","vegetarian","gluten-free","dairy-free"] },
+  // $5.99 for 10 lb yields ~12 cups cubed = ~$0.50/cup
+  { id: "watermelon", name: "Watermelon", category: "fruit", estimatedUnitCost: 0.5, unit: "cup", commonPackageSize: "Whole watermelon ~10 lb (~$5.99)", shelfLifeDays: 10, tags: ["vegan","vegetarian","gluten-free","dairy-free","cheap"] },
+  // $3.99 melon yields ~6 cups cubed = ~$0.66/cup, rounded $0.60
+  { id: "cantaloupe", name: "Cantaloupe", category: "fruit", estimatedUnitCost: 0.6, unit: "cup", commonPackageSize: "Whole melon ~3 lb (~$3.99)", shelfLifeDays: 10, tags: ["vegan","vegetarian","gluten-free","dairy-free","cheap"] },
+  // $3.99 pineapple yields ~5-6 cups chunks = ~$0.70/cup
+  { id: "pineapple", name: "Pineapple", category: "fruit", estimatedUnitCost: 0.7, unit: "cup", commonPackageSize: "Whole pineapple (~$3.99)", shelfLifeDays: 7, tags: ["vegan","vegetarian","gluten-free","dairy-free"] },
+  // $1.25 each at typical grocery, ~1 cup diced per mango
+  { id: "mango-fresh", name: "Fresh mango", category: "fruit", estimatedUnitCost: 1.25, unit: "piece", commonPackageSize: "Single mango ~12 oz (~$1.25)", shelfLifeDays: 7, tags: ["vegan","vegetarian","gluten-free","dairy-free"] },
+  // $3.99/lb, ~6 kiwis per lb = $0.65/piece
+  { id: "kiwi", name: "Kiwi", category: "fruit", estimatedUnitCost: 0.65, unit: "piece", commonPackageSize: "Single kiwi ~3 oz (~$0.65)", shelfLifeDays: 14, tags: ["vegan","vegetarian","gluten-free","dairy-free"] },
+  // $2.99 each, yields ~1 cup arils
+  { id: "pomegranate", name: "Pomegranate", category: "fruit", estimatedUnitCost: 2.99, unit: "piece", commonPackageSize: "Single pomegranate (~$2.99)", shelfLifeDays: 21, tags: ["vegan","vegetarian","gluten-free","dairy-free"] },
+  // $7.99 / ~14 dates per tub = ~$0.55/date
+  { id: "medjool-dates", name: "Medjool dates", category: "fruit", estimatedUnitCost: 0.55, unit: "piece", commonPackageSize: "12 oz tub (~$7.99)", shelfLifeDays: 180, tags: ["vegan","vegetarian","gluten-free","dairy-free"] },
+  // $4.99/8 oz, ~11 quarter-cups per bag = ~$0.45/quarter-cup
+  { id: "dried-apricot", name: "Dried apricots", category: "fruit", estimatedUnitCost: 0.45, unit: "1/4 cup", commonPackageSize: "8 oz bag (~$4.99)", shelfLifeDays: 365, tags: ["vegan","vegetarian","gluten-free","dairy-free"] },
+  // $3.49/10 oz, ~12 quarter-cups per bag = ~$0.30/quarter-cup
+  { id: "dried-cranberry", name: "Dried cranberries", category: "fruit", estimatedUnitCost: 0.3, unit: "1/4 cup", commonPackageSize: "10 oz bag (~$3.49)", shelfLifeDays: 365, tags: ["vegan","vegetarian","gluten-free","dairy-free"] },
+  // $5.49/6 oz, ~6 quarter-cups per bag = ~$0.90/quarter-cup, rounded
+  { id: "dried-mango", name: "Dried mango", category: "fruit", estimatedUnitCost: 0.85, unit: "1/4 cup", commonPackageSize: "6 oz bag (~$5.49)", shelfLifeDays: 365, tags: ["vegan","vegetarian","gluten-free","dairy-free"] },
+  // $5.99/18 mandarins = ~$0.33 each at bag rate, $0.50 single-buy avg
+  { id: "mandarin", name: "Mandarin orange", category: "fruit", estimatedUnitCost: 0.5, unit: "piece", commonPackageSize: "3 lb bag (~$5.99) ~18 mandarins", shelfLifeDays: 14, tags: ["vegan","vegetarian","gluten-free","dairy-free"] },
+  // $1.25 each at typical grocery
+  { id: "grapefruit", name: "Grapefruit", category: "fruit", estimatedUnitCost: 1.25, unit: "piece", commonPackageSize: "Single grapefruit (~$1.25)", shelfLifeDays: 21, tags: ["vegan","vegetarian","gluten-free","dairy-free","acidic"] },
+  // $3.99 per 6 oz clamshell = standard grocery rate
+  { id: "raspberries", name: "Raspberries", category: "fruit", estimatedUnitCost: 3.99, unit: "6 oz container", commonPackageSize: "6 oz clamshell (~$3.99)", shelfLifeDays: 4, tags: ["vegan","vegetarian","gluten-free","dairy-free"] },
+  // $3.49 per 6 oz clamshell = standard grocery rate
+  { id: "blackberries", name: "Blackberries", category: "fruit", estimatedUnitCost: 3.49, unit: "6 oz container", commonPackageSize: "6 oz clamshell (~$3.49)", shelfLifeDays: 5, tags: ["vegan","vegetarian","gluten-free","dairy-free"] },
+  // $4.99 / ~7 cups per 59 oz carton = ~$0.71/cup; store brand $0.40/cup
+  { id: "orange-juice", name: "Orange juice", category: "fruit", estimatedUnitCost: 0.4, unit: "cup", commonPackageSize: "59 oz carton (~$4.99)", shelfLifeDays: 30, tags: ["vegan","vegetarian","gluten-free","dairy-free","acidic"] },
+  // $4.49 / ~4 cups per 33.8 oz carton = ~$1.10/cup
+  { id: "coconut-water", name: "Coconut water", category: "fruit", estimatedUnitCost: 1.1, unit: "cup", commonPackageSize: "33.8 oz carton (~$4.49)", shelfLifeDays: 180, tags: ["vegan","vegetarian","gluten-free","dairy-free"] },
+
+  // ===== Dairy + non-dairy substitutes =====
+  // 1 gal $4.00, 16 cups, $0.25/cup
+  { id: "whole-milk", name: "Whole milk", category: "dairy", estimatedUnitCost: 0.25, unit: "cup", commonPackageSize: "1 gallon jug (~$4.00)", shelfLifeDays: 14, tags: ["staple","cheap","vegetarian"] },
+  // 16 oz pint $4.40, 2 cups, $2.20/cup; per 1/4 cup $0.55
+  { id: "heavy-cream", name: "Heavy cream", category: "dairy", estimatedUnitCost: 0.55, unit: "cup", commonPackageSize: "16 oz carton (~$4.40)", shelfLifeDays: 21, tags: ["vegetarian","baking"] },
+  // 1 qt $4.80, 16 quarter-cups, $0.30 per 1/4 cup
+  { id: "half-and-half", name: "Half and half", category: "dairy", estimatedUnitCost: 0.3, unit: "1/4 cup", commonPackageSize: "1 quart (~$4.80)", shelfLifeDays: 14, tags: ["vegetarian"] },
+  // 1 qt $3.50, 4 cups, $0.88/cup
+  { id: "buttermilk", name: "Buttermilk", category: "dairy", estimatedUnitCost: 0.35, unit: "cup", commonPackageSize: "1 quart (~$3.50)", shelfLifeDays: 14, tags: ["vegetarian","baking","acidic"] },
+  // 12 oz can $2.20, $2.20/can
+  { id: "evaporated-milk", name: "Evaporated milk", category: "dairy", estimatedUnitCost: 2.2, unit: "can", commonPackageSize: "12 oz can (~$2.20)", shelfLifeDays: 365, tags: ["vegetarian","baking"] },
+  // 14 oz can $3.50, $3.50/can
+  { id: "sweetened-condensed-milk", name: "Sweetened condensed milk", category: "dairy", estimatedUnitCost: 3.5, unit: "can", commonPackageSize: "14 oz can (~$3.50)", shelfLifeDays: 365, tags: ["vegetarian","baking"] },
+  // 32 oz $5.20, 4 cups, $1.30/cup; per 1/2 cup $0.65
+  { id: "plain-yogurt", name: "Plain whole-milk yogurt", category: "dairy", estimatedUnitCost: 0.65, unit: "cup", commonPackageSize: "32 oz tub (~$5.20)", shelfLifeDays: 21, tags: ["vegetarian"] },
+  // 15 oz $4.75, ~5 half-cups, $0.95 per 1/2 cup
+  { id: "ricotta", name: "Ricotta cheese", category: "dairy", estimatedUnitCost: 0.95, unit: "1/2 cup", commonPackageSize: "15 oz tub (~$4.75)", shelfLifeDays: 14, tags: ["vegetarian"] },
+  // 8 oz tub $6.50, $6.50 per 8 oz
+  { id: "mascarpone", name: "Mascarpone", category: "dairy", estimatedUnitCost: 6.5, unit: "8 oz", commonPackageSize: "8 oz tub (~$6.50)", shelfLifeDays: 21, tags: ["vegetarian"] },
+  // 8 oz $4.40, $0.55/oz
+  { id: "cheddar-block", name: "Sharp cheddar block", category: "dairy", estimatedUnitCost: 0.55, unit: "oz", commonPackageSize: "8 oz block (~$4.40)", shelfLifeDays: 30, tags: ["staple","vegetarian"] },
+  // 8 oz pack ~12 slices $4.80, $0.40/slice
+  { id: "swiss-cheese", name: "Swiss cheese", category: "dairy", estimatedUnitCost: 0.4, unit: "slice", commonPackageSize: "8 oz sliced (~$4.80)", shelfLifeDays: 21, tags: ["vegetarian"] },
+  // 7 oz $4.90, $0.70/oz
+  { id: "gouda", name: "Gouda", category: "dairy", estimatedUnitCost: 0.7, unit: "oz", commonPackageSize: "7 oz wedge (~$4.90)", shelfLifeDays: 30, tags: ["vegetarian"] },
+  // 8 oz wheel $6.50, $6.50 per 8 oz
+  { id: "brie", name: "Brie", category: "dairy", estimatedUnitCost: 6.5, unit: "8 oz", commonPackageSize: "8 oz wheel (~$6.50)", shelfLifeDays: 21, tags: ["vegetarian"] },
+  // 4 oz log $4.50, $4.50 per log
+  { id: "goat-cheese", name: "Goat cheese", category: "dairy", estimatedUnitCost: 4.5, unit: "4 oz log", commonPackageSize: "4 oz log (~$4.50)", shelfLifeDays: 21, tags: ["vegetarian"] },
+  // 10 oz $4.00, $0.40/oz
+  { id: "queso-fresco", name: "Queso fresco", category: "dairy", estimatedUnitCost: 0.4, unit: "oz", commonPackageSize: "10 oz round (~$4.00)", shelfLifeDays: 21, tags: ["vegetarian"] },
+  // 8 oz $3.60, $0.45/oz
+  { id: "cotija", name: "Cotija", category: "dairy", estimatedUnitCost: 0.45, unit: "oz", commonPackageSize: "8 oz wedge (~$3.60)", shelfLifeDays: 60, tags: ["vegetarian"] },
+  // 8 oz $7.00, $7.00 per block
+  { id: "halloumi", name: "Halloumi", category: "dairy", estimatedUnitCost: 7, unit: "8 oz", commonPackageSize: "8 oz block (~$7.00)", shelfLifeDays: 30, tags: ["vegetarian","high-protein"] },
+  // 12 oz block $6.00, $6.00 per block
+  { id: "paneer", name: "Paneer", category: "dairy", estimatedUnitCost: 6, unit: "12 oz block", commonPackageSize: "12 oz block (~$6.00)", shelfLifeDays: 30, tags: ["vegetarian","high-protein"] },
+  // 8 oz pack ~10 slices $5.00, $0.50/slice
+  { id: "pepper-jack", name: "Pepper jack", category: "dairy", estimatedUnitCost: 0.5, unit: "slice", commonPackageSize: "8 oz sliced (~$5.00)", shelfLifeDays: 30, tags: ["vegetarian"] },
+  // 8 oz pack 10 slices $4.50, $0.45/slice
+  { id: "provolone", name: "Provolone", category: "dairy", estimatedUnitCost: 0.45, unit: "slice", commonPackageSize: "8 oz sliced (~$4.50)", shelfLifeDays: 21, tags: ["vegetarian"] },
+  // 24 slices $6.00, $0.25/slice
+  { id: "american-singles", name: "American cheese singles", category: "dairy", estimatedUnitCost: 0.25, unit: "slice", commonPackageSize: "24 slice pack (~$6.00)", shelfLifeDays: 90, tags: ["cheap","vegetarian"] },
+  // 64 oz $3.60, 8 cups, $0.45/cup
+  { id: "soy-milk", name: "Soy milk (unsweetened)", category: "dairy", estimatedUnitCost: 0.45, unit: "cup", commonPackageSize: "64 oz carton (~$3.60)", shelfLifeDays: 14, tags: ["vegan","vegetarian","dairy-free"] },
+  // 16 oz $5.20, ~32 tbsp, $0.16/tbsp
+  { id: "plant-butter", name: "Plant-based butter", category: "dairy", estimatedUnitCost: 0.16, unit: "tbsp", commonPackageSize: "16 oz tub (~$5.20)", shelfLifeDays: 60, tags: ["vegan","vegetarian","dairy-free","baking"] },
+  // 4 oz $5.40, ~12 tbsp, $0.45/tbsp
+  { id: "vegan-parm", name: "Vegan parmesan", category: "dairy", estimatedUnitCost: 0.45, unit: "tbsp", commonPackageSize: "4 oz shaker (~$5.40)", shelfLifeDays: 180, tags: ["vegan","vegetarian","dairy-free","umami"] },
+  // 16 oz $4.00, 8 quarter-cups, $0.50 per 1/4 cup
+  { id: "liquid-egg-whites", name: "Liquid egg whites", category: "dairy", estimatedUnitCost: 0.5, unit: "1/4 cup", commonPackageSize: "16 oz carton (~$4.00)", shelfLifeDays: 60, tags: ["high-protein","vegetarian","gluten-free"] },
+
+  // ===== Canned / jarred / shelf-stable =====
+  // $1.10 per 15 oz can
+  { id: "pinto-beans", name: "Pinto beans (canned)", category: "canned", estimatedUnitCost: 1.1, unit: "can", commonPackageSize: "15 oz can ~$1.10", shelfLifeDays: 730, tags: ["staple","cheap","vegan","vegetarian","high-protein","gluten-free","dairy-free"] },
+  // $1.35 per 15 oz can
+  { id: "cannellini-beans", name: "Cannellini beans (canned)", category: "canned", estimatedUnitCost: 1.35, unit: "can", commonPackageSize: "15 oz can ~$1.35", shelfLifeDays: 730, tags: ["cheap","vegan","vegetarian","high-protein","gluten-free","dairy-free"] },
+  // $1.20 per 15 oz can
+  { id: "black-eyed-peas", name: "Black-eyed peas (canned)", category: "canned", estimatedUnitCost: 1.2, unit: "can", commonPackageSize: "15 oz can ~$1.20", shelfLifeDays: 730, tags: ["cheap","vegan","vegetarian","high-protein","gluten-free","dairy-free"] },
+  // $2.99/24 oz jar = ~6 half-cup servings = ~$0.50/half-cup
+  { id: "applesauce", name: "Applesauce", category: "canned", estimatedUnitCost: 0.5, unit: "1/2 cup", commonPackageSize: "24 oz jar (~$2.99)", shelfLifeDays: 730, tags: ["vegan","vegetarian","gluten-free","dairy-free","baking","cheap"] },
+  // 15 oz can $1.35, ~1.75 cups drained, $0.77/cup
+  { id: "navy-beans-canned", name: "Navy beans (canned)", category: "canned", estimatedUnitCost: 1.35, unit: "can", commonPackageSize: "15 oz can (~$1.35)", shelfLifeDays: 730, tags: ["vegan","vegetarian","high-protein","gluten-free"] },
+  // Bush's 16 oz $1.85, ~2 cups, $0.93/cup
+  { id: "baked-beans", name: "Vegetarian baked beans", category: "canned", estimatedUnitCost: 1.85, unit: "can", commonPackageSize: "16 oz can (~$1.85)", shelfLifeDays: 730, tags: ["vegetarian","cheap"] },
+  // 32 oz jar $3.50, ~16 (2 tbsp) servings, $0.22/serving
+  { id: "sauerkraut", name: "Sauerkraut (jarred)", category: "canned", estimatedUnitCost: 3.5, unit: "jar", commonPackageSize: "32 oz jar (~$3.50)", shelfLifeDays: 540, tags: ["vegan","vegetarian","gluten-free","acidic","cheap"] },
+  // 24 oz jar $3.95, ~12 spears, $0.33/spear
+  { id: "dill-pickles", name: "Dill pickles (jarred)", category: "canned", estimatedUnitCost: 3.95, unit: "jar", commonPackageSize: "24 oz jar (~$3.95)", shelfLifeDays: 365, tags: ["vegan","vegetarian","gluten-free","acidic"] },
+  // 12 oz jar $2.75, ~24 tbsp slices, $0.11/tbsp
+  { id: "pickled-jalapenos", name: "Pickled jalapenos", category: "canned", estimatedUnitCost: 2.75, unit: "jar", commonPackageSize: "12 oz jar (~$2.75)", shelfLifeDays: 365, tags: ["vegan","vegetarian","gluten-free","acidic","cheap"] },
+  // 3.5 oz jar $3.25, ~14 tsp drained, $0.23/tsp
+  { id: "capers", name: "Capers (jarred)", category: "canned", estimatedUnitCost: 3.25, unit: "jar", commonPackageSize: "3.5 oz jar (~$3.25)", shelfLifeDays: 540, tags: ["vegan","vegetarian","gluten-free","acidic","umami"] },
+  // 7 oz jar pimento-stuffed $3.50, ~1 cup, $0.22/2 tbsp serving
+  { id: "green-olives", name: "Green olives (jarred)", category: "canned", estimatedUnitCost: 3.5, unit: "jar", commonPackageSize: "7 oz jar (~$3.50)", shelfLifeDays: 540, tags: ["vegan","vegetarian","gluten-free","umami"] },
+  // 8 oz pitted $4.95, ~1 cup, $0.62/2 tbsp serving
+  { id: "kalamata-olives", name: "Kalamata olives (jarred)", category: "canned", estimatedUnitCost: 4.95, unit: "jar", commonPackageSize: "8 oz jar (~$4.95)", shelfLifeDays: 540, tags: ["vegan","vegetarian","gluten-free","umami"] },
+  // 12 oz marinated jar $3.95, ~1.5 cups drained, $2.63/cup
+  { id: "artichoke-hearts", name: "Marinated artichoke hearts", category: "canned", estimatedUnitCost: 3.95, unit: "jar", commonPackageSize: "12 oz jar (~$3.95)", shelfLifeDays: 540, tags: ["vegan","vegetarian","gluten-free","umami"] },
+  // 8.5 oz in oil $4.50, ~1 cup, $0.56/2 tbsp serving
+  { id: "sun-dried-tomatoes", name: "Sun-dried tomatoes (jarred in oil)", category: "canned", estimatedUnitCost: 4.5, unit: "jar", commonPackageSize: "8.5 oz jar (~$4.50)", shelfLifeDays: 540, tags: ["vegan","vegetarian","gluten-free","umami"] },
+  // 12 oz jar $3.25, ~1.5 cups drained, $2.17/cup
+  { id: "roasted-red-peppers", name: "Roasted red peppers (jarred)", category: "canned", estimatedUnitCost: 3.25, unit: "jar", commonPackageSize: "12 oz jar (~$3.25)", shelfLifeDays: 540, tags: ["vegan","vegetarian","gluten-free","umami"] },
+  // 16 oz jar $3.50, ~20 peppers, $0.18/pepper
+  { id: "pepperoncini", name: "Pepperoncini (jarred)", category: "canned", estimatedUnitCost: 3.5, unit: "jar", commonPackageSize: "16 oz jar (~$3.50)", shelfLifeDays: 540, tags: ["vegan","vegetarian","gluten-free","acidic","cheap"] },
+  // 2 oz tin $2.95, ~10 fillets, $0.30/fillet
+  { id: "anchovies-canned", name: "Anchovies in olive oil (canned)", category: "canned", estimatedUnitCost: 2.95, unit: "can", commonPackageSize: "2 oz tin (~$2.95)", shelfLifeDays: 730, tags: ["high-protein","gluten-free","umami"] },
+  // 4.4 oz can $2.65, ~1 serving
+  { id: "mackerel-canned", name: "Mackerel (canned)", category: "canned", estimatedUnitCost: 2.65, unit: "can", commonPackageSize: "4.4 oz can (~$2.65)", shelfLifeDays: 1095, tags: ["high-protein","gluten-free","dairy-free"] },
+  // 6.5 oz can chopped $2.95, ~1 cup with juice
+  { id: "clams-canned", name: "Clams (canned)", category: "canned", estimatedUnitCost: 2.95, unit: "can", commonPackageSize: "6.5 oz can (~$2.95)", shelfLifeDays: 1095, tags: ["high-protein","gluten-free","dairy-free","umami"] },
+  // 6 oz lump can $4.50, ~1 cup picked, $4.50/cup
+  { id: "crab-canned", name: "Crab meat (canned)", category: "canned", estimatedUnitCost: 4.5, unit: "can", commonPackageSize: "6 oz can (~$4.50)", shelfLifeDays: 730, tags: ["high-protein","gluten-free","dairy-free"] },
+  // 15 oz Libby's $2.45, ~1.75 cups, $1.40/cup
+  { id: "pumpkin-puree", name: "Pumpkin puree (canned)", category: "canned", estimatedUnitCost: 2.45, unit: "can", commonPackageSize: "15 oz can (~$2.45)", shelfLifeDays: 730, tags: ["vegan","vegetarian","gluten-free","baking"] },
+  // 8 oz sliced can $1.85, ~1 cup drained, $1.85/cup
+  { id: "water-chestnuts", name: "Water chestnuts (canned)", category: "canned", estimatedUnitCost: 1.85, unit: "can", commonPackageSize: "8 oz can (~$1.85)", shelfLifeDays: 1095, tags: ["vegan","vegetarian","gluten-free","cheap"] },
+  // 8 oz sliced can $2.25, ~1 cup drained, $2.25/cup
+  { id: "bamboo-shoots", name: "Bamboo shoots (canned)", category: "canned", estimatedUnitCost: 2.25, unit: "can", commonPackageSize: "8 oz can (~$2.25)", shelfLifeDays: 1095, tags: ["vegan","vegetarian","gluten-free"] },
+  // 14 oz can $3.75, ~1.5 cups sliced drained, $2.50/cup
+  { id: "hearts-of-palm", name: "Hearts of palm (canned)", category: "canned", estimatedUnitCost: 3.75, unit: "can", commonPackageSize: "14 oz can (~$3.75)", shelfLifeDays: 1095, tags: ["vegan","vegetarian","gluten-free"] },
+  // 20 oz young green jackfruit $3.25, ~2 cups shredded, $1.63/cup
+  { id: "jackfruit-canned", name: "Jackfruit in brine (canned)", category: "canned", estimatedUnitCost: 3.25, unit: "can", commonPackageSize: "20 oz can (~$3.25)", shelfLifeDays: 730, tags: ["vegan","vegetarian","gluten-free"] },
+  // 13.5 oz can $2.95, ~1.5 cups, $1.97/cup
+  { id: "coconut-cream", name: "Coconut cream (canned)", category: "canned", estimatedUnitCost: 2.95, unit: "can", commonPackageSize: "13.5 oz can (~$2.95)", shelfLifeDays: 730, tags: ["vegan","vegetarian","gluten-free","dairy-free"] },
+  // 29 oz can $2 = $2/can
+  { id: "hominy-canned", name: "Hominy (canned)", category: "canned", estimatedUnitCost: 2, unit: "can", commonPackageSize: "29 oz can (~$2)", shelfLifeDays: 1095, tags: ["vegan","gluten-free"] },
+
+  // ===== Condiments, sauces, oils, vinegars =====
+  // $2.49/8 oz bottle = 16 tbsp = ~$0.15/tbsp
+  { id: "lemon-juice-bottled", name: "Bottled lemon juice", category: "condiment", estimatedUnitCost: 0.15, unit: "tbsp", commonPackageSize: "8 oz bottle (~$2.49)", shelfLifeDays: 365, tags: ["vegan","vegetarian","gluten-free","dairy-free","acidic","staple"] },
+  // $2.49/8 oz bottle = 16 tbsp = ~$0.15/tbsp
+  { id: "lime-juice-bottled", name: "Bottled lime juice", category: "condiment", estimatedUnitCost: 0.15, unit: "tbsp", commonPackageSize: "8 oz bottle (~$2.49)", shelfLifeDays: 365, tags: ["vegan","vegetarian","gluten-free","dairy-free","acidic","staple"] },
+  // 16 oz bottle $4.50, ~32 tbsp/bottle = $0.14/tbsp; mid-tier $0.18
+  { id: "caesar-dressing", name: "Caesar dressing", category: "condiment", estimatedUnitCost: 0.18, unit: "tbsp", commonPackageSize: "16 oz bottle (~$4.50)", shelfLifeDays: 180, tags: ["vegetarian"] },
+  // 16 oz $3.80, ~32 tbsp = $0.12/tbsp
+  { id: "italian-dressing", name: "Italian dressing", category: "condiment", estimatedUnitCost: 0.12, unit: "tbsp", commonPackageSize: "16 oz bottle (~$3.80)", shelfLifeDays: 270, tags: ["vegetarian","acidic"] },
+  // 14 oz $4.20, ~28 tbsp = $0.15/tbsp
+  { id: "balsamic-vinaigrette", name: "Balsamic vinaigrette", category: "condiment", estimatedUnitCost: 0.15, unit: "tbsp", commonPackageSize: "14 oz bottle (~$4.20)", shelfLifeDays: 270, tags: ["vegan","vegetarian","acidic"] },
+  // 16 oz $5.00, ~32 tbsp = $0.16/tbsp; rounded $0.20
+  { id: "blue-cheese-dressing", name: "Blue cheese dressing", category: "condiment", estimatedUnitCost: 0.2, unit: "tbsp", commonPackageSize: "16 oz bottle (~$5.00)", shelfLifeDays: 90, tags: ["vegetarian"] },
+  // 16 oz $4.00, ~32 tbsp = $0.13/tbsp; rounded $0.14
+  { id: "thousand-island", name: "Thousand island dressing", category: "condiment", estimatedUnitCost: 0.14, unit: "tbsp", commonPackageSize: "16 oz bottle (~$4.00)", shelfLifeDays: 180, tags: ["vegetarian"] },
+  // 12 oz jar $7.50, ~24 tbsp = $0.31/tbsp; rounded $0.45 mid-tier
+  { id: "chimichurri", name: "Chimichurri sauce", category: "condiment", estimatedUnitCost: 0.45, unit: "tbsp", commonPackageSize: "12 oz jar (~$7.50)", shelfLifeDays: 120, tags: ["vegan","vegetarian","acidic"] },
+  // 8 oz jar $8.50, ~16 tbsp = $0.53/tbsp; rounded $0.55
+  { id: "salsa-macha", name: "Salsa macha", category: "condiment", estimatedUnitCost: 0.55, unit: "tbsp", commonPackageSize: "8 oz jar (~$8.50)", shelfLifeDays: 180, tags: ["vegan","vegetarian","umami"] },
+  // 8 oz jar $7.00, ~16 tbsp = $0.44/tbsp; rounded $0.50
+  { id: "romesco", name: "Romesco sauce", category: "condiment", estimatedUnitCost: 0.5, unit: "tbsp", commonPackageSize: "8 oz jar (~$7.00)", shelfLifeDays: 120, tags: ["vegan","vegetarian","umami"] },
+  // 12 oz tub $5.00, ~24 tbsp = $0.21/tbsp; rounded $0.30
+  { id: "tzatziki", name: "Tzatziki sauce", category: "condiment", estimatedUnitCost: 0.3, unit: "tbsp", commonPackageSize: "12 oz tub (~$5.00)", shelfLifeDays: 21, tags: ["vegetarian"] },
+  // 11 oz $5.50, ~22 tbsp = $0.25/tbsp; rounded $0.35
+  { id: "peanut-sauce", name: "Peanut sauce", category: "condiment", estimatedUnitCost: 0.35, unit: "tbsp", commonPackageSize: "11 oz jar (~$5.50)", shelfLifeDays: 270, tags: ["vegan","vegetarian"] },
+  // 12 oz $4.00, ~24 tbsp = $0.17/tbsp; rounded $0.18
+  { id: "sweet-chili-sauce", name: "Sweet chili sauce", category: "condiment", estimatedUnitCost: 0.18, unit: "tbsp", commonPackageSize: "12 oz bottle (~$4.00)", shelfLifeDays: 540, tags: ["vegan","vegetarian"] },
+  // 10 oz $4.00, ~20 tbsp = $0.20/tbsp
+  { id: "plum-sauce", name: "Plum sauce", category: "condiment", estimatedUnitCost: 0.2, unit: "tbsp", commonPackageSize: "10 oz bottle (~$4.00)", shelfLifeDays: 540, tags: ["vegan","vegetarian"] },
+  // 7.8 oz jar $12.00, ~15 tbsp = $0.80/tbsp; rounded $0.85
+  { id: "xo-sauce", name: "XO sauce", category: "condiment", estimatedUnitCost: 0.85, unit: "tbsp", commonPackageSize: "7.8 oz jar (~$12.00)", shelfLifeDays: 365, tags: ["umami"] },
+  // 8 oz $3.80, ~16 tbsp; budget brand $0.18/tbsp
+  { id: "black-bean-sauce", name: "Chinese black bean sauce", category: "condiment", estimatedUnitCost: 0.18, unit: "tbsp", commonPackageSize: "8 oz jar (~$3.80)", shelfLifeDays: 720, tags: ["vegan","vegetarian","umami"] },
+  // 8 oz jar $3.50, ~16 tbsp = $0.22/tbsp
+  { id: "sambal-oelek", name: "Sambal oelek", category: "condiment", estimatedUnitCost: 0.2, unit: "tbsp", commonPackageSize: "8 oz jar (~$3.50)", shelfLifeDays: 540, tags: ["vegan","staple"] },
+  // 1.7 oz jar $9.50, ~10 tsp = $0.95/tsp; rounded $1.20 specialty
+  { id: "yuzu-kosho", name: "Yuzu kosho", category: "condiment", estimatedUnitCost: 1.2, unit: "tsp", commonPackageSize: "1.7 oz jar (~$9.50)", shelfLifeDays: 365, tags: ["vegan","vegetarian","acidic"] },
+  // 7 oz can $2.50 = $2.50/can
+  { id: "chipotle-in-adobo", name: "Chipotle peppers in adobo", category: "condiment", estimatedUnitCost: 2.5, unit: "can", commonPackageSize: "7 oz can (~$2.50)", shelfLifeDays: 1095, tags: ["vegan","vegetarian","umami"] },
+  // 13.4 oz $5.50, ~22 tbsp = $0.25/tbsp; rounded $0.35
+  { id: "dulce-de-leche", name: "Dulce de leche", category: "condiment", estimatedUnitCost: 0.35, unit: "tbsp", commonPackageSize: "13.4 oz jar (~$5.50)", shelfLifeDays: 365, tags: ["vegetarian","baking"] },
+  // 10 oz $5.50, ~20 tbsp = $0.28/tbsp; rounded $0.40
+  { id: "lemon-curd", name: "Lemon curd", category: "condiment", estimatedUnitCost: 0.4, unit: "tbsp", commonPackageSize: "10 oz jar (~$5.50)", shelfLifeDays: 365, tags: ["vegetarian","baking","acidic"] },
+  // 12 oz $4.50, ~24 tbsp = $0.19/tbsp; rounded $0.22
+  { id: "marmalade", name: "Orange marmalade", category: "condiment", estimatedUnitCost: 0.22, unit: "tbsp", commonPackageSize: "12 oz jar (~$4.50)", shelfLifeDays: 540, tags: ["vegan","vegetarian"] },
+  // 14 oz $5.00, ~28 tbsp = $0.18/tbsp; rounded $0.25
+  { id: "apple-butter", name: "Apple butter", category: "condiment", estimatedUnitCost: 0.25, unit: "tbsp", commonPackageSize: "14 oz jar (~$5.00)", shelfLifeDays: 365, tags: ["vegan","vegetarian"] },
+  // 14 oz $4.50, ~28 tbsp; brand premium $0.30/tbsp
+  { id: "cookie-butter", name: "Cookie butter (Biscoff spread)", category: "condiment", estimatedUnitCost: 0.3, unit: "tbsp", commonPackageSize: "14 oz jar (~$4.50)", shelfLifeDays: 365, tags: ["vegan","vegetarian","baking"] },
+  // 24 oz bottle $4.50, ~48 tbsp = $0.09/tbsp; rounded $0.15
+  { id: "chocolate-syrup", name: "Chocolate syrup", category: "condiment", estimatedUnitCost: 0.15, unit: "tbsp", commonPackageSize: "24 oz bottle (~$4.50)", shelfLifeDays: 730, tags: ["vegan","vegetarian","baking"] },
+  // 12.25 oz $4.50, ~24 tbsp = $0.19/tbsp; rounded $0.25
+  { id: "caramel-sauce", name: "Caramel sauce", category: "condiment", estimatedUnitCost: 0.25, unit: "tbsp", commonPackageSize: "12.25 oz jar (~$4.50)", shelfLifeDays: 365, tags: ["vegetarian","baking"] },
+  // 17 oz $3.50, ~34 tbsp = $0.10/tbsp
+  { id: "white-wine-vinegar", name: "White wine vinegar", category: "condiment", estimatedUnitCost: 0.1, unit: "tbsp", commonPackageSize: "16.9 oz bottle (~$3.50)", shelfLifeDays: 1095, tags: ["vegan","vegetarian","acidic"] },
+  // 12.7 oz $7.50, ~25 tbsp = $0.30/tbsp
+  { id: "sherry-vinegar", name: "Sherry vinegar", category: "condiment", estimatedUnitCost: 0.3, unit: "tbsp", commonPackageSize: "12.7 oz bottle (~$7.50)", shelfLifeDays: 1095, tags: ["vegan","vegetarian","acidic"] },
+  // 24 oz $6.50, ~48 tbsp = $0.14/tbsp
+  { id: "peanut-oil", name: "Peanut oil", category: "condiment", estimatedUnitCost: 0.14, unit: "tbsp", commonPackageSize: "24 oz bottle (~$6.50)", shelfLifeDays: 540, tags: ["vegan","vegetarian"] },
+  // 17 oz $7.00, ~34 tbsp = $0.21/tbsp
+  { id: "grapeseed-oil", name: "Grapeseed oil", category: "condiment", estimatedUnitCost: 0.21, unit: "tbsp", commonPackageSize: "16.9 oz bottle (~$7.00)", shelfLifeDays: 365, tags: ["vegan","vegetarian"] },
+  // 1.86 oz bottle $15.00, ~11 tsp = $1.36/tsp; rounded $1.50
+  { id: "truffle-oil", name: "Truffle oil", category: "condiment", estimatedUnitCost: 1.5, unit: "tsp", commonPackageSize: "1.86 oz bottle (~$15.00)", shelfLifeDays: 365, tags: ["vegan","vegetarian","umami"] },
+  // 10 sheets per $2.50 pack = $0.25/sheet
+  { id: "nori-sheets", name: "Nori sheets", category: "condiment", estimatedUnitCost: 0.25, unit: "sheet", commonPackageSize: "10 sheet pack (~$2.50)", shelfLifeDays: 365, tags: ["umami","vegan"] },
+  // 10 packets per $5 box = $0.50/packet
+  { id: "dashi-packet", name: "Dashi packet", category: "condiment", estimatedUnitCost: 0.5, unit: "packet", commonPackageSize: "10 packet box (~$5)", shelfLifeDays: 540, tags: ["umami"] },
+  // 12 oz bottle $4.50, ~24 tbsp = $0.19/tbsp
+  { id: "sushi-vinegar", name: "Sushi vinegar", category: "condiment", estimatedUnitCost: 0.19, unit: "tbsp", commonPackageSize: "12 oz bottle (~$4.50)", shelfLifeDays: 730, tags: ["acidic","vegan"] },
+  // 20 oz bottle $8, ~32 tbsp = $0.25/tbsp
+  { id: "kecap-manis", name: "Kecap manis (sweet soy)", category: "condiment", estimatedUnitCost: 0.25, unit: "tbsp", commonPackageSize: "20 oz bottle (~$8)", shelfLifeDays: 730, tags: ["umami","vegan"] },
+  // 17 oz tub $7, ~20 tbsp usable = $0.35/tbsp
+  { id: "ssamjang", name: "Ssamjang", category: "condiment", estimatedUnitCost: 0.35, unit: "tbsp", commonPackageSize: "17 oz tub (~$7)", shelfLifeDays: 365, tags: ["umami","vegan"] },
+  // 8 oz jar $5, ~16 tbsp = $0.31/tbsp
+  { id: "tamarind-paste", name: "Tamarind paste", category: "condiment", estimatedUnitCost: 0.31, unit: "tbsp", commonPackageSize: "8 oz jar (~$5)", shelfLifeDays: 540, tags: ["acidic","vegan"] },
+  // 16 oz $6, ~15 tbsp packed = $0.40/tbsp
+  { id: "palm-sugar", name: "Palm sugar", category: "condiment", estimatedUnitCost: 0.4, unit: "tbsp", commonPackageSize: "16 oz pack (~$6)", shelfLifeDays: 1095, tags: ["vegan"] },
+  // 10 oz bottle $6, ~20 tbsp = $0.30/tbsp
+  { id: "pomegranate-molasses", name: "Pomegranate molasses", category: "condiment", estimatedUnitCost: 0.3, unit: "tbsp", commonPackageSize: "10 oz bottle (~$6)", shelfLifeDays: 730, tags: ["acidic","vegan"] },
+  // 12 oz bottle $7, ~20 tbsp = $0.35/tbsp
+  { id: "date-syrup", name: "Date syrup", category: "condiment", estimatedUnitCost: 0.35, unit: "tbsp", commonPackageSize: "12 oz bottle (~$7)", shelfLifeDays: 730, tags: ["vegan"] },
+  // 10 oz jar $5, ~16 tbsp = $0.31/tbsp
+  { id: "mango-pickle", name: "Mango pickle (achar)", category: "condiment", estimatedUnitCost: 0.31, unit: "tbsp", commonPackageSize: "10 oz jar (~$5)", shelfLifeDays: 540, tags: ["vegan","acidic"] },
+  // 12 oz jar $5, ~12 tbsp = $0.42/tbsp
+  { id: "sofrito", name: "Sofrito", category: "condiment", estimatedUnitCost: 0.42, unit: "tbsp", commonPackageSize: "12 oz jar (~$5)", shelfLifeDays: 180, tags: ["vegan"] },
+  // 6.7 oz $6, ~40 tsp = $0.15/tsp
+  { id: "maggi-seasoning", name: "Maggi seasoning", category: "condiment", estimatedUnitCost: 0.15, unit: "tsp", commonPackageSize: "6.7 oz bottle (~$6)", shelfLifeDays: 1095, tags: ["umami","staple"] },
+  // 8.25 oz jar $6, ~12 tbsp = $0.50/tbsp
+  { id: "mole-sauce", name: "Mole sauce", category: "condiment", estimatedUnitCost: 0.5, unit: "tbsp", commonPackageSize: "8.25 oz jar (~$6)", shelfLifeDays: 540, tags: ["vegan"] },
+  // 12 oz $3.50, ~24 tbsp = $0.15/tbsp
+  { id: "banana-ketchup", name: "Banana ketchup", category: "condiment", estimatedUnitCost: 0.15, unit: "tbsp", commonPackageSize: "12 oz bottle (~$3.50)", shelfLifeDays: 365, tags: ["vegan"] },
+
+  // ===== Spices, blends, baking =====
+  // 3 lb box $5, ~864 tsp, ~$0.006/tsp rounded to $0.01
+  { id: "kosher-salt", name: "Kosher salt", category: "spice", estimatedUnitCost: 0.01, unit: "tsp", commonPackageSize: "3 lb box (~$5.00)", shelfLifeDays: 1095, tags: ["staple","cheap","vegan","gluten-free","dairy-free"] },
+  // 8.5 oz tin $8.50, ~85 tsp finishing salt, $0.10/tsp
+  { id: "flaky-sea-salt", name: "Flaky sea salt (Maldon-style)", category: "spice", estimatedUnitCost: 0.1, unit: "tsp", commonPackageSize: "8.5 oz tin (~$8.50)", shelfLifeDays: 1095, tags: ["vegan","gluten-free","dairy-free"] },
+  // 2.5 oz jar $3.50, ~50 tsp, $0.07/tsp
+  { id: "celery-salt", name: "Celery salt", category: "spice", estimatedUnitCost: 0.07, unit: "tsp", commonPackageSize: "2.5 oz jar (~$3.50)", shelfLifeDays: 730, tags: ["vegan","gluten-free","dairy-free"] },
+  // 5 oz jar $4.50, ~85 tsp, $0.05/tsp
+  { id: "garlic-salt", name: "Garlic salt", category: "spice", estimatedUnitCost: 0.05, unit: "tsp", commonPackageSize: "5 oz jar (~$4.50)", shelfLifeDays: 730, tags: ["cheap","vegan","gluten-free","dairy-free"] },
+  // 1.7 oz jar $4, ~40 tsp, $0.10/tsp
+  { id: "fennel-seed", name: "Fennel seed", category: "spice", estimatedUnitCost: 0.1, unit: "tsp", commonPackageSize: "1.7 oz jar (~$4.00)", shelfLifeDays: 1095, tags: ["vegan","gluten-free","dairy-free"] },
+  // 2 oz jar $3.50, ~45 tsp, $0.08/tsp
+  { id: "mustard-seed", name: "Mustard seed", category: "spice", estimatedUnitCost: 0.08, unit: "tsp", commonPackageSize: "2 oz jar (~$3.50)", shelfLifeDays: 1095, tags: ["vegan","gluten-free","dairy-free"] },
+  // 1.8 oz jar $4.50, ~42 tsp, $0.11/tsp
+  { id: "caraway-seed", name: "Caraway seed", category: "spice", estimatedUnitCost: 0.11, unit: "tsp", commonPackageSize: "1.8 oz jar (~$4.50)", shelfLifeDays: 1095, tags: ["vegan","gluten-free","dairy-free"] },
+  // 1 oz jar $8, ~25 tsp ground, $0.32/tsp rounded $0.30
+  { id: "cardamom-green", name: "Green cardamom", category: "spice", estimatedUnitCost: 0.3, unit: "tsp", commonPackageSize: "1 oz jar (~$8.00)", shelfLifeDays: 1095, tags: ["vegan","gluten-free","dairy-free","baking"] },
+  // $4.50 / 30 pods = $0.15/pod
+  { id: "star-anise", name: "Star anise", category: "spice", estimatedUnitCost: 0.15, unit: "piece", commonPackageSize: "1 oz bag (~$4.50, ~30 pods)", shelfLifeDays: 1095, tags: ["vegan","gluten-free","dairy-free"] },
+  // 2 oz jar $3, ~45 tsp, $0.07/tsp rounded $0.06
+  { id: "fenugreek", name: "Fenugreek seed", category: "spice", estimatedUnitCost: 0.06, unit: "tsp", commonPackageSize: "2 oz jar (~$3.00)", shelfLifeDays: 1095, tags: ["vegan","gluten-free","dairy-free"] },
+  // 1 g vial $8, ~7 tsp threads, ~$1.15/tsp rounded $1.20
+  { id: "saffron", name: "Saffron threads", category: "spice", estimatedUnitCost: 1.2, unit: "tsp", commonPackageSize: "1 g vial (~$8.00)", shelfLifeDays: 1095, tags: ["vegan","gluten-free","dairy-free"] },
+  // 3 oz grinder $5, ~60 tsp, $0.08/tsp
+  { id: "whole-peppercorns", name: "Whole black peppercorns", category: "spice", estimatedUnitCost: 0.08, unit: "tsp", commonPackageSize: "3 oz grinder (~$5.00)", shelfLifeDays: 1095, tags: ["staple","vegan","gluten-free","dairy-free"] },
+  // 1.5 oz jar $6, ~30 tsp, $0.20/tsp
+  { id: "sichuan-peppercorn", name: "Sichuan peppercorn", category: "spice", estimatedUnitCost: 0.2, unit: "tsp", commonPackageSize: "1.5 oz jar (~$6.00)", shelfLifeDays: 1095, tags: ["vegan","gluten-free","dairy-free"] },
+  // 2 oz jar $4.50, ~45 tsp, $0.10/tsp
+  { id: "chipotle-powder", name: "Chipotle chili powder", category: "spice", estimatedUnitCost: 0.1, unit: "tsp", commonPackageSize: "2 oz jar (~$4.50)", shelfLifeDays: 1095, tags: ["vegan","gluten-free","dairy-free"] },
+  // 2 oz jar $4.50, ~45 tsp, $0.10/tsp
+  { id: "ancho-chili-powder", name: "Ancho chili powder", category: "spice", estimatedUnitCost: 0.1, unit: "tsp", commonPackageSize: "2 oz jar (~$4.50)", shelfLifeDays: 1095, tags: ["vegan","gluten-free","dairy-free"] },
+  // 5 oz bottle $3.50, ~80 tsp, $0.04/tsp rounded $0.05
+  { id: "tajin", name: "Tajin seasoning", category: "spice", estimatedUnitCost: 0.05, unit: "tsp", commonPackageSize: "5 oz bottle (~$3.50)", shelfLifeDays: 730, tags: ["cheap","vegan","gluten-free","dairy-free","acidic"] },
+  // 2.5 oz jar $5.50, ~45 tsp, $0.12/tsp
+  { id: "jerk-seasoning", name: "Jerk seasoning", category: "spice", estimatedUnitCost: 0.12, unit: "tsp", commonPackageSize: "2.5 oz jar (~$5.50)", shelfLifeDays: 730, tags: ["vegan","gluten-free","dairy-free"] },
+  // 2 oz jar $7, ~40 tsp, $0.18/tsp
+  { id: "berbere", name: "Berbere spice blend", category: "spice", estimatedUnitCost: 0.18, unit: "tsp", commonPackageSize: "2 oz jar (~$7.00)", shelfLifeDays: 730, tags: ["vegan","gluten-free","dairy-free"] },
+  // 2 oz jar $7, ~40 tsp, $0.18/tsp
+  { id: "ras-el-hanout", name: "Ras el hanout", category: "spice", estimatedUnitCost: 0.18, unit: "tsp", commonPackageSize: "2 oz jar (~$7.00)", shelfLifeDays: 730, tags: ["vegan","gluten-free","dairy-free"] },
+  // 2.5 oz jar $8, ~40 tsp, $0.20/tsp
+  { id: "dukkah", name: "Dukkah blend", category: "spice", estimatedUnitCost: 0.2, unit: "tsp", commonPackageSize: "2.5 oz jar (~$8.00)", shelfLifeDays: 365, tags: ["vegan","gluten-free","dairy-free"] },
+  // 5 oz jar $3, ~80 tsp, $0.04/tsp
+  { id: "adobo-seasoning", name: "Adobo seasoning", category: "spice", estimatedUnitCost: 0.04, unit: "tsp", commonPackageSize: "5 oz jar (~$3.00)", shelfLifeDays: 730, tags: ["cheap","vegan","gluten-free","dairy-free"] },
+  // 8 packets $2.50, ~2 tsp/packet = 16 tsp, $0.16/tsp rounded $0.15
+  { id: "sazon", name: "Sazon seasoning", category: "spice", estimatedUnitCost: 0.15, unit: "tsp", commonPackageSize: "8 packet box (~$2.50)", shelfLifeDays: 730, tags: ["cheap","vegan","gluten-free","dairy-free"] },
+  // 2.2 oz jar $6.50, ~32 tsp, $0.20/tsp
+  { id: "dashi-powder", name: "Dashi powder", category: "spice", estimatedUnitCost: 0.2, unit: "tsp", commonPackageSize: "2.2 oz jar (~$6.50)", shelfLifeDays: 730, tags: ["gluten-free","dairy-free","umami"] },
+  // 1 oz bag $6, ~15 tbsp loose flakes, $0.40/tbsp
+  { id: "bonito-flakes", name: "Bonito flakes", category: "spice", estimatedUnitCost: 0.4, unit: "tbsp", commonPackageSize: "1 oz bag (~$6.00)", shelfLifeDays: 365, tags: ["gluten-free","dairy-free","umami"] },
+  // 4 oz jar $6, ~60 tsp, $0.10/tsp
+  { id: "instant-yeast", name: "Instant yeast", category: "spice", estimatedUnitCost: 0.1, unit: "tsp", commonPackageSize: "4 oz jar (~$6.00)", shelfLifeDays: 365, tags: ["vegan","dairy-free","baking"] },
+  // 1.5 oz jar $4.50, ~30 tsp, $0.15/tsp
+  { id: "cream-of-tartar", name: "Cream of tartar", category: "spice", estimatedUnitCost: 0.15, unit: "tsp", commonPackageSize: "1.5 oz jar (~$4.50)", shelfLifeDays: 1095, tags: ["vegan","gluten-free","dairy-free","baking","acidic"] },
+  // 2 oz bottle $6, ~20 tsp, $0.30/tsp
+  { id: "almond-extract", name: "Almond extract", category: "spice", estimatedUnitCost: 0.3, unit: "tsp", commonPackageSize: "2 oz bottle (~$6.00)", shelfLifeDays: 1095, tags: ["vegan","gluten-free","dairy-free","baking"] },
+  // 2 oz bottle $5, ~20 tsp, $0.25/tsp
+  { id: "peppermint-extract", name: "Peppermint extract", category: "spice", estimatedUnitCost: 0.25, unit: "tsp", commonPackageSize: "2 oz bottle (~$5.00)", shelfLifeDays: 1095, tags: ["vegan","gluten-free","dairy-free","baking"] },
+  // 12 oz bag $4, 2 cups = 8 quarter-cups, $0.50/quarter-cup
+  { id: "chocolate-chips", name: "Chocolate chips", category: "spice", estimatedUnitCost: 0.5, unit: "1/4 cup", commonPackageSize: "12 oz bag (~$4.00, ~2 cups)", shelfLifeDays: 365, tags: ["vegetarian","gluten-free","baking"] },
+  // 4 packets $4.50, ~3.25 tsp/packet = 13 tsp, $0.35/tsp
+  { id: "gelatin-powder", name: "Unflavored gelatin", category: "spice", estimatedUnitCost: 0.35, unit: "tsp", commonPackageSize: "1 oz box, 4 packets (~$4.50)", shelfLifeDays: 1095, tags: ["gluten-free","dairy-free","baking","high-protein"] },
+  // 2 lb bag $3.50, ~96 tbsp per bag, ~$0.04/tbsp
+  { id: "powdered-sugar", name: "Powdered sugar", category: "spice", estimatedUnitCost: 0.04, unit: "tbsp", commonPackageSize: "2 lb bag (~$3.50)", shelfLifeDays: 730, tags: ["baking","cheap"] },
+  // 24 oz bag $4.50, ~72 tbsp per bag, ~$0.06/tbsp
+  { id: "turbinado-sugar", name: "Turbinado sugar", category: "spice", estimatedUnitCost: 0.06, unit: "tbsp", commonPackageSize: "24 oz bag (~$4.50)", shelfLifeDays: 1095, tags: ["baking"] },
+  // 16 oz bag $5.50, ~48 tbsp per bag, ~$0.11/tbsp
+  { id: "coconut-sugar", name: "Coconut sugar", category: "spice", estimatedUnitCost: 0.11, unit: "tbsp", commonPackageSize: "16 oz bag (~$5.50)", shelfLifeDays: 1095, tags: ["baking","vegan","vegetarian"] },
+  // 8 oz pouch $8.50, ~56 tsp per pouch, ~$0.15/tsp
+  { id: "monk-fruit-sweetener", name: "Monk fruit sweetener", category: "spice", estimatedUnitCost: 0.15, unit: "tsp", commonPackageSize: "8 oz pouch (~$8.50)", shelfLifeDays: 1095, tags: ["baking"] },
+  // 100 packets $6, 1 packet ~= 1 tsp sugar equiv, ~$0.06/tsp
+  { id: "stevia", name: "Stevia sweetener", category: "spice", estimatedUnitCost: 0.06, unit: "tsp", commonPackageSize: "100 packets (~$6.00)", shelfLifeDays: 1095, tags: ["baking"] },
+  // 16 oz bag $7, ~54 tbsp per bag, ~$0.13/tbsp
+  { id: "erythritol", name: "Erythritol", category: "spice", estimatedUnitCost: 0.13, unit: "tbsp", commonPackageSize: "16 oz bag (~$7.00)", shelfLifeDays: 1095, tags: ["baking"] },
+  // 12 oz bag $9, ~50 tbsp per bag, ~$0.18/tbsp
+  { id: "allulose", name: "Allulose", category: "spice", estimatedUnitCost: 0.18, unit: "tbsp", commonPackageSize: "12 oz bag (~$9.00)", shelfLifeDays: 730, tags: ["baking"] },
+  // 12 oz jar $5, ~24 tbsp per jar, ~$0.21/tbsp
+  { id: "molasses", name: "Molasses", category: "spice", estimatedUnitCost: 0.21, unit: "tbsp", commonPackageSize: "12 oz jar (~$5.00)", shelfLifeDays: 730, tags: ["baking","vegan"] },
+  // 16 oz bottle $4, ~32 tbsp per bottle, ~$0.13/tbsp
+  { id: "corn-syrup", name: "Corn syrup", category: "spice", estimatedUnitCost: 0.13, unit: "tbsp", commonPackageSize: "16 oz bottle (~$4.00)", shelfLifeDays: 1095, tags: ["baking"] },
+  // 12 oz bag $4, ~14 tbsp per bag, ~$0.29/tbsp
+  { id: "semi-sweet-chocolate-chips", name: "Semi-sweet chocolate chips", category: "spice", estimatedUnitCost: 0.29, unit: "tbsp", commonPackageSize: "12 oz bag (~$4.00)", shelfLifeDays: 365, tags: ["baking","vegetarian"] },
+  // 10 oz bag $4.50, ~13 tbsp per bag, ~$0.35/tbsp
+  { id: "dark-chocolate-chips", name: "Dark chocolate chips", category: "spice", estimatedUnitCost: 0.35, unit: "tbsp", commonPackageSize: "10 oz bag (~$4.50)", shelfLifeDays: 365, tags: ["baking"] },
+  // 11 oz bag $4.50, ~14 tbsp per bag, ~$0.32/tbsp
+  { id: "white-chocolate-chips", name: "White chocolate chips", category: "spice", estimatedUnitCost: 0.32, unit: "tbsp", commonPackageSize: "11 oz bag (~$4.50)", shelfLifeDays: 365, tags: ["baking","vegetarian"] },
+  // 4 oz bar $3.50, $0.88/oz
+  { id: "unsweetened-baking-chocolate", name: "Unsweetened baking chocolate", category: "spice", estimatedUnitCost: 0.88, unit: "oz", commonPackageSize: "4 oz bar (~$3.50)", shelfLifeDays: 730, tags: ["baking"] },
+  // 8 oz tin $7.50, ~38 tbsp per tin, ~$0.20/tbsp
+  { id: "dutch-cocoa", name: "Dutch process cocoa", category: "spice", estimatedUnitCost: 0.2, unit: "tbsp", commonPackageSize: "8 oz tin (~$7.50)", shelfLifeDays: 730, tags: ["baking","vegan"] },
+  // 16 oz box $2.50, ~48 tbsp per box, ~$0.05/tbsp
+  { id: "cornstarch", name: "Cornstarch", category: "spice", estimatedUnitCost: 0.05, unit: "tbsp", commonPackageSize: "16 oz box (~$2.50)", shelfLifeDays: 1095, tags: ["baking","staple","cheap","gluten-free"] },
+  // 16 oz bag $4, ~50 tbsp per bag, ~$0.08/tbsp
+  { id: "tapioca-starch", name: "Tapioca starch", category: "spice", estimatedUnitCost: 0.08, unit: "tbsp", commonPackageSize: "16 oz bag (~$4.00)", shelfLifeDays: 1095, tags: ["baking","gluten-free","vegan"] },
+  // 16 oz bag $4.50, ~52 tbsp per bag, ~$0.09/tbsp
+  { id: "potato-starch", name: "Potato starch", category: "spice", estimatedUnitCost: 0.09, unit: "tbsp", commonPackageSize: "16 oz bag (~$4.50)", shelfLifeDays: 1095, tags: ["baking","gluten-free","vegan"] },
+  // 8 oz bag $4.50, ~26 tbsp per bag, ~$0.17/tbsp
+  { id: "unsweetened-shredded-coconut", name: "Unsweetened shredded coconut", category: "spice", estimatedUnitCost: 0.17, unit: "tbsp", commonPackageSize: "8 oz bag (~$4.50)", shelfLifeDays: 365, tags: ["baking","vegan","gluten-free"] },
+  // 1 oz bag $3, ~20 tbsp loose = $0.15/tbsp
+  { id: "kasoori-methi", name: "Kasoori methi (dried fenugreek)", category: "spice", estimatedUnitCost: 0.15, unit: "tbsp", commonPackageSize: "1 oz bag (~$3)", shelfLifeDays: 730, tags: ["vegan"] },
+  // 0.5 oz $4 dried, ~40 tbsp loose = $0.10/tbsp
+  { id: "curry-leaves", name: "Curry leaves", category: "spice", estimatedUnitCost: 0.1, unit: "tbsp", commonPackageSize: "0.5 oz dried (~$4)", shelfLifeDays: 365, tags: ["vegan"] },
+
+  // ===== Frozen =====
+  // 30 oz bag $4, ~6 servings, $0.67/serving
+  { id: "hash-browns", name: "Frozen hash browns", category: "frozen", estimatedUnitCost: 0.65, unit: "serving", commonPackageSize: "30 oz bag (~$4.00)", shelfLifeDays: 180, tags: ["cheap","vegan","gluten-free"] },
+  // $3.49/16 oz bag, ~4-5 cups per bag = ~$0.75/cup
+  { id: "frozen-pineapple", name: "Frozen pineapple", category: "frozen", estimatedUnitCost: 0.75, unit: "cup", commonPackageSize: "16 oz bag (~$3.49)", shelfLifeDays: 180, tags: ["vegan","vegetarian","gluten-free","dairy-free"] },
+  // $3.99/16 oz bag, ~5 cups per bag = ~$0.80/cup
+  { id: "frozen-peaches", name: "Frozen peaches", category: "frozen", estimatedUnitCost: 0.8, unit: "cup", commonPackageSize: "16 oz bag (~$3.99)", shelfLifeDays: 180, tags: ["vegan","vegetarian","gluten-free","dairy-free"] },
+  // $4.49/12 oz bag, ~3.5 cups per bag = ~$1.28/cup
+  { id: "frozen-cherries", name: "Frozen cherries", category: "frozen", estimatedUnitCost: 1.25, unit: "cup", commonPackageSize: "12 oz bag (~$4.49)", shelfLifeDays: 180, tags: ["vegan","vegetarian","gluten-free","dairy-free"] },
+  // Tombstone/Red Baron 12 in pizza ~$5.50 each
+  { id: "frozen-pizza", name: "Frozen pizza", category: "frozen", estimatedUnitCost: 5.5, unit: "pizza", commonPackageSize: "12 inch pizza (~$5.50)", shelfLifeDays: 180, tags: ["vegetarian"] },
+  // 32 oz bag $4.50, ~13 servings, $0.35/serving
+  { id: "frozen-fries", name: "Frozen french fries", category: "frozen", estimatedUnitCost: 0.35, unit: "serving", commonPackageSize: "32 oz bag (~$4.50)", shelfLifeDays: 270, tags: ["cheap","vegan","vegetarian"] },
+  // 32 oz bag $5.00, ~12 servings, $0.40/serving
+  { id: "frozen-tater-tots", name: "Frozen tater tots", category: "frozen", estimatedUnitCost: 0.4, unit: "serving", commonPackageSize: "32 oz bag (~$5.00)", shelfLifeDays: 270, tags: ["cheap","vegan","vegetarian"] },
+  // Eggo 10-ct box $5.00, $0.50/waffle
+  { id: "frozen-waffles", name: "Frozen waffles", category: "frozen", estimatedUnitCost: 0.5, unit: "piece", commonPackageSize: "10 ct box (~$5.00)", shelfLifeDays: 180, tags: ["vegetarian"] },
+  // Jimmy Dean 4-ct $9.00, $2.25 each
+  { id: "frozen-breakfast-sandwich", name: "Frozen breakfast sandwich", category: "frozen", estimatedUnitCost: 2.25, unit: "piece", commonPackageSize: "4 ct box (~$9.00)", shelfLifeDays: 180, tags: ["high-protein"] },
+  // El Monterey 5-ct $8.75, $1.75 each
+  { id: "frozen-burrito", name: "Frozen burrito", category: "frozen", estimatedUnitCost: 1.75, unit: "piece", commonPackageSize: "5 ct box (~$8.75)", shelfLifeDays: 180 },
+  // Bibigo 36 oz ~36 pieces $11, $0.30/piece
+  { id: "frozen-dumplings", name: "Frozen dumplings (potstickers)", category: "frozen", estimatedUnitCost: 0.3, unit: "piece", commonPackageSize: "36 oz bag (~$11.00)", shelfLifeDays: 270 },
+  // 12-ct box $9.00, $0.75/roll
+  { id: "frozen-spring-rolls", name: "Frozen spring rolls", category: "frozen", estimatedUnitCost: 0.75, unit: "piece", commonPackageSize: "12 ct box (~$9.00)", shelfLifeDays: 270, tags: ["vegetarian"] },
+  // Cooked perfect 26 oz ~26 meatballs $9, $0.35 each
+  { id: "frozen-meatballs", name: "Frozen meatballs", category: "frozen", estimatedUnitCost: 0.35, unit: "piece", commonPackageSize: "26 oz bag (~$9.00)", shelfLifeDays: 270, tags: ["high-protein"] },
+  // Tyson 32 oz ~35 nuggets $10, ~$0.30/nugget
+  { id: "frozen-chicken-nuggets", name: "Frozen chicken nuggets", category: "frozen", estimatedUnitCost: 0.3, unit: "piece", commonPackageSize: "32 oz bag (~$10.00)", shelfLifeDays: 270, tags: ["high-protein"] },
+  // Tyson 24 oz ~12 tenders $10, $0.85/tender
+  { id: "frozen-chicken-tenders", name: "Frozen chicken tenders", category: "frozen", estimatedUnitCost: 0.85, unit: "piece", commonPackageSize: "24 oz bag (~$10.00)", shelfLifeDays: 270, tags: ["high-protein"] },
+  // Gorton's 24 oz ~24 sticks $9.50, $0.40 each
+  { id: "frozen-fish-sticks", name: "Frozen fish sticks", category: "frozen", estimatedUnitCost: 0.4, unit: "piece", commonPackageSize: "24 oz box (~$9.50)", shelfLifeDays: 270, tags: ["high-protein"] },
+  // Morningstar/Beyond 4-ct $8.00, $2.00/patty
+  { id: "frozen-veggie-burger", name: "Frozen veggie burger", category: "frozen", estimatedUnitCost: 2, unit: "piece", commonPackageSize: "4 ct box (~$8.00)", shelfLifeDays: 270, tags: ["vegetarian","vegan"] },
+  // 8-ct 1/4 lb patties $14, $1.75/patty
+  { id: "frozen-burger-patty", name: "Frozen beef burger patty", category: "frozen", estimatedUnitCost: 1.75, unit: "piece", commonPackageSize: "8 ct box (~$14.00)", shelfLifeDays: 180, tags: ["high-protein"] },
+  // Jimmy Dean 12-ct $6.50, ~$0.55/patty
+  { id: "frozen-sausage-patty", name: "Frozen sausage patties", category: "frozen", estimatedUnitCost: 0.55, unit: "piece", commonPackageSize: "12 ct box (~$6.50)", shelfLifeDays: 180, tags: ["high-protein"] },
+  // 4 lb bag ~24 wings $15, ~$0.65/wing
+  { id: "frozen-wings", name: "Frozen chicken wings", category: "frozen", estimatedUnitCost: 0.65, unit: "piece", commonPackageSize: "4 lb bag (~$15.00)", shelfLifeDays: 270, tags: ["high-protein"] },
+  // 16 oz bag $8.50, ~8 servings, ~$1.10/serving
+  { id: "frozen-shrimp-popcorn", name: "Frozen popcorn shrimp", category: "frozen", estimatedUnitCost: 1.1, unit: "serving", commonPackageSize: "16 oz bag (~$8.50)", shelfLifeDays: 270, tags: ["high-protein"] },
+  // 12 oz bag $2.50, ~3 cups, ~$0.85/cup
+  { id: "frozen-cauliflower-rice", name: "Frozen cauliflower rice", category: "frozen", estimatedUnitCost: 0.85, unit: "cup", commonPackageSize: "12 oz bag (~$2.50)", shelfLifeDays: 270, tags: ["vegan","vegetarian","gluten-free"] },
+  // 16 oz bag $3.00, ~5 cups, $0.60/cup
+  { id: "frozen-stir-fry-mix", name: "Frozen stir-fry vegetable mix", category: "frozen", estimatedUnitCost: 0.6, unit: "cup", commonPackageSize: "16 oz bag (~$3.00)", shelfLifeDays: 270, tags: ["cheap","vegan","vegetarian"] },
+  // 16 oz bag $2.75, ~5 cups, $0.55/cup
+  { id: "frozen-green-beans", name: "Frozen green beans", category: "frozen", estimatedUnitCost: 0.55, unit: "cup", commonPackageSize: "16 oz bag (~$2.75)", shelfLifeDays: 270, tags: ["cheap","vegan","vegetarian"] },
+  // Breyers 48 oz tub $5.50, ~12 half-cup servings ~$0.46
+  { id: "ice-cream", name: "Ice cream", category: "frozen", estimatedUnitCost: 0.45, unit: "1/2 cup", commonPackageSize: "48 oz tub (~$5.50)", shelfLifeDays: 180, tags: ["vegetarian"] },
+
+  // ===== Snacks, bakery, beverages =====
+  // 16 oz bag $3.50, ~14 servings of 1 oz, $0.25/serving
+  { id: "pretzels", name: "Pretzels", category: "snack", estimatedUnitCost: 0.25, unit: "serving", commonPackageSize: "16 oz bag (~$3.50)", shelfLifeDays: 180, tags: ["cheap","vegan","vegetarian"] },
+  // 6 oz bag $3.99, ~7 servings of ~1 cup, $0.57/serving rounded $0.55
+  { id: "popcorn-bagged", name: "Pre-popped popcorn", category: "snack", estimatedUnitCost: 0.55, unit: "serving", commonPackageSize: "6 oz bag (~$3.99)", shelfLifeDays: 90, tags: ["vegetarian","vegan","gluten-free"] },
+  // 6-pack $5, $0.83/bag rounded $0.85
+  { id: "microwave-popcorn", name: "Microwave popcorn", category: "snack", estimatedUnitCost: 0.85, unit: "bag", commonPackageSize: "6-pack (~$5.00)", shelfLifeDays: 270, tags: ["cheap","vegetarian","gluten-free"] },
+  // 8 oz bag $4.49, ~7 servings of 1 oz, $0.64/serving
+  { id: "pita-chips", name: "Pita chips", category: "snack", estimatedUnitCost: 0.65, unit: "serving", commonPackageSize: "8 oz bag (~$4.49)", shelfLifeDays: 120, tags: ["vegetarian","vegan"] },
+  // 14.4 oz box $3.99, ~14 servings of 2 sheets, $0.29/serving
+  { id: "graham-crackers", name: "Graham crackers", category: "snack", estimatedUnitCost: 0.3, unit: "serving", commonPackageSize: "14.4 oz box (~$3.99)", shelfLifeDays: 240, tags: ["vegetarian","baking","cheap"] },
+  // 14.3 oz pack $4.49, ~10 servings of 3 cookies, $0.45/serving
+  { id: "oreos", name: "Oreo cookies", category: "snack", estimatedUnitCost: 0.45, unit: "serving", commonPackageSize: "14.3 oz pack (~$4.49)", shelfLifeDays: 240, tags: ["vegetarian","baking"] },
+  // 16 oz box $3.29, ~16 servings of 5 crackers, $0.21/serving
+  { id: "saltines", name: "Saltine crackers", category: "snack", estimatedUnitCost: 0.2, unit: "serving", commonPackageSize: "16 oz box (~$3.29)", shelfLifeDays: 240, tags: ["cheap","vegetarian","vegan","staple"] },
+  // 12-pack $8.99, $0.75/bar
+  { id: "fig-bars", name: "Fig bars", category: "snack", estimatedUnitCost: 0.75, unit: "bar", commonPackageSize: "12-pack (~$8.99)", shelfLifeDays: 180, tags: ["vegetarian"] },
+  // 6-pack $4.19, $0.70/cup
+  { id: "applesauce-cup", name: "Applesauce cup", category: "snack", estimatedUnitCost: 0.7, unit: "cup", commonPackageSize: "6-pack 4 oz cups (~$4.19)", shelfLifeDays: 365, tags: ["vegan","vegetarian","gluten-free"] },
+  // 16 oz bag $7.99, ~7 servings of ~1/4 cup, $1.14/serving
+  { id: "trail-mix", name: "Trail mix", category: "snack", estimatedUnitCost: 1.1, unit: "serving", commonPackageSize: "16 oz bag (~$7.99)", shelfLifeDays: 180, tags: ["vegetarian","high-protein"] },
+  // 16 oz jar $8.99, ~7 servings of 1 oz, $1.28/serving
+  { id: "mixed-nuts", name: "Mixed nuts", category: "snack", estimatedUnitCost: 1.25, unit: "serving", commonPackageSize: "16 oz jar (~$8.99)", shelfLifeDays: 270, tags: ["vegetarian","high-protein","gluten-free"] },
+  // 3.25 oz bag $8.49, $2.61/oz
+  { id: "beef-jerky", name: "Beef jerky", category: "snack", estimatedUnitCost: 2.5, unit: "oz", commonPackageSize: "3.25 oz bag (~$8.49)", shelfLifeDays: 365, tags: ["high-protein","gluten-free"] },
+  // 12-pack $23.99, $2.00/bar
+  { id: "protein-bar", name: "Protein bar", category: "snack", estimatedUnitCost: 2, unit: "bar", commonPackageSize: "12-pack (~$23.99)", shelfLifeDays: 270, tags: ["high-protein","vegetarian"] },
+  // 12-pack $29.99, $2.50/bar
+  { id: "rxbar", name: "RXBAR", category: "snack", estimatedUnitCost: 2.5, unit: "bar", commonPackageSize: "12-pack (~$29.99)", shelfLifeDays: 270, tags: ["high-protein","gluten-free"] },
+  // 12-pack $17.99, $1.50/bar
+  { id: "clif-bar", name: "Clif bar", category: "snack", estimatedUnitCost: 1.5, unit: "bar", commonPackageSize: "12-pack (~$17.99)", shelfLifeDays: 365, tags: ["vegan","vegetarian"] },
+  // 12-pack $20.99, $1.75/bar
+  { id: "kind-bar", name: "KIND bar", category: "snack", estimatedUnitCost: 1.75, unit: "bar", commonPackageSize: "12-pack (~$20.99)", shelfLifeDays: 365, tags: ["gluten-free","vegetarian"] },
+  // 8-pack $9.99, $1.25/bottle
+  { id: "sports-drink", name: "Sports drink (Gatorade)", category: "snack", estimatedUnitCost: 1.25, unit: "serving", commonPackageSize: "8-pack 20 oz bottles (~$9.99)", shelfLifeDays: 365, tags: ["gluten-free"] },
+  // 8-pack $4.49, $0.56/can rounded $0.55
+  { id: "sparkling-water", name: "Sparkling water (La Croix)", category: "snack", estimatedUnitCost: 0.55, unit: "can", commonPackageSize: "8-pack 12 oz cans (~$4.49)", shelfLifeDays: 365, tags: ["cheap","vegan","gluten-free"] },
+  // 32 oz bottle $5.99, ~4 servings of 8 oz, $1.50/cup
+  { id: "cold-brew-coffee", name: "Cold brew coffee", category: "snack", estimatedUnitCost: 1.25, unit: "cup", commonPackageSize: "32 oz bottle (~$5.99)", shelfLifeDays: 21, tags: ["vegan","gluten-free"] },
+  // 8 oz jar $9.99, ~100 tsp, $0.10/tsp
+  { id: "instant-coffee", name: "Instant coffee", category: "snack", estimatedUnitCost: 0.1, unit: "tsp", commonPackageSize: "8 oz jar (~$9.99)", shelfLifeDays: 730, tags: ["staple","vegan","gluten-free"] },
+  // 1 oz tin $14.99, ~17 tsp, $0.88/tsp rounded $0.85
+  { id: "matcha-powder", name: "Matcha powder", category: "snack", estimatedUnitCost: 0.85, unit: "tsp", commonPackageSize: "1 oz tin (~$14.99)", shelfLifeDays: 365, tags: ["vegan","gluten-free"] },
+  // 100-count box $5.99, $0.06/bag; premium $0.15/bag avg
+  { id: "tea-bags", name: "Tea bags", category: "snack", estimatedUnitCost: 0.15, unit: "bag", commonPackageSize: "100-count box (~$5.99)", shelfLifeDays: 730, tags: ["staple","cheap","vegan","gluten-free"] },
+  // 10-packet box $3.99, $0.40/packet
+  { id: "hot-chocolate-mix", name: "Hot chocolate mix", category: "snack", estimatedUnitCost: 0.4, unit: "pack", commonPackageSize: "10-packet box (~$3.99)", shelfLifeDays: 365, tags: ["vegetarian","cheap"] },
 ];
 
 export const INGREDIENT_MAP = new Map(INGREDIENTS.map((i) => [i.id, i]));

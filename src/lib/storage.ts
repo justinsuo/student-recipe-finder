@@ -1,11 +1,13 @@
 "use client";
 
+import { STARTER_PANTRY_IDS } from "@/data/pantryPresets";
 import type { GroceryItem, PantryItem } from "@/lib/types";
 
 const KEYS = {
   pantry: "srf:pantry",
   grocery: "srf:grocery",
   saved: "srf:saved",
+  pantrySeeded: "srf:pantry-seeded",
 } as const;
 
 function safeRead<T>(key: string, fallback: T): T {
@@ -28,8 +30,31 @@ function safeWrite(key: string, value: unknown) {
   }
 }
 
+function rawHas(key: string): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.localStorage.getItem(key) !== null;
+  } catch {
+    return false;
+  }
+}
+
 export const storage = {
   getPantry(): PantryItem[] {
+    // First-ever load (no pantry entry at all) seeds a starter pantry so a
+    // brand-new user can immediately try recipe matching without typing
+    // 30 ingredients first. We only seed when the KEY IS ABSENT — if the
+    // user has explicitly cleared their pantry (key present but []), we
+    // respect that. The `pantrySeeded` flag prevents re-seeding after they
+    // later wipe localStorage and restart.
+    if (typeof window !== "undefined" && !rawHas(KEYS.pantry) && !rawHas(KEYS.pantrySeeded)) {
+      const starter: PantryItem[] = STARTER_PANTRY_IDS.map((ingredientId) => ({
+        ingredientId,
+      }));
+      safeWrite(KEYS.pantry, starter);
+      safeWrite(KEYS.pantrySeeded, true);
+      return starter;
+    }
     return safeRead<PantryItem[]>(KEYS.pantry, []);
   },
   setPantry(items: PantryItem[]) {
