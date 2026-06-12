@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 import {
   Sparkles,
@@ -120,50 +121,71 @@ function BenefitsRow() {
   return (
     <div className="grid grid-cols-2 gap-2 pt-1 sm:grid-cols-4 sm:gap-3">
       <BenefitCard
+        href="/pantry"
         icon={<Briefcase size={16} strokeWidth={2.4} />}
         label="Use what you have"
         toneIcon="bg-[#E8FAF0] text-[#0F5E33]"
+        focusRing="focus-visible:ring-[#2FBF71]"
       />
       <BenefitCard
+        href="/cheap-recipes"
         icon={<DollarSign size={16} strokeWidth={2.6} />}
         label="Respects your budget"
         toneIcon="bg-[#FFF3CC] text-[#7A4A00]"
+        focusRing="focus-visible:ring-[#FFC93D]"
       />
       <BenefitCard
+        href="/nourish"
         icon={<BarChart3 size={16} strokeWidth={2.4} />}
         label="Macro & nutrition breakdown"
         toneIcon="bg-[#EFE8FF] text-[#3F2BB8]"
+        focusRing="focus-visible:ring-[#7C5CFF]"
       />
       <BenefitCard
+        href="/grocery-list"
         icon={<ListChecks size={16} strokeWidth={2.4} />}
         label="Auto grocery list"
         toneIcon="bg-[#DCFAF1] text-[#0B6E55]"
+        focusRing="focus-visible:ring-[#20C7A5]"
       />
     </div>
   );
 }
 
 function BenefitCard({
+  href,
   icon,
   label,
   toneIcon,
+  focusRing,
 }: {
+  href: string;
   icon: React.ReactNode;
   label: string;
   toneIcon: string;
+  focusRing: string;
 }) {
   return (
-    <div className="flex items-center gap-2 rounded-xl border border-white/70 bg-white/70 px-2.5 py-2 shadow-sm backdrop-blur transition-all motion-safe:hover:-translate-y-px hover:bg-white">
+    <Link
+      href={href}
+      className={`group flex items-center gap-2 rounded-xl border border-white/70 bg-white/70 px-2.5 py-2 shadow-sm backdrop-blur transition-all motion-safe:hover:-translate-y-px hover:border-white hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${focusRing}`}
+    >
       <span
         aria-hidden
         className={`grid h-8 w-8 flex-none place-items-center rounded-lg ${toneIcon}`}
       >
         {icon}
       </span>
-      <span className="text-[11px] font-semibold leading-tight text-[#241A12] sm:text-xs">
+      <span className="min-w-0 flex-1 text-[11px] font-semibold leading-tight text-[#241A12] sm:text-xs">
         {label}
       </span>
-    </div>
+      <ArrowRight
+        aria-hidden
+        size={12}
+        strokeWidth={2.6}
+        className="flex-none text-[#6B5A4A] opacity-50 transition-all group-hover:opacity-100 motion-safe:group-hover:translate-x-0.5"
+      />
+    </Link>
   );
 }
 
