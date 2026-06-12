@@ -137,6 +137,66 @@ const EQUIPMENT_OPTS = [
 
 const DIET_OPTS = ["vegetarian", "vegan", "high-protein", "gluten-free", "dairy-free"];
 
+// "Something creative" mode picks one item from each pool and weaves
+// them into a seed string the model sees in its prompt. Two clicks in
+// a row should rarely land on the same combo (5^4 = 625 combos).
+const CREATIVE_CUISINES = [
+  "Korean × Italian",
+  "Japanese × Mexican",
+  "Thai × Mediterranean",
+  "Vietnamese × Tex-Mex",
+  "Indian × Southern American",
+  "Filipino × Cajun",
+  "Levantine × Japanese",
+  "West African × Caribbean",
+];
+const CREATIVE_TECHNIQUES = [
+  "smashed-and-crisped",
+  "steam-then-sear",
+  "cold-marinated",
+  "torn-and-toasted",
+  "sticky-glazed",
+  "pickle-charred",
+  "blistered + raw",
+  "broth-poached then fried",
+];
+const CREATIVE_FORMATS = [
+  "served on a savory waffle",
+  "tucked inside a folded omelet",
+  "as a high-protein mug bowl",
+  "as a hand-held taco-wrap hybrid",
+  "as a single-skillet party crisp",
+  "on a bed of crushed chips",
+  "as a no-cook chilled bowl",
+  "ladled over crispy ramen",
+];
+const CREATIVE_FLAVOR_ANCHORS = [
+  "gochujang + honey",
+  "miso + brown butter",
+  "harissa + yogurt",
+  "chili crisp + lime",
+  "fish sauce + caramel",
+  "tamarind + maple",
+  "preserved lemon + black pepper",
+  "ginger-scallion + sesame",
+];
+
+function pickOne<T>(arr: readonly T[], salt: number): T {
+  // No Math.random in workflow-safe code paths, but this file is a
+  // React client — Math.random is fine here. The salt arg lets us bias
+  // the picks slightly so the same render doesn't repeat values.
+  const i = Math.floor((Math.random() + salt * 0.137) * arr.length) % arr.length;
+  return arr[i];
+}
+
+function buildCreativeSeed(): string {
+  const cuisine = pickOne(CREATIVE_CUISINES, 1);
+  const technique = pickOne(CREATIVE_TECHNIQUES, 2);
+  const format = pickOne(CREATIVE_FORMATS, 3);
+  const anchor = pickOne(CREATIVE_FLAVOR_ANCHORS, 4);
+  return `Lean into a ${cuisine} mashup, ${technique} technique, ${format}, with ${anchor} as the flavor anchor. The result should still be dorm-cookable and taste excellent.`;
+}
+
 export default function AIChefPageWrapper() {
   return (
     <Suspense fallback={<div className="text-stone-500">Loading…</div>}>
@@ -562,6 +622,14 @@ function AIChefPage() {
       // Fast path: parallel Haiku calls direct from browser (~3–5s total)
       // instead of the worker-based mega-call (22s+). Falls back to the
       // worker path when the Anthropic key isn't configured.
+      // When the user picked "Something creative" (mode === "imagine"),
+      // we crank the model's temperature, inject a bold-cooking directive
+      // into the prompt, and switch the 4 parallel role hints to creative
+      // archetypes (fusion mashup / weird format / comfort flip / random
+      // pantry wildcard). A fresh seed per click also prevents two
+      // back-to-back generations from returning the same wildcard.
+      const wantsCreative = mode === "imagine";
+      const creativeSeed = wantsCreative ? buildCreativeSeed() : undefined;
       const res = isAiEnabled()
         ? await generateRecipeQuickOptions({
             pantryIngredients: pantryNames,
@@ -573,6 +641,8 @@ function AIChefPage() {
             servings,
             equipment,
             dietTags: diet,
+            creativityBoost: wantsCreative,
+            creativeSeed,
           })
         : await generateRecipeOptions({
             pantryIngredients: pantryNames,
@@ -583,7 +653,10 @@ function AIChefPage() {
             servings,
             equipment,
             dietTags: diet,
-            creativityLevel: creativity,
+            // Force the slow worker path into its strongest creativity
+            // setting too when the user picked the imagine mode, so both
+            // code paths behave consistently.
+            creativityLevel: wantsCreative ? "creative" : creativity,
             appendToExisting: append,
             previousOptions: append
               ? options.map((o) => ({ recipe: { name: o.recipe.name } }))

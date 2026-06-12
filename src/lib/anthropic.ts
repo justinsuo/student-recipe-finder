@@ -310,6 +310,21 @@ export interface HaikuRecipeInput {
   dietTags?: string[];
   timeLimit?: string;
   refinement?: string;
+  /**
+   * When true, the prompt nudges Haiku to be genuinely bold — unusual
+   * ingredient combinations, fusion mashups, surprising formats — and
+   * the temperature is raised. Set this when the user picked the
+   * "Something creative" mode on /ai-chef so the 4 options come back
+   * meaningfully different from the safe pantry-match baseline.
+   */
+  creativityBoost?: boolean;
+  /**
+   * Free-form creativity seed appended to the prompt so two clicks in
+   * a row don't return the same dish. Compose this from a few
+   * random pickers on the client (cuisine + technique + format) so
+   * every generation has fresh direction.
+   */
+  creativeSeed?: string;
 }
 
 interface SlimHaikuRecipe {
@@ -375,6 +390,31 @@ Respond with ONLY valid JSON in this exact shape (no markdown):
   "imagePromptHint": "1 sentence — no people, no text, no logos"
 }`;
 
+// Creative directive — injected into the user prompt when the user picks
+// "Something creative" on /ai-chef. The model defaults to safe pantry-match
+// recipes, so without this, all four parallel options collapse into minor
+// variations of fried rice / scrambled-eggs / pasta. With it on, Haiku is
+// explicitly told to gamble.
+const CREATIVITY_DIRECTIVE = `
+[CREATIVE MODE — ON]
+Throw out the safe playbook. This user wants a recipe that surprises them.
+
+Push hard on:
+- Unexpected cuisine combinations (Korean × Italian, Mexican × Japanese, Indian × Cajun, etc.).
+- Unconventional formats (savory waffle, ramen taco, blender-only ice cream, mug cake dinner, no-stove sushi bake, breakfast-for-dinner, dessert that doubles as a meal).
+- A bold flavor anchor: gochujang, miso, harissa, chili crisp, fish sauce, brown butter, browned garlic honey, smoked paprika, lime + black pepper.
+- A surprise ingredient pairing the user wouldn't have thought to combine.
+- A fun, evocative recipe name — not "Chicken Rice Bowl". Aim for something like "Lazy Korean Hot Honey Egg Rice" or "Microwave Carbonara Mug".
+
+Still required:
+- Actually edible. No joke recipes.
+- Uses the pantry where it fits and stays within budget + equipment + diet.
+- Numbers stay realistic (cost, time, quantities).
+- Step list still works for a tired student in a dorm kitchen.
+
+If the user typed cravings, honor them but lean into the bold version of what they asked for.
+`.trim();
+
 function buildQuickRecipeUserPrompt(opts: HaikuRecipeInput): string {
   const lines: string[] = ["What can I cook tonight with what I have?"];
   if (opts.pantryIngredients?.length) {
@@ -400,6 +440,13 @@ function buildQuickRecipeUserPrompt(opts: HaikuRecipeInput): string {
   }
   if (opts.refinement) {
     lines.push(`Refinement: ${opts.refinement}`);
+  }
+  if (opts.creativityBoost) {
+    lines.push("");
+    lines.push(CREATIVITY_DIRECTIVE);
+  }
+  if (opts.creativeSeed) {
+    lines.push(`Creative seed (use to vary direction): ${opts.creativeSeed}`);
   }
   lines.push("\nReturn ONLY valid JSON matching the schema. No markdown.");
   return lines.join("\n");
@@ -497,7 +544,11 @@ export async function generateRecipeQuick(
   const text = await callAnthropic({
     system: QUICK_RECIPE_SYSTEM,
     maxTokens: 1500,
-    temperature: 0.6,
+    // Bump sampling when creativityBoost is on so the model actually
+    // ventures away from the safe "fried rice / scrambled eggs" baseline.
+    // Anthropic caps at 1.0; 0.95 gives Haiku room to surprise without
+    // going completely incoherent.
+    temperature: opts.creativityBoost ? 0.95 : 0.6,
     messages: [
       { role: "user", content: buildQuickRecipeUserPrompt(opts) },
     ],
@@ -513,27 +564,65 @@ export async function generateRecipeQuick(
  */
 import type { GeneratedRecipeOption, GeneratedRecipeOptionSet, OptionLabel } from "@/lib/workerClient";
 
+// Pool of variations used to spice the per-call refinement when
+// creativityBoost is on. Each role still has a distinct hint so the
+// 4 returned options actually look different from each other.
+const CREATIVE_ROLES: Array<{ id: string; label: OptionLabel; hint: string }> = [
+  {
+    id: "opt-1",
+    label: "most-creative",
+    hint: "Fusion mashup: two cuisines collide on purpose (e.g. Korean × Italian, Mexican × Japanese). Bold flavor anchor, evocative name, still cookable in a dorm.",
+  },
+  {
+    id: "opt-2",
+    label: "wildcard",
+    hint: "Unusual format: dinner that lives in a mug, on a waffle iron, inside a tortilla, or as a no-cook bowl. The format itself should surprise the user.",
+  },
+  {
+    id: "opt-3",
+    label: "comfort-food",
+    hint: "Comfort-food flip: a familiar craving (mac & cheese, fried rice, ramen, breakfast sandwich) reimagined with one unexpected twist that makes it feel new.",
+  },
+  {
+    id: "opt-4",
+    label: "uses-most-pantry",
+    hint: "Random pantry wildcard: pick 1-2 of the LESS obvious pantry items and build the dish around them. Surprising but uses what the user already has.",
+  },
+];
+
+const SAFE_ROLES: Array<{ id: string; label: OptionLabel; hint: string }> = [
+  { id: "opt-1", label: "best-match", hint: "Best overall match: balanced, satisfying, fits the user's pantry, budget, and equipment closely." },
+  { id: "opt-2", label: "cheapest", hint: "Cheapest variant: bare-essentials ingredients, minimize anything missing, lowest cost per serving." },
+  { id: "opt-3", label: "fastest", hint: "Fastest variant: minimal steps, single-pan or single-bowl, under 15 minutes total." },
+  { id: "opt-4", label: "wildcard", hint: "Creative wildcard: meaningfully DIFFERENT format from the main (bowl vs wrap vs soup vs no-cook). Surprising but realistic." },
+];
+
 export async function generateRecipeQuickOptions(
   opts: HaikuRecipeInput,
 ): Promise<GeneratedRecipeOptionSet> {
-  const ROLES: Array<{ id: string; label: OptionLabel; hint: string }> = [
-    { id: "opt-1", label: "best-match", hint: "Best overall match: balanced, satisfying, fits the user's pantry, budget, and equipment closely." },
-    { id: "opt-2", label: "cheapest", hint: "Cheapest variant: bare-essentials ingredients, minimize anything missing, lowest cost per serving." },
-    { id: "opt-3", label: "fastest", hint: "Fastest variant: minimal steps, single-pan or single-bowl, under 15 minutes total." },
-    { id: "opt-4", label: "wildcard", hint: "Creative wildcard: meaningfully DIFFERENT format from the main (bowl vs wrap vs soup vs no-cook). Surprising but realistic." },
-  ];
+  const ROLES = opts.creativityBoost ? CREATIVE_ROLES : SAFE_ROLES;
   const results = await Promise.all(
     ROLES.map(async (role): Promise<GeneratedRecipeOption | null> => {
       try {
         const r = await generateRecipeQuick({
           ...opts,
-          refinement: role.hint,
+          // Stack per-role hint after any caller-provided refinement so
+          // both signals reach the model.
+          refinement: opts.refinement
+            ? `${opts.refinement}\n${role.hint}`
+            : role.hint,
         });
         return {
           id: role.id,
           optionLabel: role.label,
           shortReason: r.whyThisFits || "",
-          pantryMatchScore: role.id === "opt-1" ? 1 : 0.85,
+          // In creative mode no role is the "obvious match" — give them
+          // equal weight and let the first one render selected.
+          pantryMatchScore: opts.creativityBoost
+            ? 0.9
+            : role.id === "opt-1"
+              ? 1
+              : 0.85,
           selectedByDefault: role.id === "opt-1",
           notesInfluenceSummary: "",
           recipe: r,
