@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Sparkles,
@@ -262,6 +262,14 @@ function AIChefPage() {
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [optionImages, setOptionImages] = useState<Record<string, string>>({});
   const [optionSavedIds, setOptionSavedIds] = useState<Record<string, string>>({});
+  // Mirror of optionSavedIds + optionImages that's safe to read inside async
+  // callbacks. React setState is asynchronous, so when persistOption() runs
+  // immediately followed by generateImageForOption(), the latter's closure
+  // sees the OLD optionSavedIds — and the image silently fails to attach
+  // to the saved recipe (which is what made the image disappear when the
+  // user clicked "Open full page"). These refs let us read the live values.
+  const optionSavedIdsRef = useRef<Record<string, string>>({});
+  const optionImagesRef = useRef<Record<string, string>>({});
   const [generatingImageIds, setGeneratingImageIds] = useState<Set<string>>(new Set());
   const [appending, setAppending] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
@@ -510,26 +518,38 @@ function AIChefPage() {
         : img.url;
       if (src) {
         setOptionImages((m) => ({ ...m, [o.id]: src }));
-        // Update saved recipe with image URL
-        const saved = optionSavedIds[o.id];
-        if (saved) {
-          const existing = getCustomRecipes().find((r) => r.id === saved);
-          if (existing) {
-            saveCustomRecipe({
-              ...existing,
-              image: {
-                src,
-                alt: o.recipe.name,
-                sourceName: "AI generated",
-                license: "Generated image",
-                isAIGenerated: true,
-                isFallback: false,
-                generatedPrompt: img.prompt,
-                generatedAt: new Date().toISOString(),
-                model: img.model,
-              },
-            });
-          }
+        optionImagesRef.current = { ...optionImagesRef.current, [o.id]: src };
+        // Make sure the recipe is persisted before we attach the image.
+        // persistOption() is idempotent — returns the existing id if we
+        // already saved it this session. Reading from the ref avoids the
+        // stale-closure race that was making images disappear after the
+        // user clicked "Open full page".
+        const savedId = optionSavedIdsRef.current[o.id] ?? persistOption(o);
+        // Stash the b64 in the separate image store so it survives a
+        // page navigation. The recipe blob still carries the data URL
+        // as a fallback, but the dedicated store dedupes + auto-evicts.
+        if (img.b64_json) {
+          storeRecipeImage(savedId, img.b64_json, {
+            prompt: img.prompt,
+            model: img.model,
+          });
+        }
+        const existing = getCustomRecipes().find((r) => r.id === savedId);
+        if (existing) {
+          saveCustomRecipe({
+            ...existing,
+            image: {
+              src,
+              alt: o.recipe.name,
+              sourceName: "AI generated",
+              license: "Generated image",
+              isAIGenerated: true,
+              isFallback: false,
+              generatedPrompt: img.prompt,
+              generatedAt: new Date().toISOString(),
+              model: img.model,
+            },
+          });
         }
       }
     } catch (e) {
@@ -550,7 +570,13 @@ function AIChefPage() {
   }
 
   function persistOption(o: GeneratedRecipeOption): string {
-    const id = optionSavedIds[o.id] ?? makeCustomRecipeId(o.recipe.name, "gen");
+    // Read from the ref so we don't allocate a NEW id every call inside
+    // the same render cycle. Without this, two back-to-back calls (e.g.
+    // the auto-persist loop followed by generateImageForOption) would
+    // each see an empty optionSavedIds and mint two different ids.
+    const id =
+      optionSavedIdsRef.current[o.id] ??
+      makeCustomRecipeId(o.recipe.name, "gen");
     const r = reconcileNutrition(o.recipe);
     const ai: AIGeneratedRecipe = {
       id,
@@ -592,7 +618,36 @@ function AIChefPage() {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    saveCustomRecipe(ai);
+    // If we already generated an image for this option (auto-image ran
+    // first, or the user is re-saving), splice it in so the persisted
+    // blob carries the image. Otherwise we'd overwrite a real image
+    // with a fallback whenever persistOption() gets called a second
+    // time (which generateImageForOption now does idempotently).
+    const existingImg = optionImagesRef.current[o.id];
+    const finalAi: AIGeneratedRecipe = existingImg
+      ? {
+          ...ai,
+          image: {
+            src: existingImg,
+            alt: r.name,
+            sourceName: "AI generated",
+            license: "Generated image",
+            isAIGenerated: true,
+            isFallback: false,
+          },
+        }
+      : ai;
+    saveCustomRecipe(finalAi);
+    // Also drop the b64 into the separate image store so it survives
+    // navigation even if localStorage drops the recipe blob image field.
+    if (existingImg && existingImg.startsWith("data:image/")) {
+      const b64 = existingImg.replace(/^data:image\/[a-z]+;base64,/, "");
+      storeRecipeImage(id, b64);
+    }
+    optionSavedIdsRef.current = {
+      ...optionSavedIdsRef.current,
+      [o.id]: id,
+    };
     setOptionSavedIds((m) => ({ ...m, [o.id]: id }));
     return id;
   }

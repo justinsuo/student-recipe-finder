@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
+  ArrowRight,
   Bookmark,
   BookmarkCheck,
   Clock,
@@ -255,6 +256,12 @@ function CustomRecipePage() {
         </h1>
         <p className="text-stone-700">{recipe.description}</p>
         <div className="flex flex-wrap gap-2 pt-2">
+          <Link
+            href={`/recipes/cook?id=${id}`}
+            className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-px hover:bg-emerald-700"
+          >
+            <ChefHat size={14} /> Cook step-by-step <ArrowRight size={14} />
+          </Link>
           <Button
             variant="outline"
             onClick={() => toggleSaved(id)}
