@@ -5,7 +5,9 @@
  * The Worker URL is injected at build time via NEXT_PUBLIC_WORKER_URL.
  */
 
-const WORKER_URL = (process.env.NEXT_PUBLIC_WORKER_URL ?? "").replace(/\/$/, "");
+import { config } from "@shared/platform/config";
+
+const WORKER_URL = config().workerUrl;
 
 export function isWorkerConfigured(): boolean {
   return WORKER_URL.length > 0;

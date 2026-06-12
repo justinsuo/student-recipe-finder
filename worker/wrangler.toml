@@ -3,6 +3,21 @@ main = "src/index.ts"
 compatibility_date = "2025-05-01"
 compatibility_flags = ["nodejs_compat"]
 
+# ── Cross-device sync (web ⇄ iPhone) ─────────────────────────────────────────
+# /sync/pull and /sync/push store each anonymous "sync code"'s user data
+# (pantry, grocery, saved, custom recipes, the Nourish diary, …) in this KV
+# namespace so an edit on the website appears on the phone and vice-versa.
+# Create it once, paste the printed id below, then redeploy:
+#
+#   wrangler kv namespace create WAIVY_SYNC
+#   # → copy the id into `id` here, then `wrangler deploy`
+#
+# Sync degrades gracefully: if the binding is missing the routes return 503 and
+# both apps keep working fully (local-only).
+[[kv_namespaces]]
+binding = "SYNC"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
 # OPENAI_API_KEY and ALLOWED_ORIGIN are stored as worker secrets:
 #   wrangler secret put OPENAI_API_KEY
 #   wrangler secret put ALLOWED_ORIGIN  (e.g. https://justinsuo.github.io)

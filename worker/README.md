@@ -43,6 +43,22 @@ gh secret set WORKER_URL --body "https://waivy-api.<your-cf-subdomain>.workers.d
 | POST | `/ingredients/match` | Semantic match: pantry item ↔ recipe requirement |
 | POST | `/generate-recipe` | AI Chef recipe generation |
 | POST | `/generate-recipe-image` | OpenAI image generation for a recipe |
+| POST | `/sync/pull` | Cross-device sync: read a sync code's data |
+| POST | `/sync/push` | Cross-device sync: merge + read back (per-key last-write-wins) |
+
+(plus `/generate-recipe-options`, `/recipes/import-url`, `/recipes/import-text`, `/recipes/web-search`, `/pricing/estimate-ingredient`, `/recipes/remix`.)
+
+## Cross-device sync (web ⇄ iPhone)
+
+`/sync/pull` and `/sync/push` back the cross-device sync used by the iPhone app and the website. State for each anonymous **sync code** lives in a KV namespace as `{ keys: { [storageKey]: { value, updatedAt } } }`, reconciled per-key last-write-wins. Enable it once:
+
+```bash
+wrangler kv namespace create WAIVY_SYNC
+# paste the printed id into the [[kv_namespaces]] block in wrangler.toml (binding "SYNC")
+wrangler deploy
+```
+
+If the `SYNC` binding is absent the routes return `503` and both apps keep working fully (local-only). Request bodies: `POST /sync/pull { code }` → `{ keys }`; `POST /sync/push { code, changes }` → merged `{ keys }`.
 
 ## Local dev
 

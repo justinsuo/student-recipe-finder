@@ -10,6 +10,8 @@
 //    Default is enabled. Setting changes are picked up immediately
 //    because each call reads the flag fresh — no cache.
 
+import { kv } from "@shared/platform/kv";
+
 const STORAGE_KEY = "srf:haptics-enabled";
 
 function safeWindow(): Window | null {
@@ -27,7 +29,7 @@ export function isHapticsEnabled(): boolean {
   const w = safeWindow();
   if (!w) return false;
   try {
-    const raw = w.localStorage.getItem(STORAGE_KEY);
+    const raw = kv().getItem(STORAGE_KEY);
     if (raw === null) return true;
     return raw !== "false";
   } catch {
@@ -40,7 +42,7 @@ export function setHapticsEnabled(enabled: boolean): void {
   const w = safeWindow();
   if (!w) return;
   try {
-    w.localStorage.setItem(STORAGE_KEY, enabled ? "true" : "false");
+    kv().setItem(STORAGE_KEY, enabled ? "true" : "false");
   } catch {
     /* ignore quota */
   }

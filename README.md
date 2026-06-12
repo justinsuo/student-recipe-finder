@@ -1,6 +1,8 @@
 # Waivy
 
-**Live site:** https://justinsuo.github.io/waivy/
+**Live site:** https://justinsuo.github.io/waivy/ · **iPhone app:** [`/mobile`](mobile/) (Expo / React Native)
+
+> 📱 **There is now a native iPhone app** in [`mobile/`](mobile/). It is a mobile-first rebuild (bottom tabs, bottom sheets, gestures, haptics, full-screen guided cooking, camera/voice, local notifications) that **shares this repo's exact business logic** — recipes, the nutrition/pricing/scoring engines, and the AI clients are imported in place from `src/`, not duplicated. A cross-device **sync** layer (`shared/` + the Worker's `/sync` KV endpoints) keeps your pantry, grocery list, saved & custom recipes, and Nourish diary in step between the website and the phone. See [`mobile/README.md`](mobile/README.md).
 
 > Waivy (sometimes "Waivy AI") is the AI cooking assistant for students. Previously released as "Student Recipe Finder" — the repo, package name, and live URL were renamed on 2026-06-02. The `srf:` localStorage prefix is kept as-is so existing users don't lose their pantry / saved / grocery list.
 

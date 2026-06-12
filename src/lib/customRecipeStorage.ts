@@ -6,6 +6,7 @@ import type {
   CustomRecipeImage,
   UserCreatedRecipe,
 } from "@/lib/customRecipeTypes";
+import { kv } from "@shared/platform/kv";
 
 const RECIPES_KEY = "srf:custom-recipes";
 const IMAGES_KEY = "srf:custom-recipe-images"; // small base64s only, with cap
@@ -16,7 +17,7 @@ const MAX_TOTAL_IMAGE_BYTES = 6 * 1024 * 1024; // 6 MB total
 function safeRead<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
   try {
-    const raw = window.localStorage.getItem(key);
+    const raw = kv().getItem(key);
     return raw ? (JSON.parse(raw) as T) : fallback;
   } catch {
     return fallback;
@@ -26,7 +27,7 @@ function safeRead<T>(key: string, fallback: T): T {
 function safeWrite(key: string, value: unknown) {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(key, JSON.stringify(value));
+    kv().setItem(key, JSON.stringify(value));
   } catch {
     /* quota — fall through */
   }
@@ -119,7 +120,7 @@ export function storeRecipeImage(
     bytes,
   };
   try {
-    window.localStorage.setItem(IMAGES_KEY, JSON.stringify(map));
+    kv().setItem(IMAGES_KEY, JSON.stringify(map));
     return { ok: true };
   } catch {
     return { ok: false, reason: "localStorage quota" };

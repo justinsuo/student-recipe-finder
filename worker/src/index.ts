@@ -16,6 +16,9 @@
 interface Env {
   OPENAI_API_KEY: string;
   ALLOWED_ORIGIN?: string;
+  // KV namespace backing cross-device sync (/sync/*). Optional: when the
+  // binding is absent the sync routes return 503 and the apps stay local-only.
+  SYNC?: KVNamespace;
   // Per-task model overrides — each falls back to DEFAULT_TEXT_MODEL
   // if not set. All env vars are optional.
   DEFAULT_TEXT_MODEL?: string;
@@ -1515,6 +1518,100 @@ function buildImagePrompt(
   return `${name}. ${methodHint} Visible ingredients: ${ingredientList}. ${base}.`;
 }
 
+// ---------- Cross-device sync (KV) ----------
+//
+// Each anonymous "sync code" maps to one KV document:
+//   { keys: { [storageKey]: { value: <stringified JSON>, updatedAt: <ms> } } }
+// Reconciliation is per-key last-write-wins by updatedAt. No accounts, no
+// passwords — the code itself is the capability. The web app and the iPhone app
+// call these identically so an edit on one device shows up on the other.
+
+type SyncEntry = { value: string; updatedAt: number };
+type SyncDoc = { keys: Record<string, SyncEntry> };
+
+const SYNC_CODE_RE = /^[a-z0-9]{4,40}$/;
+const MAX_SYNC_DOC_BYTES = 4_000_000; // ~4MB guard (KV allows 25MB; stay lean)
+
+function syncKvKey(code: string): string {
+  return `sync:${code}`;
+}
+
+async function readSyncDoc(env: Env, code: string): Promise<SyncDoc> {
+  if (!env.SYNC) return { keys: {} };
+  const raw = await env.SYNC.get(syncKvKey(code));
+  if (!raw) return { keys: {} };
+  try {
+    const parsed = JSON.parse(raw) as SyncDoc;
+    if (parsed && typeof parsed === "object" && parsed.keys) return parsed;
+  } catch {
+    // corrupted doc — start fresh rather than wedge the user
+  }
+  return { keys: {} };
+}
+
+async function handleSyncPull(req: Request, env: Env): Promise<Response> {
+  const origin = req.headers.get("Origin");
+  if (!env.SYNC) return jsonResponse({ error: "Sync not configured" }, 503, env, origin);
+  let body: { code?: string };
+  try {
+    body = (await req.json()) as { code?: string };
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400, env, origin);
+  }
+  const code = (body.code || "").trim().toLowerCase();
+  if (!SYNC_CODE_RE.test(code)) {
+    return jsonResponse({ error: "Invalid sync code" }, 400, env, origin);
+  }
+  const doc = await readSyncDoc(env, code);
+  return jsonResponse(doc, 200, env, origin);
+}
+
+async function handleSyncPush(req: Request, env: Env): Promise<Response> {
+  const origin = req.headers.get("Origin");
+  if (!env.SYNC) return jsonResponse({ error: "Sync not configured" }, 503, env, origin);
+  let body: { code?: string; changes?: Record<string, SyncEntry> };
+  try {
+    body = (await req.json()) as typeof body;
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400, env, origin);
+  }
+  const code = (body.code || "").trim().toLowerCase();
+  if (!SYNC_CODE_RE.test(code)) {
+    return jsonResponse({ error: "Invalid sync code" }, 400, env, origin);
+  }
+  const doc = await readSyncDoc(env, code);
+  const changes = body.changes || {};
+  let mutated = false;
+  for (const [key, entry] of Object.entries(changes)) {
+    if (
+      !entry ||
+      typeof entry.value !== "string" ||
+      typeof entry.updatedAt !== "number"
+    ) {
+      continue; // skip malformed entries defensively
+    }
+    const existing = doc.keys[key];
+    if (!existing || entry.updatedAt > existing.updatedAt) {
+      doc.keys[key] = { value: entry.value, updatedAt: entry.updatedAt };
+      mutated = true;
+    }
+  }
+  if (mutated) {
+    const serialized = JSON.stringify(doc);
+    if (serialized.length > MAX_SYNC_DOC_BYTES) {
+      return jsonResponse(
+        { error: "Sync payload too large" },
+        413,
+        env,
+        origin,
+      );
+    }
+    await env.SYNC.put(syncKvKey(code), serialized);
+  }
+  // Return the merged doc so the caller can apply anyone else's newer keys.
+  return jsonResponse(doc, 200, env, origin);
+}
+
 // ---------- Main router ----------
 
 export default {
@@ -1592,6 +1689,10 @@ export default {
         return handlePricingEstimateIngredient(req, env);
       case "/recipes/remix":
         return handleRemix(req, env);
+      case "/sync/pull":
+        return handleSyncPull(req, env);
+      case "/sync/push":
+        return handleSyncPush(req, env);
       default:
         return jsonResponse({ error: "Not found" }, 404, env, origin);
     }
