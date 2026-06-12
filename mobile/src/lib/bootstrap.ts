@@ -14,6 +14,7 @@ import { setConfig } from "@shared/platform/config";
 import { makeTrackedKV } from "@shared/sync/trackedKV";
 import { isSyncEnabled, syncNow } from "@shared/sync/syncClient";
 import { hydrateKV, mobileKV } from "./kvMobile";
+import { loadShotsFlag } from "./screenshots";
 
 // Show cooking-timer notifications even while the app is foregrounded.
 Notifications.setNotificationHandler({
@@ -61,6 +62,7 @@ export async function bootstrap(): Promise<void> {
   await hydrateKV();
   setKV(makeTrackedKV(mobileKV, scheduleSync));
   applySavedConfig();
+  await loadShotsFlag();
 
   if (isSyncEnabled()) syncNow().catch(() => {});
   setInterval(() => {

@@ -55,6 +55,28 @@ npx expo export --platform ios   # production bundle
 npx expo-doctor                  # environment check
 ```
 
+## Screenshots — auto-updated on every push
+
+The repo's [screenshot gallery](../docs/screenshots/) regenerates itself, so the
+images are never stale:
+
+- The app has a built-in **tour mode** (`src/lib/screenshots.ts` +
+  `src/components/ScreenshotDriver.tsx`). When a `shots.json` flag file is dropped
+  into its container, it seeds realistic demo data and auto-walks every screen,
+  announcing each one.
+- [`scripts/capture-screenshots.sh`](scripts/capture-screenshots.sh) flips that
+  flag, grabs a clean `simctl io` screenshot per screen into `docs/screenshots/`,
+  and downscales them.
+- A [`pre-push` git hook](../.githooks/pre-push) runs the capture before every
+  push (when a booted sim + Metro are available) and won't let stale images ship.
+  Enable it once per clone:
+
+  ```bash
+  git config core.hooksPath .githooks      # from the repo root
+  ```
+
+  Capture manually any time: `bash mobile/scripts/capture-screenshots.sh`.
+
 ## Theme
 
 The "Pantry Pop" palette (cream `#FFF8ED`, basil `#2FBF71`, carrot/butter/grape/teal/sky/pink accents) lives in `src/theme/index.ts`, mirroring the web tokens.

@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+#
+# Keeps the iPhone-app screenshot gallery (docs/screenshots/) up to date on every
+# push. If a booted simulator with Waivy + a running Metro dev server is
+# available, it re-captures the screens; if they changed, it commits them and
+# stops the push so the fresh commit gets included on your next `git push`.
+#
+# It skips cleanly (and never blocks) when no simulator/app/Metro is around
+# (e.g. CI or a teammate's machine), so it's safe for everyone.
+#
+# Enable once:   git config core.hooksPath .githooks
+# Bypass once:   WAIVY_SKIP_SHOTS=1 git push     (or: git push --no-verify)
+set -uo pipefail
+
+[ -n "${WAIVY_SKIP_SHOTS:-}" ] && exit 0
+
+ROOT="$(git rev-parse --show-toplevel)"
+UDID="$(xcrun simctl list devices booted 2>/dev/null | grep -oE '\([0-9A-Fa-f-]{36}\)' | tr -d '()' | head -1)"
+
+if [ -z "$UDID" ] || ! xcrun simctl get_app_container "$UDID" com.waivy.app data >/dev/null 2>&1; then
+  echo "[waivy] no booted simulator with the app — skipping screenshot refresh"
+  exit 0
+fi
+if ! lsof -i :8081 >/dev/null 2>&1; then
+  echo "[waivy] Metro dev server not running — skipping screenshot refresh (cd mobile && npx expo start)"
+  exit 0
+fi
+
+echo "[waivy] 📸 refreshing app screenshots before push…"
+if ! bash "$ROOT/mobile/scripts/capture-screenshots.sh" "$UDID"; then
+  echo "[waivy] capture failed — pushing without refreshing"
+  exit 0
+fi
+
+if ! git -C "$ROOT" diff --quiet -- docs/screenshots 2>/dev/null; then
+  git -C "$ROOT" add docs/screenshots
+  git -C "$ROOT" commit -m "chore: refresh iPhone app screenshots" --no-verify >/dev/null
+  echo "[waivy] ✅ screenshots changed — committed them. Run 'git push' once more to include the update."
+  exit 1
+fi
+
+echo "[waivy] screenshots already up to date ✓"
+exit 0
