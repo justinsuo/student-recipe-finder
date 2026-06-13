@@ -8,6 +8,7 @@ import { useKVRaw } from "../store";
 import * as N from "@/lib/nourish/storage";
 import { sumTotals } from "@/lib/nourish/types";
 import { celebrate } from "~/components/Celebration";
+import { recordActivity } from "~/lib/streak";
 import type {
   DiaryEntry,
   FoodItem,
@@ -72,7 +73,13 @@ export function useRecentFoods(): FoodItem[] {
   return N.getRecentFoods();
 }
 
-export function logFood(food: FoodItem, meal: MealSlot, servings: number, date?: string) {
+export function logFood(
+  food: FoodItem,
+  meal: MealSlot,
+  servings: number,
+  date?: string,
+  opts?: { silent?: boolean },
+) {
   const d = date ?? N.todayString();
   const before = sumTotals(N.getDiaryForDate(d));
   const entry: DiaryEntry = {
@@ -90,16 +97,22 @@ export function logFood(food: FoodItem, meal: MealSlot, servings: number, date?:
   N.addDiaryEntry(entry);
   N.pushRecentFood(food);
 
-  // Celebrate the moment a daily goal is *crossed* (Duolingo-style win).
-  // Only on today's log, and only on the crossing so it doesn't repeat.
-  if (d === N.todayString()) {
-    const after = sumTotals(N.getDiaryForDate(d));
-    const t = N.getTargets() ?? DEFAULT_TARGET;
-    if (t.proteinG && before.proteinG < t.proteinG && after.proteinG >= t.proteinG) {
-      celebrate("Protein goal hit! 💪");
-    } else if (t.calorieTarget && before.kcal < t.calorieTarget && after.kcal >= t.calorieTarget) {
-      celebrate("Calorie goal hit! 🎯");
-    }
+  if (d !== N.todayString()) return;
+  // Count the day toward the cooking/logging streak.
+  const streak = recordActivity();
+  // The caller (e.g. cook-complete) may own its own celebration — stay silent.
+  if (opts?.silent) return;
+
+  // Celebrate, in priority order: a new streak day, then a goal *crossing*
+  // (only on the crossing so it doesn't repeat every subsequent log).
+  const after = sumTotals(N.getDiaryForDate(d));
+  const t = N.getTargets() ?? DEFAULT_TARGET;
+  if (streak.increased && streak.count > 1) {
+    celebrate(`${streak.count}-day streak! 🔥`);
+  } else if (t.proteinG && before.proteinG < t.proteinG && after.proteinG >= t.proteinG) {
+    celebrate("Protein goal hit! 💪");
+  } else if (t.calorieTarget && before.kcal < t.calorieTarget && after.kcal >= t.calorieTarget) {
+    celebrate("Calorie goal hit! 🎯");
   }
 }
 

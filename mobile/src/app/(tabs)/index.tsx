@@ -10,6 +10,7 @@ import { colors, space, radius, accent, AccentKey, shadow } from "~/theme";
 import { allSeedViews } from "~/lib/recipes";
 import { usePantry, useGrocery } from "~/lib/stores/app";
 import { useToday } from "~/lib/stores/nourish";
+import { useStreak } from "~/lib/streak";
 import { rankPantryCatalog } from "~/lib/catalog";
 
 function greeting() {
@@ -31,6 +32,7 @@ export default function HomeScreen() {
   const { pantry } = usePantry();
   const { grocery } = useGrocery();
   const today = useToday();
+  const streak = useStreak();
 
   const allViews = allSeedViews();
   const cheapest = useMemo(() => {
@@ -53,7 +55,23 @@ export default function HomeScreen() {
           <Txt variant="label">{greeting()} 👋</Txt>
           <Txt variant="title">What should we cook?</Txt>
         </View>
-        <IconButton icon="settings" onPress={() => router.push("/settings")} />
+        <Row gap={8}>
+          {streak.count > 0 ? (
+            <Row
+              gap={3}
+              style={{
+                backgroundColor: accent.cheap.tint,
+                paddingHorizontal: 11,
+                paddingVertical: 7,
+                borderRadius: radius.pill,
+              }}
+            >
+              <Txt style={{ fontSize: 15 }}>🔥</Txt>
+              <Txt weight="800" color={accent.cheap.shadow}>{streak.count}</Txt>
+            </Row>
+          ) : null}
+          <IconButton icon="settings" onPress={() => router.push("/settings")} />
+        </Row>
       </Row>
 
       {/* Quick actions */}

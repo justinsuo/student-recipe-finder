@@ -11,7 +11,12 @@ export function mealSlotNow(): MealSlot {
   return "snack";
 }
 
-export function logRecipeAsMeal(name: string, n: NutritionEstimate, externalId?: string): number {
+export function logRecipeAsMeal(
+  name: string,
+  n: NutritionEstimate,
+  externalId?: string,
+  opts?: { silent?: boolean },
+): number {
   const food: FoodItem = {
     id: `recipe-${Date.now().toString(36)}-${Math.floor((n.calories || 0))}`,
     source: "recipe",
@@ -24,6 +29,6 @@ export function logRecipeAsMeal(name: string, n: NutritionEstimate, externalId?:
     fatG: Math.round((n.fat || 0) * 10) / 10,
     fiberG: n.fiber,
   };
-  logFood(food, mealSlotNow(), 1);
+  logFood(food, mealSlotNow(), 1, undefined, opts);
   return food.kcal;
 }
