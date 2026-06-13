@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { Txt, Row, Button, Press, IconButton, EmptyState } from "~/components/ui";
 import { toast } from "~/components/Toast";
+import { celebrate } from "~/components/Celebration";
 import { colors, space, radius, accent } from "~/theme";
 import { getSeedRecipe, getCustom, getAnyView } from "~/lib/recipes";
 import { logRecipeAsMeal } from "~/lib/actions";
@@ -147,7 +148,7 @@ export default function GuidedCookScreen() {
         <Button title="Back" icon="arrow-left" variant="secondary" size="lg" style={{ flex: 1 }} disabled={i === 0} onPress={() => { Speech.stop(); setI((v) => Math.max(0, v - 1)); }} />
         {isLast ? (
           <Button title="Done 🎉" icon="check" accentKey="pantry" variant="accent" size="lg" style={{ flex: 2 }}
-            onPress={() => { Speech.stop(); const c = logRecipeAsMeal(data.name, data.nutrition, recipeId); toast(`Nice! Logged ${c} cal`, "reward"); router.back(); }} />
+            onPress={() => { Speech.stop(); const c = logRecipeAsMeal(data.name, data.nutrition, recipeId); celebrate("Nice work! 🎉"); toast(`Logged ${c} cal`, "reward"); router.back(); }} />
         ) : (
           <Button title="Next step" icon="arrow-right" accentKey="ai-chef" variant="accent" size="lg" style={{ flex: 2 }} onPress={() => { Speech.stop(); setI((v) => Math.min(total - 1, v + 1)); }} />
         )}

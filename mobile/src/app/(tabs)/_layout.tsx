@@ -1,28 +1,43 @@
 import { Tabs } from "expo-router";
-import { Platform, View } from "react-native";
+import { Platform } from "react-native";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import { useEffect } from "react";
 import { Feather } from "@expo/vector-icons";
-import { colors, shadow } from "~/theme";
+import { colors } from "~/theme";
+import { selection as hapticSelection } from "~/lib/haptics";
 
 function TabIcon({ name, color, focused }: { name: any; color: string; focused: boolean }) {
+  // Active icon springs up a touch when selected — small, satisfying.
+  const s = useSharedValue(focused ? 1 : 0.92);
+  useEffect(() => {
+    s.value = withSpring(focused ? 1 : 0.92, { damping: 10, stiffness: 320 });
+  }, [focused]);
+  const aStyle = useAnimatedStyle(() => ({ transform: [{ scale: s.value }] }));
   return (
-    <View
-      style={{
-        width: 46,
-        height: 32,
-        borderRadius: 16,
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: focused ? colors.basilSoft : "transparent",
-      }}
+    <Animated.View
+      style={[
+        {
+          width: 46,
+          height: 32,
+          borderRadius: 16,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: focused ? colors.basilSoft : "transparent",
+        },
+        aStyle,
+      ]}
     >
       <Feather name={name} size={focused ? 21 : 20} color={color} />
-    </View>
+    </Animated.View>
   );
 }
 
 export default function TabLayout() {
   return (
     <Tabs
+      screenListeners={{
+        tabPress: () => hapticSelection(),
+      }}
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.basilShadow,

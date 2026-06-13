@@ -7,6 +7,7 @@ import { useCallback } from "react";
 import { useKVRaw } from "../store";
 import * as N from "@/lib/nourish/storage";
 import { sumTotals } from "@/lib/nourish/types";
+import { celebrate } from "~/components/Celebration";
 import type {
   DiaryEntry,
   FoodItem,
@@ -72,9 +73,11 @@ export function useRecentFoods(): FoodItem[] {
 }
 
 export function logFood(food: FoodItem, meal: MealSlot, servings: number, date?: string) {
+  const d = date ?? N.todayString();
+  const before = sumTotals(N.getDiaryForDate(d));
   const entry: DiaryEntry = {
     id: N.newId(),
-    date: date ?? N.todayString(),
+    date: d,
     meal,
     food,
     quantityServings: servings,
@@ -86,6 +89,18 @@ export function logFood(food: FoodItem, meal: MealSlot, servings: number, date?:
   };
   N.addDiaryEntry(entry);
   N.pushRecentFood(food);
+
+  // Celebrate the moment a daily goal is *crossed* (Duolingo-style win).
+  // Only on today's log, and only on the crossing so it doesn't repeat.
+  if (d === N.todayString()) {
+    const after = sumTotals(N.getDiaryForDate(d));
+    const t = N.getTargets() ?? DEFAULT_TARGET;
+    if (t.proteinG && before.proteinG < t.proteinG && after.proteinG >= t.proteinG) {
+      celebrate("Protein goal hit! 💪");
+    } else if (t.calorieTarget && before.kcal < t.calorieTarget && after.kcal >= t.calorieTarget) {
+      celebrate("Calorie goal hit! 🎯");
+    }
+  }
 }
 
 export function deleteEntry(id: string) {

@@ -19,10 +19,33 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
+  withSpring,
 } from "react-native-reanimated";
 import { Feather } from "@expo/vector-icons";
 import { colors, radius, space, font, shadow, accent, AccentKey, BUTTON_DEPTH } from "~/theme";
-import { tap as hapticTap, selection as hapticSelection } from "~/lib/haptics";
+import {
+  light as hapticLight,
+  medium as hapticMedium,
+  heavy as hapticHeavy,
+  success as hapticSuccess,
+  selection as hapticSelection,
+} from "~/lib/haptics";
+
+// Springs tuned for a satisfying, Duolingo-ish "pop" on press/release.
+const PRESS_SPRING = { damping: 14, stiffness: 320, mass: 0.5 } as const;
+const POP_SPRING = { damping: 9, stiffness: 380, mass: 0.5 } as const;
+
+type HapticKind = "none" | "light" | "medium" | "heavy" | "selection" | "success";
+function fireHaptic(kind: HapticKind) {
+  switch (kind) {
+    case "light": return hapticLight();
+    case "medium": return hapticMedium();
+    case "heavy": return hapticHeavy();
+    case "selection": return hapticSelection();
+    case "success": return hapticSuccess();
+    default: return;
+  }
+}
 
 type FeatherName = React.ComponentProps<typeof Feather>["name"];
 
@@ -159,13 +182,13 @@ export function Card({
 export function Press({
   onPress,
   haptic = "light",
-  scaleTo = 0.97,
+  scaleTo = 0.96,
   style,
   children,
   disabled,
   ...rest
 }: PressableProps & {
-  haptic?: "none" | "light" | "selection";
+  haptic?: HapticKind;
   scaleTo?: number;
 }) {
   const s = useSharedValue(1);
@@ -176,14 +199,14 @@ export function Press({
         {...rest}
         disabled={disabled}
         onPressIn={() => {
-          s.value = withTiming(scaleTo, { duration: 90 });
+          s.value = withTiming(scaleTo, { duration: 70 });
         }}
         onPressOut={() => {
-          s.value = withTiming(1, { duration: 120 });
+          // spring back with a touch of overshoot — the "pop".
+          s.value = withSpring(1, POP_SPRING);
         }}
         onPress={(e) => {
-          if (haptic === "light") hapticTap();
-          else if (haptic === "selection") hapticSelection();
+          fireHaptic(haptic);
           onPress?.(e);
         }}
         style={style}
@@ -209,6 +232,7 @@ export function Button({
   loading,
   disabled,
   full,
+  haptic,
   style,
 }: {
   title: string;
@@ -220,6 +244,8 @@ export function Button({
   loading?: boolean;
   disabled?: boolean;
   full?: boolean;
+  /** Override the press haptic. Filled CTAs default to "medium", others "light". */
+  haptic?: HapticKind;
   style?: any;
 }) {
   const depth = useSharedValue(0);
@@ -264,14 +290,15 @@ export function Button({
           <Pressable
             disabled={isDisabled}
             onPressIn={() => {
-              if (isFilled) depth.value = withTiming(BUTTON_DEPTH, { duration: 70 });
+              if (isFilled) depth.value = withTiming(BUTTON_DEPTH, { duration: 60 });
             }}
             onPressOut={() => {
-              depth.value = withTiming(0, { duration: 110 });
+              // pop back up off the 3D shadow with a little bounce.
+              depth.value = withSpring(0, PRESS_SPRING);
             }}
             onPress={() => {
               if (isDisabled) return;
-              hapticTap();
+              fireHaptic(haptic ?? (isFilled ? "medium" : "light"));
               onPress?.();
             }}
             style={[

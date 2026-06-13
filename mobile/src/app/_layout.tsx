@@ -7,6 +7,7 @@ import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { bootstrap } from "~/lib/bootstrap";
 import { ToastHost } from "~/components/Toast";
+import { CelebrationHost } from "~/components/Celebration";
 import { ScreenshotDriver } from "~/components/ScreenshotDriver";
 import { colors } from "~/theme";
 
@@ -58,6 +59,7 @@ export default function RootLayout() {
           <Stack.Screen name="nourish/progress" />
         </Stack>
         <ToastHost />
+        <CelebrationHost />
         <ScreenshotDriver />
       </SafeAreaProvider>
     </GestureHandlerRootView>
