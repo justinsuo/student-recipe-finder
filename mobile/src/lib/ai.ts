@@ -33,6 +33,7 @@ import type { AIGeneratedRecipe } from "@/lib/customRecipeTypes";
 import type { NutritionEstimate } from "@/lib/types";
 import { saveRecipeImageB64, saveRecipeImageFromUrl } from "./imageStore";
 import { generateOptionsLocal, refineLocal, type LocalChefInput } from "./localChef";
+import { rankPantryCatalog } from "./catalog";
 
 /** A backend AI (worker or browser Haiku) is configured. */
 export function aiBackendAvailable(): boolean {
@@ -74,8 +75,8 @@ export interface ChefInput {
   refinement?: string;
 }
 
-/** Generate 4 recipe options (best-match / cheapest / fastest / wildcard). */
-export async function generateOptions(input: ChefInput): Promise<GeneratedRecipeOptionSet> {
+/** Try the real AI backends (worker → Haiku). Returns null if none configured. */
+async function tryAiOptions(input: ChefInput): Promise<GeneratedRecipeOptionSet | null> {
   if (isWorkerConfigured()) {
     const wInput: GenerateOptionsInput = {
       pantryIngredients: input.pantryIngredients,
@@ -89,8 +90,7 @@ export async function generateOptions(input: ChefInput): Promise<GeneratedRecipe
       dietTags: input.dietTags,
       creativityLevel: input.creativityLevel,
     };
-    const set = await generateRecipeOptions(wInput);
-    return repairOptionNutrition(set);
+    return repairOptionNutrition(await generateRecipeOptions(wInput));
   }
   if (isAiEnabled()) {
     const hInput: HaikuRecipeInput = {
@@ -103,11 +103,46 @@ export async function generateOptions(input: ChefInput): Promise<GeneratedRecipe
       refinement: input.refinement,
       creativityBoost: input.creativityLevel === "creative",
     } as HaikuRecipeInput;
-    const set = await generateRecipeQuickOptions(hInput);
-    return repairOptionNutrition(set);
+    return repairOptionNutrition(await generateRecipeQuickOptions(hInput));
   }
-  // No backend → on-device generation from the pantry + catalog (always works).
+  return null;
+}
+
+/** Generate 4 recipe options (AI if configured, else on-device). */
+export async function generateOptions(input: ChefInput): Promise<GeneratedRecipeOptionSet> {
+  return (await tryAiOptions(input)) ?? generateOptionsLocal(toLocalInput(input));
+}
+
+/** AI-only options (throws if no backend). Used by the hybrid flow. */
+export async function generateAiOnly(input: ChefInput): Promise<GeneratedRecipeOptionSet> {
+  const set = await tryAiOptions(input);
+  if (!set) throw new Error("no AI backend");
+  return set;
+}
+
+/** Instant on-device options from the pantry + catalog. */
+export function instantOptions(input: ChefInput): GeneratedRecipeOptionSet {
   return generateOptionsLocal(toLocalInput(input));
+}
+
+/**
+ * How well does the catalog already cover this request? Drives the hybrid
+ * decision: if a database recipe is "close enough" we show it instantly and let
+ * AI generate the rest in the background.
+ */
+export function dbCloseness(input: ChefInput): { closeEnough: boolean; matchPercent: number } {
+  const ids = input.selectedPantryIngredientIds ?? [];
+  if (ids.length === 0) return { closeEnough: true, matchPercent: 0 };
+  const ranked = rankPantryCatalog(ids.map((id) => ({ ingredientId: id })), {
+    equipment: (input.equipment ?? []) as any,
+    diet: (input.dietTags ?? []) as any,
+  });
+  const top = ranked[0];
+  if (!top) return { closeEnough: false, matchPercent: 0 };
+  return {
+    closeEnough: top.matchPercent >= 55 && top.missingIngredients.length <= 2,
+    matchPercent: Math.round(top.matchPercent),
+  };
 }
 
 /** Refine a recipe ("make it cheaper", "higher protein", …). */

@@ -1,5 +1,5 @@
 /** Recipe cards — full (vertical) and compact (horizontal carousel). */
-import React from "react";
+import React, { useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -16,13 +16,15 @@ function money(n: number) {
 
 function ImageOrGradient({ view, height }: { view: RecipeView; height: number }) {
   const a = accent[view.accent];
-  if (view.imageUri) {
+  const [failed, setFailed] = useState(false);
+  if (view.imageUri && !failed) {
     return (
       <Image
         source={{ uri: view.imageUri }}
         style={{ width: "100%", height, backgroundColor: a.tint }}
         contentFit="cover"
         transition={200}
+        onError={() => setFailed(true)}
       />
     );
   }

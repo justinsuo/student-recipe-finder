@@ -1,6 +1,15 @@
 import type { Recipe } from "@/lib/types";
 import { AIR_FRYER_RECIPES } from "./airFryerRecipes";
 import { MICROWAVE_RECIPES } from "./microwaveRecipes";
+import { MACRO_RECIPES } from "./macroRecipes/index";
+
+// The macro-recipe library was previously used only by Nourish. Its "original"
+// variants (994 real, ingredientId-based dishes) are now first-class catalog
+// recipes — with real photos sourced into src/data/macroRecipePhotos.ts — so
+// both the website and the iPhone app browse the full ~1,223-recipe library.
+const MACRO_ORIGINAL_RECIPES: Recipe[] = MACRO_RECIPES.filter(
+  (r) => r.variantType === "original",
+);
 
 const BASE_RECIPES: Recipe[] = [
   {
@@ -4551,6 +4560,7 @@ export const RECIPES: Recipe[] = [
   ...BASE_RECIPES,
   ...AIR_FRYER_RECIPES,
   ...MICROWAVE_RECIPES,
+  ...MACRO_ORIGINAL_RECIPES,
 ];
 
 export const RECIPE_MAP = new Map(RECIPES.map((r) => [r.id, r]));

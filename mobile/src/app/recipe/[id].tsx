@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -22,6 +22,7 @@ import type { NutritionEstimate } from "@/lib/types";
 
 export default function RecipeDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const [heroFailed, setHeroFailed] = useState(false);
   const insets = useSafeAreaInsets();
   const recipeId = decodeURIComponent(String(id));
   const { isSaved, toggleSaved } = useSaved();
@@ -95,8 +96,8 @@ export default function RecipeDetailScreen() {
       <Screen padded={false}>
         {/* Hero image */}
         <View style={{ height: 280 }}>
-          {view.imageUri ? (
-            <Image source={{ uri: view.imageUri }} style={StyleSheet.absoluteFill} contentFit="cover" />
+          {view.imageUri && !heroFailed ? (
+            <Image source={{ uri: view.imageUri }} style={StyleSheet.absoluteFill} contentFit="cover" onError={() => setHeroFailed(true)} />
           ) : (
             <LinearGradient colors={[a.tint, a.main]} style={[StyleSheet.absoluteFill, { alignItems: "center", justifyContent: "center" }]}>
               <Txt style={{ fontSize: 96 }}>{view.emoji}</Txt>

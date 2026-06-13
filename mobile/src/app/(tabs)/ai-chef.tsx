@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { ActivityIndicator, ScrollView, View } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Screen } from "~/components/Screen";
@@ -11,7 +11,7 @@ import { usePantry, useGrocery } from "~/lib/stores/app";
 import { logFood } from "~/lib/stores/nourish";
 import { ingredientLabel } from "~/lib/recipes";
 import {
-  aiAvailable, aiBackendAvailable, aiMode, generateOptions, refine, persistGenerated, generateAndStoreImage,
+  aiBackendAvailable, aiMode, instantOptions, generateAiOnly, dbCloseness, refine, persistGenerated, generateAndStoreImage,
   type GeneratedRecipe, type GeneratedRecipeOptionSet,
 } from "~/lib/ai";
 import { tap } from "~/lib/haptics";
@@ -44,6 +44,7 @@ export default function AiChefScreen() {
   const [creativity, setCreativity] = useState<"practical" | "balanced" | "creative">("balanced");
 
   const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
   const [refiningId, setRefiningId] = useState<string | null>(null);
   const [results, setResults] = useState<GeneratedRecipeOptionSet | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -69,27 +70,58 @@ export default function AiChefScreen() {
       setSetupOpen(true);
       return;
     }
+    const input = {
+      pantryIngredients: selectedPantryIds.map(ingredientLabel),
+      selectedPantryIngredientIds: selectedPantryIds,
+      cravingText: notes,
+      aiNotes: notes,
+      budgetPerServing: budget || undefined,
+      servings,
+      equipment: Array.from(equipment),
+      dietTags: Array.from(diet),
+      creativityLevel: (opts?.creative ? "creative" : creativity) as "practical" | "balanced" | "creative",
+    };
+
     setLoading(true);
     setResults(null);
-    try {
-      const set = await generateOptions({
-        pantryIngredients: selectedPantryIds.map(ingredientLabel),
-        selectedPantryIngredientIds: selectedPantryIds,
-        cravingText: notes,
-        aiNotes: notes,
-        budgetPerServing: budget || undefined,
-        servings,
-        equipment: Array.from(equipment),
-        dietTags: Array.from(diet),
-        creativityLevel: opts?.creative ? "creative" : creativity,
-      });
-      setResults(set);
-      setSelectedId(set.mainOptionId || set.options[0]?.id || null);
-      toast(opts?.creative ? "Fresh AI originals ✨" : "4 recipes ready 🍳", "reward");
-    } catch (e: any) {
-      toast("Generation failed — try again", "error");
-    } finally {
+
+    // 1) Instant on-device options from the catalog — shown immediately.
+    const db = instantOptions(input);
+    const close = dbCloseness(input).closeEnough;
+    const backend = aiBackendAvailable();
+
+    if (!backend) {
+      // No AI key → pure on-device, instant.
+      setResults(db);
+      setSelectedId(db.mainOptionId);
       setLoading(false);
+      toast("Recipes ready 🍳", "reward");
+      return;
+    }
+
+    // 2) Hybrid: if a DB recipe is close enough, show it right away while AI
+    //    cooks up the rest; otherwise show one DB pick as a placeholder.
+    const keep = opts?.creative ? (close ? 1 : 0) : close ? 2 : 1;
+    const instant = db.options.slice(0, Math.max(1, keep));
+    setResults({ mainOptionId: instant[0].id, options: instant });
+    setSelectedId(instant[0].id);
+    setLoading(false);
+    setAiLoading(true);
+    if (close) toast("Instant match — cooking up more with AI ✨");
+
+    try {
+      const ai = await generateAiOnly(input);
+      const merged = [...db.options.slice(0, keep), ...ai.options].slice(0, 4);
+      setResults({ mainOptionId: merged[0].id, options: merged });
+      setSelectedId((prev) => (merged.some((o) => o.id === prev) ? prev : merged[0].id));
+      toast(opts?.creative ? "Fresh AI originals ✨" : "Recipes ready 🍳", "reward");
+    } catch {
+      // AI failed — fall back to the full on-device set (no error to the user).
+      setResults(db);
+      setSelectedId(db.mainOptionId);
+      toast("Showing pantry matches", "info");
+    } finally {
+      setAiLoading(false);
     }
   }
 
@@ -241,17 +273,34 @@ export default function AiChefScreen() {
 
       {results ? (
         <View style={{ marginTop: space.xl }}>
-          <SectionHeading title="Your options" />
+          <Row justify="space-between" style={{ marginBottom: space.sm }}>
+            <Txt variant="heading">Your options</Txt>
+            {aiLoading ? (
+              <Row gap={6}><ActivityIndicator size="small" color={accent["ai-chef"].main} /><Txt variant="caption" color={accent["ai-chef"].shadow} weight="700">AI cooking more…</Txt></Row>
+            ) : null}
+          </Row>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }} style={{ marginHorizontal: -space.lg, paddingHorizontal: space.lg, marginBottom: space.md }}>
-            {results.options.map((o) => (
-              <Press key={o.id} onPress={() => setSelectedId(o.id)} scaleTo={0.97}
-                style={{ width: 150, padding: 12, borderRadius: radius.lg, borderWidth: 2, borderColor: o.id === selectedId ? accent[OPTION_TONE[o.optionLabel] ?? "ai-chef"].main : colors.border, backgroundColor: o.id === selectedId ? accent[OPTION_TONE[o.optionLabel] ?? "ai-chef"].tint : colors.surface, gap: 6 }}>
-                <Badge label={o.optionLabel.replace("-", " ")} tone={OPTION_TONE[o.optionLabel] ?? "ai-chef"} />
-                <Txt variant="subheading" numberOfLines={2}>{o.recipe.name}</Txt>
-                <Txt variant="caption" muted numberOfLines={2}>{o.shortReason}</Txt>
-                <Row gap={6}><Txt variant="caption" weight="700" color={colors.basilShadow}>${o.recipe.estimatedCostPerServing.toFixed(2)}</Txt><Txt variant="caption" muted>· {o.recipe.totalTimeMinutes}m</Txt></Row>
-              </Press>
-            ))}
+            {results.options.map((o) => {
+              const fromDb = o.id.startsWith("local");
+              return (
+                <Press key={o.id} onPress={() => setSelectedId(o.id)} scaleTo={0.97}
+                  style={{ width: 150, padding: 12, borderRadius: radius.lg, borderWidth: 2, borderColor: o.id === selectedId ? accent[OPTION_TONE[o.optionLabel] ?? "ai-chef"].main : colors.border, backgroundColor: o.id === selectedId ? accent[OPTION_TONE[o.optionLabel] ?? "ai-chef"].tint : colors.surface, gap: 6 }}>
+                  <Row gap={5}>
+                    <Badge label={o.optionLabel.replace("-", " ")} tone={OPTION_TONE[o.optionLabel] ?? "ai-chef"} />
+                    <Badge label={fromDb ? "⚡ instant" : "✨ AI"} tone={fromDb ? "cheap" : "ai-chef"} />
+                  </Row>
+                  <Txt variant="subheading" numberOfLines={2}>{o.recipe.name}</Txt>
+                  <Txt variant="caption" muted numberOfLines={2}>{o.shortReason}</Txt>
+                  <Row gap={6}><Txt variant="caption" weight="700" color={colors.basilShadow}>${o.recipe.estimatedCostPerServing.toFixed(2)}</Txt><Txt variant="caption" muted>· {o.recipe.totalTimeMinutes}m</Txt></Row>
+                </Press>
+              );
+            })}
+            {aiLoading ? (
+              <View style={{ width: 150, padding: 12, borderRadius: radius.lg, borderWidth: 2, borderStyle: "dashed", borderColor: accent["ai-chef"].main, backgroundColor: accent["ai-chef"].tint, alignItems: "center", justifyContent: "center", gap: 8 }}>
+                <ActivityIndicator color={accent["ai-chef"].main} />
+                <Txt variant="caption" color={accent["ai-chef"].shadow} weight="700" center>Writing AI originals…</Txt>
+              </View>
+            ) : null}
           </ScrollView>
 
           {selectedOption ? <ResultPanel

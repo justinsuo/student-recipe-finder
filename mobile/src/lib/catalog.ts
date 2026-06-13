@@ -22,10 +22,10 @@ import {
 import { recipeFitsEquipment, type EquipmentProfile } from "@/lib/equipmentFilters";
 import type { Recipe, Equipment, DietTag, PantryItem, RecipeScoreResult } from "@/lib/types";
 
-const MACRO_ORIGINALS = MACRO_RECIPES.filter((r) => r.variantType === "original");
-
-export const ALL_RECIPES: Recipe[] = [...RECIPES, ...MACRO_ORIGINALS];
-export const ALL_RECIPE_MAP: Map<string, Recipe> = new Map(ALL_RECIPES.map((r) => [r.id, r]));
+// RECIPES already includes the macro "original" dishes (merged in src/data/recipes.ts),
+// so this is just the full catalog. MACRO_RECIPES stays imported for variantsOf().
+export const ALL_RECIPES: Recipe[] = RECIPES;
+export const ALL_RECIPE_MAP: Map<string, Recipe> = RECIPE_MAP;
 
 /** All macro variants of a dish (original / calorie-friendly / protein-friendly). */
 export function variantsOf(recipe: Recipe): Recipe[] {
