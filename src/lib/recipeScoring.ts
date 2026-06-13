@@ -1,5 +1,6 @@
 import { INGREDIENT_MAP } from "@/data/ingredients";
 import { CATALOG_RECIPES } from "@/data/recipes";
+import { WEB_RECIPE_COSTS } from "@/data/webRecipes";
 import {
   quoteIngredient,
   quoteRecipe,
@@ -34,10 +35,16 @@ const SPICE_IDS = new Set(
 );
 
 export function calculateRecipeCost(recipe: Recipe): number {
+  const override = WEB_RECIPE_COSTS[recipe.id];
+  if (override != null) return Math.round(override * Math.max(1, recipe.servings) * 100) / 100;
   return quoteRecipe(recipe).totalCost;
 }
 
 export function calculateCostPerServing(recipe: Recipe): number {
+  // Imported web recipes carry an AI-estimated realistic $/serving — their
+  // free-text ingredient amounts don't map to catalog units, so trust it.
+  const override = WEB_RECIPE_COSTS[recipe.id];
+  if (override != null) return override;
   return quoteRecipe(recipe).costPerServing;
 }
 
