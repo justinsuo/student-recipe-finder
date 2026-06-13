@@ -9,7 +9,7 @@
  * the 229 `RECIPES`, so we re-implement the same scoring here over the full
  * catalog using the shared per-recipe helpers (identical math, more recipes).
  */
-import { RECIPES, RECIPE_MAP } from "@/data/recipes";
+import { CATALOG_RECIPES, RECIPE_MAP } from "@/data/recipes";
 import { MACRO_RECIPES } from "@/data/macroRecipes/index";
 import { INGREDIENTS } from "@/data/ingredients";
 import {
@@ -22,9 +22,9 @@ import {
 import { recipeFitsEquipment, type EquipmentProfile } from "@/lib/equipmentFilters";
 import type { Recipe, Equipment, DietTag, PantryItem, RecipeScoreResult } from "@/lib/types";
 
-// RECIPES already includes the macro "original" dishes (merged in src/data/recipes.ts),
-// so this is just the full catalog. MACRO_RECIPES stays imported for variantsOf().
-export const ALL_RECIPES: Recipe[] = RECIPES;
+// CATALOG_RECIPES (src/data/recipes.ts) = curated + macro "original" dishes
+// (~1,223) for browse/AI Chef. RECIPE_MAP resolves any recipe id incl. variants.
+export const ALL_RECIPES: Recipe[] = CATALOG_RECIPES;
 export const ALL_RECIPE_MAP: Map<string, Recipe> = RECIPE_MAP;
 
 /** All macro variants of a dish (original / calorie-friendly / protein-friendly). */

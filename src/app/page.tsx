@@ -28,7 +28,7 @@ import {
   Bookmark,
 } from "lucide-react";
 import { RecipeCard } from "@/components/recipe/RecipeCard";
-import { RECIPES } from "@/data/recipes";
+import { RECIPES, CATALOG_RECIPES } from "@/data/recipes";
 import { RECIPE_IMAGES } from "@/data/recipeImages";
 import { calculateCostPerServing } from "@/lib/recipeScoring";
 import {
@@ -55,13 +55,13 @@ export default function HomePage() {
     .sort((a, b) => calculateCostPerServing(a) - calculateCostPerServing(b))
     .slice(1, 3);
 
-  const featured = [...RECIPES]
+  const featured = [...CATALOG_RECIPES]
     .sort((a, b) => calculateCostPerServing(a) - calculateCostPerServing(b))
     .slice(0, 6);
 
-  const airFryerCount = RECIPES.filter(isAirFryerRecipe).length;
-  const microwaveCount = RECIPES.filter(isMicrowaveRecipe).length;
-  const noStoveCount = RECIPES.filter(isNoStoveRecipe).length;
+  const airFryerCount = CATALOG_RECIPES.filter(isAirFryerRecipe).length;
+  const microwaveCount = CATALOG_RECIPES.filter(isMicrowaveRecipe).length;
+  const noStoveCount = CATALOG_RECIPES.filter(isNoStoveRecipe).length;
   const cheapestCps = heroFeatured
     ? calculateCostPerServing(heroFeatured)
     : null;
@@ -95,7 +95,7 @@ export default function HomePage() {
               </span>
               <span className="inline-flex items-baseline gap-1">
                 <AnimatedNumber
-                  value={RECIPES.length}
+                  value={CATALOG_RECIPES.length}
                   duration={1100}
                   className="text-[#241A12]"
                 />
@@ -157,7 +157,7 @@ export default function HomePage() {
             <LiquidGlassPanel tone="cream" rounded="2xl" className="px-4 py-3 pt-4 sm:max-w-md">
               <dl className="grid grid-cols-3 gap-4">
                 <HeroStat
-                  value={<AnimatedNumber value={RECIPES.length} />}
+                  value={<AnimatedNumber value={CATALOG_RECIPES.length} />}
                   label="recipes"
                 />
                 <HeroStat

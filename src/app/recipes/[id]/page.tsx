@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { RECIPE_MAP, RECIPES } from "@/data/recipes";
+import { RECIPE_MAP, ALL_RECIPES } from "@/data/recipes";
 import { RecipeDetailClient } from "@/components/recipe/RecipeDetailClient";
 
 export function generateStaticParams() {
-  return RECIPES.map((r) => ({ id: r.id }));
+  return ALL_RECIPES.map((r) => ({ id: r.id }));
 }
 
 export async function generateMetadata({
@@ -35,5 +35,8 @@ export default async function RecipePage({
   const { id } = await params;
   const recipe = RECIPE_MAP.get(id);
   if (!recipe) notFound();
-  return <RecipeDetailClient recipe={recipe} />;
+  const variantSiblings = recipe.variantGroup
+    ? ALL_RECIPES.filter((r) => r.variantGroup === recipe.variantGroup)
+    : [];
+  return <RecipeDetailClient recipe={recipe} variantSiblings={variantSiblings} />;
 }

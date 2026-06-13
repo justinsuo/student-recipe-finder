@@ -14,7 +14,7 @@
  *   - any ingredient cost < $0.005 → likely a catalog miss
  */
 
-import { RECIPES } from "../src/data/recipes";
+import { CATALOG_RECIPES } from "../src/data/recipes";
 import {
   calculateCostPerServing,
   ingredientCostBreakdown,
@@ -24,10 +24,11 @@ const MIN_CPS = 0.1;
 const MAX_CPS = 8;
 
 let issues = 0;
+const missingIngredientIds = new Set<string>();
 
-console.log(`Auditing ${RECIPES.length} recipes…\n`);
+console.log(`Auditing ${CATALOG_RECIPES.length} catalog recipes…\n`);
 
-for (const recipe of RECIPES) {
+for (const recipe of CATALOG_RECIPES) {
   const cps = calculateCostPerServing(recipe);
   const breakdown = ingredientCostBreakdown(recipe);
 
@@ -42,9 +43,11 @@ for (const recipe of RECIPES) {
   }
 
   for (const line of breakdown) {
-    const name = line.ingredient?.name ?? "(unknown ingredient)";
+    const ingredientId = recipe.ingredients[breakdown.indexOf(line)]?.ingredientId ?? "?";
+    const name = line.ingredient?.name ?? `(unknown: ${ingredientId})`;
     if (!line.ingredient) {
-      problems.push(`'${name}' not found in INGREDIENT_MAP`);
+      problems.push(`ingredientId '${ingredientId}' not found in INGREDIENT_MAP`);
+      missingIngredientIds.add(ingredientId);
       continue;
     }
     if (!Number.isFinite(line.cost)) {
@@ -63,6 +66,11 @@ for (const recipe of RECIPES) {
     console.log(`• ${recipe.id} — ${recipe.name}`);
     for (const p of problems) console.log(`    - ${p}`);
   }
+}
+
+if (missingIngredientIds.size > 0) {
+  console.log(`\nMissing ingredient IDs (${missingIngredientIds.size} unique):`);
+  for (const id of [...missingIngredientIds].sort()) console.log(`  - ${id}`);
 }
 
 console.log(

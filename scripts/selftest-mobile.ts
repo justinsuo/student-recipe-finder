@@ -7,7 +7,7 @@
 import { setKV, kv } from "@shared/platform/kv";
 import { markDirty } from "@shared/sync/syncClient";
 import { SYNCED_KEYS } from "@shared/sync/keys";
-import { RECIPES, RECIPE_MAP } from "@/data/recipes";
+import { RECIPES } from "@/data/recipes";
 import { INGREDIENTS } from "@/data/ingredients";
 import { PANTRY_PRESETS } from "@/data/pantryPresets";
 import {
@@ -37,7 +37,7 @@ function memKV() {
 setKV(memKV());
 // React Native defines a global `window` (unlike Node), so the storage modules'
 // SSR guards pass on-device. Mimic that here so the round-trip test is faithful.
-(globalThis as any).window = (globalThis as any).window || {};
+(globalThis as Record<string, unknown>).window = (globalThis as Record<string, unknown>).window || {};
 
 let pass = 0, fail = 0;
 function check(name: string, cond: boolean, detail = "") {
@@ -71,11 +71,14 @@ check("cheap ranking returns results", cheap.length > 0, `${cheap.length} under 
 check("cheap results sorted cheapest-first", cheap.length < 2 || cheap[0].costPerServing <= cheap[cheap.length - 1].costPerServing, `top = $${cheap[0]?.costPerServing.toFixed(2)}`);
 
 const pantry = [ { ingredientId: "eggs" }, { ingredientId: "rice" }, { ingredientId: "onion" }, { ingredientId: "garlic" }, { ingredientId: "soy-sauce" } ];
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ranked = rankPantryRecipes(pantry as any);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const groups = groupPantryResults(ranked, pantry as any);
 check("pantry matching returns recipes", ranked.length > 0, `${ranked.length} matched, ${groups.canMakeNow.length} cook-now`);
 
 console.log("\n── Storage round-trip (what persists/syncs) ──");
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 storage.setPantry(pantry as any);
 check("pantry persists & reads back", storage.getPantry().length === 5);
 const r = emptyUserRecipe();

@@ -22,7 +22,7 @@ import {
   searchRecipes,
   type SearchScope,
 } from "@/lib/search/recipeSearch";
-import { RECIPES } from "@/data/recipes";
+import { CATALOG_RECIPES } from "@/data/recipes";
 import type {
   CheapFilters,
   DietTag,
@@ -110,7 +110,7 @@ export default function CheapRecipesPage() {
   }, [query]);
 
   // Build the recipe index once per session
-  const searchIndex = useMemo(() => buildRecipeIndex(RECIPES), []);
+  const searchIndex = useMemo(() => buildRecipeIndex(CATALOG_RECIPES), []);
 
   // Build a set of recipe IDs that match the query (using the smart engine)
   const queryHitIds = useMemo(() => {
@@ -277,7 +277,7 @@ export default function CheapRecipesPage() {
 
         <div className="mb-5">
           <SmartRecipeSearch
-            recipes={RECIPES}
+            recipes={CATALOG_RECIPES}
             value={query}
             onChange={setQuery}
             scope={scope}

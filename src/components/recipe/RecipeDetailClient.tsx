@@ -57,15 +57,33 @@ const BACK_LINKS: Record<string, { label: string; href: string }> = {
   home: { label: "Back to home", href: "/" },
 };
 
-export function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
+const VARIANT_LABELS: Record<string, string> = {
+  original: "Original",
+  "calorie-friendly": "Calorie-friendly",
+  "protein-friendly": "Protein-friendly",
+};
+
+export function RecipeDetailClient({
+  recipe,
+  variantSiblings = [],
+}: {
+  recipe: Recipe;
+  variantSiblings?: Recipe[];
+}) {
   return (
     <Suspense fallback={<div className="h-6 w-32 animate-pulse rounded bg-stone-100" />}>
-      <RecipeDetailBody recipe={recipe} />
+      <RecipeDetailBody recipe={recipe} variantSiblings={variantSiblings} />
     </Suspense>
   );
 }
 
-function RecipeDetailBody({ recipe }: { recipe: Recipe }) {
+function RecipeDetailBody({
+  recipe,
+  variantSiblings = [],
+}: {
+  recipe: Recipe;
+  variantSiblings?: Recipe[];
+}) {
   const { isSaved, toggleSaved, pantry, addGroceryItems } = useAppStore();
   const toast = useToast();
   // Guard against rapid double-clicks: if two presses land in the same
@@ -229,6 +247,40 @@ function RecipeDetailBody({ recipe }: { recipe: Recipe }) {
           )}
         </div>
       </header>
+
+      {/* Variant selector — shown when this recipe has siblings */}
+      {variantSiblings.length > 1 && (
+        <div className="rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-stone-500">
+            Variants
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {variantSiblings.map((v) => {
+              const isActive = v.id === recipe.id;
+              const label = VARIANT_LABELS[v.variantType ?? "original"] ?? v.variantType ?? "Original";
+              return isActive ? (
+                <span
+                  key={v.id}
+                  className="inline-flex items-center rounded-full border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white"
+                >
+                  {label}
+                </span>
+              ) : (
+                <Link
+                  key={v.id}
+                  href={`/recipes/${v.id}`}
+                  className="inline-flex items-center rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-700 transition-colors hover:border-emerald-300 hover:bg-emerald-50"
+                >
+                  {label}
+                </Link>
+              );
+            })}
+          </div>
+          {recipe.variantNote && (
+            <p className="mt-2 text-xs text-stone-500">{recipe.variantNote}</p>
+          )}
+        </div>
+      )}
 
       {/* Log to Nourish */}
       <LogRecipeButton recipe={recipe} />

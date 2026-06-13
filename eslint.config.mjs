@@ -13,6 +13,7 @@ const config = [
       "next-env.d.ts",
       "worker/**",
       "out/**",
+      "mobile/**",
     ],
   },
   {

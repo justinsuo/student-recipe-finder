@@ -1,5 +1,5 @@
 import { INGREDIENT_MAP } from "@/data/ingredients";
-import { RECIPES } from "@/data/recipes";
+import { CATALOG_RECIPES } from "@/data/recipes";
 import {
   quoteIngredient,
   quoteRecipe,
@@ -146,7 +146,7 @@ export function rankCheapRecipes(filters: CheapFilters): RecipeScoreResult[] {
   const maxTime = timeBucketMaxMinutes(filters.time);
   const results: RecipeScoreResult[] = [];
 
-  for (const recipe of RECIPES) {
+  for (const recipe of CATALOG_RECIPES) {
     if (!recipeMatchesEquipment(recipe, filters.equipment)) continue;
     if (!recipeMatchesDiet(recipe, filters.diet)) continue;
     if (recipe.totalTimeMinutes > maxTime) continue;
@@ -191,7 +191,7 @@ export function rankPantryRecipes(
   const results: RecipeScoreResult[] = [];
   const maxTime = filters.time ? timeBucketMaxMinutes(filters.time) : 999;
 
-  for (const recipe of RECIPES) {
+  for (const recipe of CATALOG_RECIPES) {
     if (filters.equipment && !recipeMatchesEquipment(recipe, filters.equipment)) continue;
     if (filters.diet && !recipeMatchesDiet(recipe, filters.diet)) continue;
     if (recipe.totalTimeMinutes > maxTime) continue;
@@ -291,7 +291,7 @@ export function recommendSmartBuys(pantry: PantryItem[]): {
       const probe = new Set(effective);
       probe.add(id);
       const unlocks: number[] = [];
-      for (const recipe of RECIPES) {
+      for (const recipe of CATALOG_RECIPES) {
         const before = recipe.ingredients.filter(
           (ri) => !ri.optional && effective.has(ri.ingredientId),
         ).length;
