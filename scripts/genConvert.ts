@@ -185,8 +185,9 @@ console.log("  calories/serving — min", cals[0], "median", cals[Math.floor(cal
 console.log("  cost/serving — min $" + cs[0]?.toFixed(2), "median $" + cs[Math.floor(cs.length / 2)]?.toFixed(2), "max $" + cs[cs.length - 1]?.toFixed(2));
 
 fs.writeFileSync("src/data/genRecipes.ts",
-  'import type { Recipe } from "@/lib/types";\n\n// AI-authored recipes for famous, recognizable world dishes the catalog was\n// missing. Each has a REAL photo sourced from the open web (validated) — see\n// macroRecipePhotos.ts. Ingredients mapped to the catalog where possible (new\n// ones in genIngredients.ts). Per-serving macros + cost are AI-estimated and\n// trusted by the engines (id prefix `gen-`), like the TheMealDB imports.\nexport const GEN_RECIPES: Recipe[] = ' + JSON.stringify(out) +
-  ";\n\n// AI-estimated realistic $/serving — trusted by calculateCostPerServing for gen- ids.\nexport const GEN_RECIPE_COSTS: Record<string, number> = " + JSON.stringify(costs) + ";\n");
+  'import type { Recipe } from "@/lib/types";\n\n// AI-authored recipes for famous, recognizable world dishes the catalog was\n// missing. Each has a REAL photo sourced from the open web (validated to load\n// without a Referer). Ingredients mapped to the catalog where possible (new\n// ones in genIngredients.ts). Per-serving macros + cost are AI-estimated and\n// trusted by the engines (id prefix `gen-`), like the TheMealDB imports.\n// Regenerate with scripts/genConvert.ts.\nexport const GEN_RECIPES: Recipe[] = ' + JSON.stringify(out) +
+  ";\n\n// AI-estimated realistic $/serving — trusted by calculateCostPerServing for gen- ids.\nexport const GEN_RECIPE_COSTS: Record<string, number> = " + JSON.stringify(costs) +
+  ";\n\n// Real photo per recipe (id -> url). Consumed by getRecipeImage().\nexport const GEN_RECIPE_PHOTOS: Record<string, string> = " + JSON.stringify(photos) + ";\n");
 
 const wIngs = genIngredients;
 const wNut: Record<string, any> = {};

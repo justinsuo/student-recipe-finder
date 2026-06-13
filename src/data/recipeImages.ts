@@ -1,6 +1,7 @@
 import type { RecipeImage } from "@/lib/types";
 import { MACRO_RECIPE_PHOTOS } from "@/data/macroRecipePhotos";
 import { RECIPE_IMAGE_OVERRIDES } from "@/data/recipeImageOverrides";
+import { GEN_RECIPE_PHOTOS } from "@/data/genRecipes";
 
 /**
  * Curated real food photographs for every recipe.
@@ -2380,7 +2381,7 @@ export function getRecipeImage(id: string): RecipeImage | undefined {
   if (curated) return curated;
   // Expanded catalog (macro-recipe dishes): real photos sourced from food
   // publishers and validated. See src/data/macroRecipePhotos.ts.
-  const url = MACRO_RECIPE_PHOTOS[id];
+  const url = MACRO_RECIPE_PHOTOS[id] || GEN_RECIPE_PHOTOS[id];
   if (url) {
     return {
       src: url,
