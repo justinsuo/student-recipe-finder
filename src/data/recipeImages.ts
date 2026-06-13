@@ -1,5 +1,6 @@
 import type { RecipeImage } from "@/lib/types";
 import { MACRO_RECIPE_PHOTOS } from "@/data/macroRecipePhotos";
+import { RECIPE_IMAGE_OVERRIDES } from "@/data/recipeImageOverrides";
 
 /**
  * Curated real food photographs for every recipe.
@@ -2360,6 +2361,21 @@ export const RECIPE_IMAGES: Record<string, RecipeImage> = {
 };
 
 export function getRecipeImage(id: string): RecipeImage | undefined {
+  // Self-hosted (jsDelivr) replacements for images that don't reliably load in
+  // the app (Wikimedia rate-limiting). Checked FIRST so they win over the
+  // original curated/web URL. See recipeImageOverrides.ts.
+  const override = RECIPE_IMAGE_OVERRIDES[id];
+  if (override) {
+    return {
+      src: override,
+      alt: "Recipe photo",
+      sourceName: "Web",
+      sourceUrl: override,
+      license: "Editorial / fair use",
+      attributionRequired: false,
+      verifiedMatch: true,
+    };
+  }
   const curated = RECIPE_IMAGES[id];
   if (curated) return curated;
   // Expanded catalog (macro-recipe dishes): real photos sourced from food
