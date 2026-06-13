@@ -166,7 +166,7 @@ export default function AiChefScreen() {
             <Row gap={10}>
               <Feather name="zap" size={18} color={accent["ai-chef"].shadow} />
               <Txt variant="caption" muted style={{ flex: 1 }}>
-                Building recipes on-device from your pantry + Waivy's 229-recipe catalog with real cost & macros. Add a Worker URL in <Txt weight="700" color={accent["ai-chef"].shadow}>Settings</Txt> for AI-generated originals.
+                Building recipes on-device from your pantry + Waivy's 1,200+ recipe catalog with real cost & macros. Tap <Txt weight="700" color={accent["ai-chef"].shadow}>Surprise me</Txt> below for original AI recipes.
               </Txt>
             </Row>
           </Card>
