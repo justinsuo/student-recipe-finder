@@ -131,14 +131,22 @@ export default function RecipeDetailScreen() {
 
           {/* Ingredients */}
           <Card>
-            <Row justify="space-between" style={{ marginBottom: 6 }}>
+            <Row justify="space-between" style={{ marginBottom: 10 }}>
               <Txt variant="subheading">Ingredients</Txt>
               {data.missingNames.length ? <Press onPress={addToGrocery} haptic="selection"><Txt variant="label" color={colors.basilShadow}>+ Grocery</Txt></Press> : null}
             </Row>
             {data.ingredients.map((i, idx) => (
-              <Row key={idx} justify="space-between" style={{ paddingVertical: 6 }}>
-                <Row gap={8} style={{ flex: 1 }}>
-                  <Feather name={i.have ? "check-circle" : "circle"} size={15} color={i.have ? colors.basil : colors.textFaint} />
+              <Row
+                key={idx}
+                justify="space-between"
+                style={{
+                  paddingVertical: 10,
+                  borderTopWidth: idx === 0 ? 0 : 1,
+                  borderTopColor: colors.borderSoft,
+                }}
+              >
+                <Row gap={10} style={{ flex: 1 }}>
+                  <Feather name={i.have ? "check-circle" : "circle"} size={16} color={i.have ? colors.basil : colors.textFaint} />
                   <Txt variant="body" style={{ flex: 1 }}>
                     <Txt weight="600">{i.detail}</Txt> {i.label}{i.optional ? <Txt muted> · optional</Txt> : null}
                   </Txt>
