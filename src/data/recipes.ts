@@ -3,6 +3,7 @@ import { AIR_FRYER_RECIPES } from "./airFryerRecipes";
 import { MICROWAVE_RECIPES } from "./microwaveRecipes";
 import { MACRO_RECIPES } from "./macroRecipes";
 import { WEB_RECIPES } from "./webRecipes";
+import { GEN_RECIPES } from "./genRecipes";
 
 const BASE_RECIPES: Recipe[] = [
   {
@@ -4568,13 +4569,32 @@ function originalVariantsOnly(recipes: Recipe[]): Recipe[] {
   });
 }
 
-export const CATALOG_RECIPES: Recipe[] = [
+// Drop later recipes that repeat an earlier recipe's name so the browse grid
+// never shows the same dish twice. Earlier sources win (curated → macro →
+// web → gen). Recipes remain reachable by id via ALL_RECIPES / RECIPE_MAP.
+function dedupeByName(recipes: Recipe[]): Recipe[] {
+  const seen = new Set<string>();
+  return recipes.filter((r) => {
+    const key = r.name.toLowerCase().trim();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+export const CATALOG_RECIPES: Recipe[] = dedupeByName([
   ...RECIPES,
   ...originalVariantsOnly(MACRO_RECIPES),
   ...WEB_RECIPES,
-];
+  ...GEN_RECIPES,
+]);
 
-export const ALL_RECIPES: Recipe[] = [...RECIPES, ...MACRO_RECIPES, ...WEB_RECIPES];
+export const ALL_RECIPES: Recipe[] = [
+  ...RECIPES,
+  ...MACRO_RECIPES,
+  ...WEB_RECIPES,
+  ...GEN_RECIPES,
+];
 
 export const RECIPE_MAP = new Map<string, Recipe>(
   ALL_RECIPES.map((r) => [r.id, r]),

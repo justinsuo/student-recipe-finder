@@ -1,5 +1,6 @@
 import type { Ingredient } from "@/lib/types";
 import { WEB_INGREDIENTS } from "@/data/webIngredients";
+import { GEN_INGREDIENTS } from "@/data/genIngredients";
 
 // Prices are 2026 US grocery estimates (mid-tier chain — Kroger/Safeway/Aldi
 // blend) per the listed unit. Each row's `estimatedUnitCost` is computed
@@ -1512,6 +1513,7 @@ const INGREDIENT_ALIASES: Record<string, string> = {
 export const INGREDIENT_MAP = new Map<string, Ingredient>([
   ...INGREDIENTS.map((i) => [i.id, i] as [string, Ingredient]),
   ...WEB_INGREDIENTS.map((i) => [i.id, i] as [string, Ingredient]),
+  ...GEN_INGREDIENTS.map((i) => [i.id, i] as [string, Ingredient]),
   ...Object.entries(INGREDIENT_ALIASES).flatMap(([alias, canonical]) => {
     const ingredient = INGREDIENTS.find((i) => i.id === canonical);
     return ingredient ? [[alias, ingredient] as [string, Ingredient]] : [];

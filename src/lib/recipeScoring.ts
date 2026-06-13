@@ -1,6 +1,7 @@
 import { INGREDIENT_MAP } from "@/data/ingredients";
 import { CATALOG_RECIPES } from "@/data/recipes";
 import { WEB_RECIPE_COSTS } from "@/data/webRecipes";
+import { GEN_RECIPE_COSTS } from "@/data/genRecipes";
 import {
   quoteIngredient,
   quoteRecipe,
@@ -34,16 +35,23 @@ const SPICE_IDS = new Set(
     .map((i) => i.id),
 );
 
+// AI-estimated realistic $/serving for imported (tmdb-) + AI-authored (gen-)
+// recipes, whose free-text ingredient amounts don't map to catalog units.
+const COST_OVERRIDES: Record<string, number> = {
+  ...WEB_RECIPE_COSTS,
+  ...GEN_RECIPE_COSTS,
+};
+
 export function calculateRecipeCost(recipe: Recipe): number {
-  const override = WEB_RECIPE_COSTS[recipe.id];
+  const override = COST_OVERRIDES[recipe.id];
   if (override != null) return Math.round(override * Math.max(1, recipe.servings) * 100) / 100;
   return quoteRecipe(recipe).totalCost;
 }
 
 export function calculateCostPerServing(recipe: Recipe): number {
-  // Imported web recipes carry an AI-estimated realistic $/serving — their
-  // free-text ingredient amounts don't map to catalog units, so trust it.
-  const override = WEB_RECIPE_COSTS[recipe.id];
+  // Imported/AI-authored recipes carry an AI-estimated realistic $/serving —
+  // their free-text ingredient amounts don't map to catalog units, so trust it.
+  const override = COST_OVERRIDES[recipe.id];
   if (override != null) return override;
   return quoteRecipe(recipe).costPerServing;
 }

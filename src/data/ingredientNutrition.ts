@@ -333,7 +333,9 @@ const BASE_INGREDIENT_NUTRITION: Record<string, NutritionPerUnit> = {
 
 // New ingredients used by imported web recipes (TheMealDB).
 import { WEB_INGREDIENT_NUTRITION } from "@/data/webIngredients";
+import { GEN_INGREDIENT_NUTRITION } from "@/data/genIngredients";
 export const INGREDIENT_NUTRITION: Record<string, NutritionPerUnit> = {
   ...BASE_INGREDIENT_NUTRITION,
   ...WEB_INGREDIENT_NUTRITION,
+  ...GEN_INGREDIENT_NUTRITION,
 };
