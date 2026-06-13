@@ -7,7 +7,7 @@ import { generateOptionsLocal, refineLocal } from "../mobile/src/lib/localChef";
 let pass = 0, fail = 0;
 const check = (n: string, c: boolean, d = "") => {
   console.log((c ? "  ✓ " : "  ✗ ") + n + (d ? "  — " + d : ""));
-  c ? pass++ : fail++;
+  if (c) { pass++; } else { fail++; }
 };
 
 console.log("\n── On-device AI Chef ──");
