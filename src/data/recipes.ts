@@ -1,6 +1,7 @@
 import type { Recipe } from "@/lib/types";
 import { AIR_FRYER_RECIPES } from "./airFryerRecipes";
 import { MICROWAVE_RECIPES } from "./microwaveRecipes";
+import { MACRO_RECIPES } from "./macroRecipes";
 
 const BASE_RECIPES: Recipe[] = [
   {
@@ -4553,4 +4554,26 @@ export const RECIPES: Recipe[] = [
   ...MICROWAVE_RECIPES,
 ];
 
-export const RECIPE_MAP = new Map(RECIPES.map((r) => [r.id, r]));
+function originalVariantsOnly(recipes: Recipe[]): Recipe[] {
+  const seen = new Set<string>();
+  return recipes.filter((r) => {
+    if (!r.variantGroup) return true;
+    if (r.variantType === "original" || !r.variantType) {
+      if (seen.has(r.variantGroup)) return false;
+      seen.add(r.variantGroup);
+      return true;
+    }
+    return false;
+  });
+}
+
+export const CATALOG_RECIPES: Recipe[] = [
+  ...RECIPES,
+  ...originalVariantsOnly(MACRO_RECIPES),
+];
+
+export const ALL_RECIPES: Recipe[] = [...RECIPES, ...MACRO_RECIPES];
+
+export const RECIPE_MAP = new Map<string, Recipe>(
+  ALL_RECIPES.map((r) => [r.id, r]),
+);
