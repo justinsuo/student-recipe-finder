@@ -5,10 +5,11 @@ import { Screen } from "~/components/Screen";
 import { Sheet } from "~/components/Sheet";
 import { Txt, Row, Card, Button, Field, Press, Badge, IconButton, EmptyState, SectionHeading } from "~/components/ui";
 import { toast } from "~/components/Toast";
+import { celebrate } from "~/components/Celebration";
 import { colors, space, radius, accent } from "~/theme";
 import { useGrocery, usePantry, groceryItemName } from "~/lib/stores/app";
 import { categoryLabel } from "~/lib/recipes";
-import { tap } from "~/lib/haptics";
+import { tap, medium as hapticMedium } from "~/lib/haptics";
 import { INGREDIENTS, INGREDIENT_MAP } from "@/data/ingredients";
 import { quoteIngredient } from "@/lib/pricing/pricingEngine";
 
@@ -65,7 +66,15 @@ export default function GroceryScreen() {
                   const cost = itemCost(item.ingredientId, item.quantity);
                   const inPantry = pantrySet.has(item.ingredientId);
                   return (
-                    <Press key={item.ingredientId} onPress={() => { toggleChecked(item.ingredientId); tap(); }}
+                    <Press key={item.ingredientId} haptic="none" onPress={() => {
+                        const nowChecked = !item.checked;
+                        toggleChecked(item.ingredientId);
+                        if (nowChecked) {
+                          hapticMedium();
+                          // last item left → the whole list is done.
+                          if (grocery.filter((g) => !g.checked).length === 1) celebrate("Grocery list done! 🛒");
+                        } else { tap(); }
+                      }}
                       style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderTopWidth: idx === 0 ? 0 : 1, borderTopColor: colors.border }}>
                       <View style={{ width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: item.checked ? colors.basil : colors.borderSoft, backgroundColor: item.checked ? colors.basil : "transparent", alignItems: "center", justifyContent: "center" }}>
                         {item.checked ? <Feather name="check" size={15} color="#fff" /> : null}
