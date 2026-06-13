@@ -103,23 +103,35 @@ export default function AiChefScreen() {
     //    cooks up the rest; otherwise show one DB pick as a placeholder.
     const keep = opts?.creative ? (close ? 1 : 0) : close ? 2 : 1;
     const instant = db.options.slice(0, Math.max(1, keep));
-    setResults({ mainOptionId: instant[0].id, options: instant });
-    setSelectedId(instant[0].id);
+    // db.options can be empty (very restrictive pantry/diet) — only show an
+    // instant pick if we actually have one; otherwise wait for the AI options.
+    if (instant.length) {
+      setResults({ mainOptionId: instant[0].id, options: instant });
+      setSelectedId(instant[0].id);
+    }
     setLoading(false);
     setAiLoading(true);
-    if (close) toast("Instant match — cooking up more with AI ✨");
+    if (close && instant.length) toast("Instant match — cooking up more with AI ✨");
 
     try {
       const ai = await generateAiOnly(input);
       const merged = [...db.options.slice(0, keep), ...ai.options].slice(0, 4);
-      setResults({ mainOptionId: merged[0].id, options: merged });
-      setSelectedId((prev) => (merged.some((o) => o.id === prev) ? prev : merged[0].id));
-      toast(opts?.creative ? "Fresh AI originals ✨" : "Recipes ready 🍳", "reward");
+      if (merged.length) {
+        setResults({ mainOptionId: merged[0].id, options: merged });
+        setSelectedId((prev) => (merged.some((o) => o.id === prev) ? prev : merged[0].id));
+        toast(opts?.creative ? "Fresh AI originals ✨" : "Recipes ready 🍳", "reward");
+      } else {
+        toast("No matches — try fewer filters", "info");
+      }
     } catch {
-      // AI failed — fall back to the full on-device set (no error to the user).
-      setResults(db);
-      setSelectedId(db.mainOptionId);
-      toast("Showing pantry matches", "info");
+      // AI failed — fall back to the on-device set if we have one.
+      if (db.options.length) {
+        setResults(db);
+        setSelectedId(db.mainOptionId);
+        toast("Showing pantry matches", "info");
+      } else {
+        toast("Couldn't generate — try fewer filters", "error");
+      }
     } finally {
       setAiLoading(false);
     }
