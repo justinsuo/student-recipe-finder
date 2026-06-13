@@ -1,6 +1,19 @@
 # Waivy
 
-**Live site:** https://justinsuo.github.io/waivy/
+**Live site:** https://justinsuo.github.io/waivy/ · **iPhone app:** [`/mobile`](mobile/) (Expo / React Native)
+
+> 📱 **There is now a native iPhone app** in [`mobile/`](mobile/). It is a mobile-first rebuild (bottom tabs, bottom sheets, gestures, haptics, full-screen guided cooking, camera/voice, local notifications) that **shares this repo's exact business logic** — recipes, the nutrition/pricing/scoring engines, and the AI clients are imported in place from `src/`, not duplicated. A cross-device **sync** layer (`shared/` + the Worker's `/sync` KV endpoints) keeps your pantry, grocery list, saved & custom recipes, and Nourish diary in step between the website and the phone. See [`mobile/README.md`](mobile/README.md).
+
+## 📱 iPhone app screenshots
+
+Auto-captured from the simulator and refreshed on every push (see [`docs/screenshots/`](docs/screenshots/)).
+
+|  |  |  |  |
+| :---: | :---: | :---: | :---: |
+| <img src="docs/screenshots/01-home.png" width="180" /><br/>Home | <img src="docs/screenshots/02-ai-chef.png" width="180" /><br/>AI Chef | <img src="docs/screenshots/03-pantry.png" width="180" /><br/>Pantry | <img src="docs/screenshots/04-nourish.png" width="180" /><br/>Nourish |
+| <img src="docs/screenshots/05-grocery.png" width="180" /><br/>Grocery | <img src="docs/screenshots/07-recipe-detail.png" width="180" /><br/>Recipe detail | <img src="docs/screenshots/08-guided-cooking.png" width="180" /><br/>Guided cooking | <img src="docs/screenshots/10-explore.png" width="180" /><br/>Explore |
+
+See all twelve in **[docs/screenshots/](docs/screenshots/)**.
 
 > Waivy (sometimes "Waivy AI") is the AI cooking assistant for students. Previously released as "Student Recipe Finder" — the repo, package name, and live URL were renamed on 2026-06-02. The `srf:` localStorage prefix is kept as-is so existing users don't lose their pantry / saved / grocery list.
 

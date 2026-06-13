@@ -3,6 +3,7 @@
 // srf:nourish-meals so it survives reloads without a backend.
 
 import type { DiaryEntry, FoodItem, MealSlot } from "./types";
+import { kv } from "@shared/platform/kv";
 
 const KEY = "srf:nourish-meals";
 
@@ -29,7 +30,7 @@ export interface NourishMeal {
 function safeRead<T>(fallback: T): T {
   if (typeof window === "undefined") return fallback;
   try {
-    const raw = window.localStorage.getItem(KEY);
+    const raw = kv().getItem(KEY);
     if (!raw) return fallback;
     return JSON.parse(raw) as T;
   } catch {
@@ -40,7 +41,7 @@ function safeRead<T>(fallback: T): T {
 function safeWrite(value: unknown): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(KEY, JSON.stringify(value));
+    kv().setItem(KEY, JSON.stringify(value));
   } catch {
     // ignore quota
   }

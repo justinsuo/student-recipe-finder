@@ -6,16 +6,17 @@ import { normalizeEdamam } from "@/lib/adapters/edamam";
 import { normalizeMealDB } from "@/lib/adapters/themealdb";
 import { GLOBAL_RECIPES } from "@/data/globalRecipes";
 import { EXPLORE_RECIPES } from "@/data/exploreRecipes";
+import { config } from "@shared/platform/config";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
 export function getExploreSource() {
-  const src = process.env.NEXT_PUBLIC_EXPLORE_SOURCE;
-  if (src === "spoonacular" && process.env.NEXT_PUBLIC_SPOONACULAR_API_KEY) return "spoonacular" as const;
+  const src = config().exploreSource;
+  if (src === "spoonacular" && config().spoonacularApiKey) return "spoonacular" as const;
   if (
     src === "edamam" &&
-    process.env.NEXT_PUBLIC_EDAMAM_APP_ID &&
-    process.env.NEXT_PUBLIC_EDAMAM_APP_KEY
+    config().edamamAppId &&
+    config().edamamAppKey
   )
     return "edamam" as const;
   if (src === "themealdb") return "themealdb" as const;
@@ -231,7 +232,7 @@ function paginate(recipes: ExternalRecipe[], page: number): ExternalSearchResult
 // ─── Spoonacular ─────────────────────────────────────────────────────────────
 
 async function spoonacularSearch(f: ExploreFilters): Promise<ExternalSearchResult> {
-  const key = process.env.NEXT_PUBLIC_SPOONACULAR_API_KEY!;
+  const key = config().spoonacularApiKey;
   const params = new URLSearchParams({
     apiKey: key, number: String(PAGE_SIZE), offset: String((f.page - 1) * PAGE_SIZE),
     addRecipeInformation: "true", addRecipeNutrition: "true",
@@ -258,8 +259,8 @@ async function spoonacularSearch(f: ExploreFilters): Promise<ExternalSearchResul
 // ─── Edamam ──────────────────────────────────────────────────────────────────
 
 async function edamamSearch(f: ExploreFilters): Promise<ExternalSearchResult> {
-  const appId = process.env.NEXT_PUBLIC_EDAMAM_APP_ID!;
-  const appKey = process.env.NEXT_PUBLIC_EDAMAM_APP_KEY!;
+  const appId = config().edamamAppId;
+  const appKey = config().edamamAppKey;
   const from = (f.page - 1) * PAGE_SIZE;
   const url = new URL("https://api.edamam.com/api/recipes/v2");
   url.searchParams.set("type", "public"); url.searchParams.set("app_id", appId); url.searchParams.set("app_key", appKey);

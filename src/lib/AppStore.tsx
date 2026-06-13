@@ -10,6 +10,7 @@ import {
 } from "react";
 import type { GroceryItem, PantryItem, Recipe } from "@/lib/types";
 import { storage } from "@/lib/storage";
+import { kv } from "@shared/platform/kv";
 import { INGREDIENT_MAP } from "@/data/ingredients";
 import { RECIPE_MAP } from "@/data/recipes";
 
@@ -201,7 +202,7 @@ export function ingredientName(id: string): string {
   if (typeof window === "undefined") return id;
   // Lazy-import to avoid SSR issues
   try {
-    const raw = window.localStorage.getItem("srf:custom-ingredients");
+    const raw = kv().getItem("srf:custom-ingredients");
     if (raw) {
       const list = JSON.parse(raw) as Array<{ id: string; displayName?: string; canonicalName?: string }>;
       const found = list.find((c) => c.id === id);

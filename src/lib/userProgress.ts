@@ -6,6 +6,8 @@
 // Storage: a single object under srf:user-progress. SSR-safe + quota-safe
 // using the same pattern as other Nourish storage helpers.
 
+import { kv } from "@shared/platform/kv";
+
 const KEY = "srf:user-progress";
 
 export interface UserProgress {
@@ -29,7 +31,7 @@ const DEFAULT: UserProgress = {
 function read(): UserProgress {
   if (typeof window === "undefined") return DEFAULT;
   try {
-    const raw = window.localStorage.getItem(KEY);
+    const raw = kv().getItem(KEY);
     if (!raw) return DEFAULT;
     return { ...DEFAULT, ...(JSON.parse(raw) as Partial<UserProgress>) };
   } catch {
@@ -40,7 +42,7 @@ function read(): UserProgress {
 function write(value: UserProgress): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(KEY, JSON.stringify(value));
+    kv().setItem(KEY, JSON.stringify(value));
   } catch {
     /* ignore quota */
   }

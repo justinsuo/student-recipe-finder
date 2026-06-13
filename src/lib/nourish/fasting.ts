@@ -1,6 +1,8 @@
 // Intermittent fasting log + active-fast state. Plain localStorage; the
 // timer is computed on the client from startedAt + plan windowHours.
 
+import { kv } from "@shared/platform/kv";
+
 const ACTIVE_KEY = "srf:nourish-fasting-active";
 const LOG_KEY = "srf:nourish-fasting-log";
 
@@ -36,7 +38,7 @@ export interface FastEntry {
 function read<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
   try {
-    const raw = window.localStorage.getItem(key);
+    const raw = kv().getItem(key);
     if (!raw) return fallback;
     return JSON.parse(raw) as T;
   } catch {
@@ -46,7 +48,7 @@ function read<T>(key: string, fallback: T): T {
 function write(key: string, value: unknown): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(key, JSON.stringify(value));
+    kv().setItem(key, JSON.stringify(value));
   } catch {
     /* ignore quota */
   }

@@ -1,4 +1,5 @@
 import type { AIGroceryPriceEstimate } from "@/lib/workerClient";
+import { kv } from "@shared/platform/kv";
 
 /**
  * Local cache of AI-backed grocery price estimates, keyed by
@@ -20,7 +21,7 @@ export interface CachedAIPriceEntry {
 function safeRead<T>(fallback: T): T {
   if (typeof window === "undefined") return fallback;
   try {
-    const raw = window.localStorage.getItem(KEY);
+    const raw = kv().getItem(KEY);
     return raw ? (JSON.parse(raw) as T) : fallback;
   } catch {
     return fallback;
@@ -30,7 +31,7 @@ function safeRead<T>(fallback: T): T {
 function safeWrite(value: unknown) {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(KEY, JSON.stringify(value));
+    kv().setItem(KEY, JSON.stringify(value));
   } catch {
     /* quota — ignore */
   }

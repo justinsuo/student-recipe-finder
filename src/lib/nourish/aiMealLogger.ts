@@ -2,9 +2,11 @@
 // Strategy: AI identifies components + gram estimates → USDA grounds the macros.
 // Never let the model emit nutrition numbers directly — it hallucinates.
 
+import { config } from "@shared/platform/config";
+
 const API_URL = "https://api.anthropic.com/v1/messages";
 const MODEL = "claude-haiku-4-5-20251001";
-const API_KEY = process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY ?? "";
+const API_KEY = config().anthropicApiKey;
 
 export function isAiLoggingEnabled(): boolean {
   return API_KEY.length > 0;

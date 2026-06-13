@@ -4,6 +4,7 @@
 
 import { getFoodCacheEntry, setFoodCacheEntry } from "./storage";
 import type { FoodItem, UsdaSearchResult } from "./types";
+import { config } from "@shared/platform/config";
 
 const BASE = "https://api.nal.usda.gov/fdc/v1";
 
@@ -17,7 +18,7 @@ const NUTRIENT = {
 } as const;
 
 function apiKey(): string {
-  return process.env.NEXT_PUBLIC_USDA_API_KEY ?? "DEMO_KEY";
+  return config().usdaApiKey || "DEMO_KEY";
 }
 
 export function usingDemoKey(): boolean {

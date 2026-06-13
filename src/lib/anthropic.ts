@@ -1,6 +1,7 @@
 "use client";
 
 import { INGREDIENTS } from "@/data/ingredients";
+import { config } from "@shared/platform/config";
 
 const API_URL = "https://api.anthropic.com/v1/messages";
 const MODEL = "claude-haiku-4-5-20251001";
@@ -10,7 +11,7 @@ const API_VERSION = "2023-06-01";
  * The API key is injected at build time from a GitHub Actions secret
  * (NEXT_PUBLIC_ANTHROPIC_API_KEY). All AI calls run directly in the browser.
  */
-const API_KEY = process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY ?? "";
+const API_KEY = config().anthropicApiKey;
 
 export function isAiEnabled(): boolean {
   return API_KEY.length > 0;
