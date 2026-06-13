@@ -3,6 +3,7 @@ import { ScrollView, View } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Screen } from "~/components/Screen";
+import { Sheet } from "~/components/Sheet";
 import { Txt, Row, Card, Button, Field, Press, Badge, Pill, SegmentedControl, EmptyState, SectionHeading, Divider } from "~/components/ui";
 import { toast } from "~/components/Toast";
 import { colors, space, radius, accent } from "~/theme";
@@ -10,7 +11,7 @@ import { usePantry, useGrocery } from "~/lib/stores/app";
 import { logFood } from "~/lib/stores/nourish";
 import { ingredientLabel } from "~/lib/recipes";
 import {
-  aiAvailable, aiMode, generateOptions, refine, persistGenerated, generateAndStoreImage,
+  aiAvailable, aiBackendAvailable, aiMode, generateOptions, refine, persistGenerated, generateAndStoreImage,
   type GeneratedRecipe, type GeneratedRecipeOptionSet,
 } from "~/lib/ai";
 import { tap } from "~/lib/haptics";
@@ -47,6 +48,7 @@ export default function AiChefScreen() {
   const [results, setResults] = useState<GeneratedRecipeOptionSet | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [savedIds, setSavedIds] = useState<Record<string, string>>({});
+  const [setupOpen, setSetupOpen] = useState(false);
 
   const selectedPantryIds = useMemo(
     () => (usePantryItems ? pantry.map((p) => p.ingredientId).filter((id) => !excluded.has(id)) : []),
@@ -61,7 +63,12 @@ export default function AiChefScreen() {
     tap();
   }
 
-  async function generate() {
+  async function generate(opts?: { creative?: boolean }) {
+    // The "creative" path needs a real AI backend (writes original recipes).
+    if (opts?.creative && !aiBackendAvailable()) {
+      setSetupOpen(true);
+      return;
+    }
     setLoading(true);
     setResults(null);
     try {
@@ -74,13 +81,13 @@ export default function AiChefScreen() {
         servings,
         equipment: Array.from(equipment),
         dietTags: Array.from(diet),
-        creativityLevel: creativity,
+        creativityLevel: opts?.creative ? "creative" : creativity,
       });
       setResults(set);
       setSelectedId(set.mainOptionId || set.options[0]?.id || null);
-      toast("4 recipes ready 🍳", "reward");
+      toast(opts?.creative ? "Fresh AI originals ✨" : "4 recipes ready 🍳", "reward");
     } catch (e: any) {
-      toast(e?.message?.includes("offline") ? "AI Chef is offline" : "Generation failed — try again", "error");
+      toast("Generation failed — try again", "error");
     } finally {
       setLoading(false);
     }
@@ -220,7 +227,17 @@ export default function AiChefScreen() {
         options={[{ label: "Practical", value: "practical" }, { label: "Balanced", value: "balanced" }, { label: "Creative", value: "creative" }]} />
 
       <Button title={loading ? "Cooking up ideas…" : "Generate recipes"} icon="zap" accentKey="ai-chef" variant="accent" full loading={loading}
-        style={{ marginTop: space.lg }} onPress={generate} />
+        style={{ marginTop: space.lg }} onPress={() => generate()} />
+
+      <Press onPress={() => generate({ creative: true })} disabled={loading} style={{ marginTop: space.sm }}>
+        <View style={{ borderWidth: 1.5, borderColor: accent["ai-chef"].main, borderStyle: "dashed", borderRadius: radius.md, paddingVertical: 13, alignItems: "center", flexDirection: "row", justifyContent: "center", gap: 8, backgroundColor: accent["ai-chef"].tint }}>
+          <Feather name="feather" size={17} color={accent["ai-chef"].shadow} />
+          <Txt weight="700" color={accent["ai-chef"].shadow}>Surprise me — make something creative with AI</Txt>
+        </View>
+      </Press>
+      <Txt variant="caption" muted center style={{ marginTop: 6 }}>
+        {aiBackendAvailable() ? "Writes an original recipe with AI ✨" : "Needs an AI key — tap to set it up (the buttons above always work offline)"}
+      </Txt>
 
       {results ? (
         <View style={{ marginTop: space.xl }}>
@@ -250,6 +267,25 @@ export default function AiChefScreen() {
           /> : null}
         </View>
       ) : null}
+      <Sheet visible={setupOpen} onClose={() => setSetupOpen(false)} title="Turn on creative AI" scroll={false}>
+        <View style={{ gap: space.md }}>
+          <Row gap={10}>
+            <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: accent["ai-chef"].tint, alignItems: "center", justifyContent: "center" }}>
+              <Feather name="feather" size={20} color={accent["ai-chef"].shadow} />
+            </View>
+            <Txt variant="body" style={{ flex: 1 }}>
+              Generate <Txt weight="700">original</Txt> recipes written by AI (not matched from the catalog). It needs an AI key — your data stays yours and keys are stored only on this device.
+            </Txt>
+          </Row>
+          <Card soft style={{ gap: 6 }}>
+            <Txt variant="subheading">Two ways to enable it:</Txt>
+            <Txt variant="caption" muted>• <Txt weight="700">Anthropic key</Txt> (Claude Haiku) — fastest, paste it in Settings. A free-tier key works.</Txt>
+            <Txt variant="caption" muted>• <Txt weight="700">Worker URL</Txt> — your Cloudflare Worker (OpenAI) for full GPT originals + images.</Txt>
+          </Card>
+          <Button title="Open Settings" icon="settings" accentKey="ai-chef" variant="accent" full onPress={() => { setSetupOpen(false); router.push("/settings"); }} />
+          <Txt variant="caption" muted center>The instant on-device generator above always works — no key needed.</Txt>
+        </View>
+      </Sheet>
     </Screen>
   );
 }

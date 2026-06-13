@@ -16,6 +16,7 @@ import type { Recipe, NutritionEstimate } from "@/lib/types";
 import type { CustomRecipe } from "@/lib/customRecipeTypes";
 import { getCustomRecipes, getCustomRecipe } from "@/lib/customRecipeStorage";
 import { localImageUri } from "./imageStore";
+import { ALL_RECIPES, getCatalogRecipe } from "./catalog";
 import type { AccentKey } from "~/theme";
 
 export type RecipeSource = "seed" | "custom-ai" | "custom-user";
@@ -63,7 +64,7 @@ export function seedToView(r: Recipe): RecipeView {
     name: r.name,
     description: r.description,
     imageUri: img?.src,
-    emoji: r.emoji,
+    emoji: r.emoji || "🍽️",
     accent: accentForId(r.id),
     costPerServing: calculateCostPerServing(r),
     totalTimeMinutes: r.totalTimeMinutes,
@@ -77,12 +78,12 @@ export function seedToView(r: Recipe): RecipeView {
 
 let _seedViews: RecipeView[] | null = null;
 export function allSeedViews(): RecipeView[] {
-  if (!_seedViews) _seedViews = RECIPES.map(seedToView);
+  if (!_seedViews) _seedViews = ALL_RECIPES.map(seedToView);
   return _seedViews;
 }
 
 export function getSeedRecipe(id: string): Recipe | undefined {
-  return RECIPE_MAP.get(id);
+  return getCatalogRecipe(id);
 }
 
 // ── custom recipes ───────────────────────────────────────────────────────────

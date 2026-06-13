@@ -6,16 +6,14 @@
  * macros. When a Worker URL IS set, the worker path (GPT originals) is used
  * instead (see ai.ts).
  */
-import { RECIPES } from "@/data/recipes";
 import { INGREDIENT_MAP } from "@/data/ingredients";
 import {
-  rankPantryRecipes,
-  rankCheapRecipes,
   calculateCostPerServing,
   ingredientCostBreakdown,
 } from "@/lib/recipeScoring";
 import { bestEffortNutrition } from "@/lib/nutritionEngine";
-import type { Recipe, Equipment, DietTag, TimeBucket } from "@/lib/types";
+import { ALL_RECIPES, rankPantryCatalog, rankCheapCatalog } from "./catalog";
+import type { Recipe, Equipment, DietTag } from "@/lib/types";
 import type { GeneratedRecipe, GeneratedRecipeOptionSet, OptionLabel } from "@/lib/workerClient";
 
 function ingredientLabel(id: string): string {
@@ -111,16 +109,16 @@ function candidatePool(input: LocalChefInput): Recipe[] {
   const budget = input.budgetPerServing && input.budgetPerServing > 0 ? input.budgetPerServing : 999;
 
   if (input.pantryIds.length > 0) {
-    const ranked = rankPantryRecipes(
+    const ranked = rankPantryCatalog(
       input.pantryIds.map((id) => ({ ingredientId: id })),
-      { equipment, diet, time: "any" as TimeBucket | "any" },
+      { equipment, diet },
     );
     if (ranked.length) return ranked.map((r) => r.recipe);
   }
-  const cheap = rankCheapRecipes({ budgetPerServing: budget, servings: input.servings ?? 1, equipment, diet, time: "any" });
+  const cheap = rankCheapCatalog({ budgetPerServing: budget, equipment, diet });
   if (cheap.length) return cheap.map((r) => r.recipe);
   // last resort: whole catalog by cost
-  return [...RECIPES].sort((a, b) => calculateCostPerServing(a) - calculateCostPerServing(b));
+  return [...ALL_RECIPES].sort((a, b) => calculateCostPerServing(a) - calculateCostPerServing(b));
 }
 
 /** Build a 4-option set (best-match / cheapest / fastest / high-protein). */
@@ -129,7 +127,7 @@ export function generateOptionsLocal(input: LocalChefInput): GeneratedRecipeOpti
   const pool = candidatePool(input).slice(0, 60);
   if (pool.length === 0) {
     // truly nothing — synthesize from the cheapest recipe so the UI still works
-    const fallback = [...RECIPES].sort((a, b) => calculateCostPerServing(a) - calculateCostPerServing(b))[0];
+    const fallback = [...ALL_RECIPES].sort((a, b) => calculateCostPerServing(a) - calculateCostPerServing(b))[0];
     pool.push(fallback);
   }
 

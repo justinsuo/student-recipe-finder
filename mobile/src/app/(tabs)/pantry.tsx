@@ -15,7 +15,7 @@ import { tap } from "~/lib/haptics";
 import { INGREDIENTS, INGREDIENT_MAP, QUICK_ADD_STAPLES } from "@/data/ingredients";
 import { PANTRY_PRESETS } from "@/data/pantryPresets";
 import { matchIngredientByName } from "@/lib/nutritionEngine";
-import { rankPantryRecipes, groupPantryResults } from "@/lib/recipeScoring";
+import { rankPantryCatalog } from "~/lib/catalog";
 import { recognizeIngredientsFromImage } from "@/lib/anthropic";
 
 const CATEGORY_ORDER = ["protein", "vegetable", "fruit", "dairy", "grain", "canned", "frozen", "condiment", "spice", "snack"];
@@ -40,7 +40,7 @@ export default function PantryScreen() {
 
   const readyCount = useMemo(() => {
     if (pantry.length === 0) return 0;
-    return groupPantryResults(rankPantryRecipes(pantry), pantry).canMakeNow.length;
+    return rankPantryCatalog(pantry).filter((r) => r.missingIngredients.length === 0).length;
   }, [pantry]);
 
   const matches = useMemo(() => {

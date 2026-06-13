@@ -10,7 +10,7 @@ import { colors, space, radius, accent, AccentKey, shadow } from "~/theme";
 import { allSeedViews } from "~/lib/recipes";
 import { usePantry, useGrocery } from "~/lib/stores/app";
 import { useToday } from "~/lib/stores/nourish";
-import { rankPantryRecipes, groupPantryResults } from "@/lib/recipeScoring";
+import { rankPantryCatalog } from "~/lib/catalog";
 
 function greeting() {
   const h = new Date().getHours();
@@ -37,9 +37,9 @@ export default function HomeScreen() {
     return [...allViews].sort((a, b) => a.costPerServing - b.costPerServing).slice(0, 10);
   }, [allViews]);
 
-  const pantryGroups = useMemo(() => {
+  const canMakeNow = useMemo(() => {
     if (pantry.length === 0) return null;
-    return groupPantryResults(rankPantryRecipes(pantry), pantry);
+    return rankPantryCatalog(pantry).filter((r) => r.missingIngredients.length === 0);
   }, [pantry]);
 
   const useSoon = pantry.filter((p) => p.useSoon).length;
@@ -118,8 +118,8 @@ export default function HomeScreen() {
             <Feather name="archive" size={22} color={colors.basil} />
             <Txt variant="title">{pantry.length}</Txt>
             <Txt variant="label">ingredients in pantry</Txt>
-            {pantryGroups ? (
-              <Badge label={`${pantryGroups.canMakeNow.length} ready to cook`} tone="pantry" icon="check" />
+            {canMakeNow ? (
+              <Badge label={`${canMakeNow.length} ready to cook`} tone="pantry" icon="check" />
             ) : (
               <Txt variant="caption" muted>Add items to match recipes</Txt>
             )}

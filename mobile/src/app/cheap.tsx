@@ -13,7 +13,7 @@ import { seedToView } from "~/lib/recipes";
 import { tap } from "~/lib/haptics";
 import { colors, space, radius, accent } from "~/theme";
 
-import { rankCheapRecipes } from "@/lib/recipeScoring";
+import { rankCheapCatalog } from "~/lib/catalog";
 import type {
   CheapFilters,
   Equipment,
@@ -116,15 +116,13 @@ export default function CheapScreen() {
   };
 
   const { results, error } = useMemo(() => {
-    const filters: CheapFilters = {
-      budgetPerServing: budget,
-      servings: 1,
-      equipment,
-      diet,
-      time,
-    };
+    const maxTimeMinutes =
+      time === "under-10" ? 10 : time === "under-20" ? 20 : time === "under-30" ? 30 : time === "meal-prep" ? 90 : 9999;
     try {
-      return { results: rankCheapRecipes(filters), error: null as string | null };
+      return {
+        results: rankCheapCatalog({ budgetPerServing: budget, equipment, diet, maxTimeMinutes }),
+        error: null as string | null,
+      };
     } catch (e) {
       return { results: [], error: "We couldn't rank recipes right now." };
     }
