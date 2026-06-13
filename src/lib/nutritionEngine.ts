@@ -189,6 +189,16 @@ export function bestEffortNutrition(recipe: Recipe): {
       confidence: "medium",
     };
   }
+  // Recipes imported from the web (TheMealDB) carry AI-estimated per-serving
+  // macros — more accurate than recomputing from free-text ingredient amounts
+  // that don't map cleanly to catalog units. Trust the stored estimate.
+  if (recipe.id.startsWith("tmdb-") && recipe.estimatedNutrition?.calories > 0) {
+    return {
+      estimate: recipe.estimatedNutrition,
+      source: "hand-entered",
+      confidence: "medium",
+    };
+  }
   const calc = calculateRecipeMacros(recipe);
   const missingRatio = calc.missingIngredientIds.length / recipe.ingredients.length;
   if (missingRatio > 0.5) {

@@ -21,7 +21,7 @@ export interface NutritionPerUnit {
   confidence: "high" | "medium" | "low";
 }
 
-export const INGREDIENT_NUTRITION: Record<string, NutritionPerUnit> = {
+const BASE_INGREDIENT_NUTRITION: Record<string, NutritionPerUnit> = {
   // ===== Grains / starches =====
   rice: { calories: 205, protein: 4.3, carbs: 45, fat: 0.4, fiber: 0.6, confidence: "high" }, // 1 cup cooked
   pasta: { calories: 200, protein: 7.5, carbs: 42, fat: 1.2, fiber: 2.5, confidence: "high" }, // 1 serving (2 oz dry)
@@ -329,4 +329,11 @@ export const INGREDIENT_NUTRITION: Record<string, NutritionPerUnit> = {
 
   // Sweeteners
   "white-sugar": { calories: 50, protein: 0, carbs: 13, fat: 0, confidence: "high" },
+};
+
+// New ingredients used by imported web recipes (TheMealDB).
+import { WEB_INGREDIENT_NUTRITION } from "@/data/webIngredients";
+export const INGREDIENT_NUTRITION: Record<string, NutritionPerUnit> = {
+  ...BASE_INGREDIENT_NUTRITION,
+  ...WEB_INGREDIENT_NUTRITION,
 };

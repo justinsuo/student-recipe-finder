@@ -2,6 +2,7 @@ import type { Recipe } from "@/lib/types";
 import { AIR_FRYER_RECIPES } from "./airFryerRecipes";
 import { MICROWAVE_RECIPES } from "./microwaveRecipes";
 import { MACRO_RECIPES } from "./macroRecipes";
+import { WEB_RECIPES } from "./webRecipes";
 
 const BASE_RECIPES: Recipe[] = [
   {
@@ -4570,9 +4571,10 @@ function originalVariantsOnly(recipes: Recipe[]): Recipe[] {
 export const CATALOG_RECIPES: Recipe[] = [
   ...RECIPES,
   ...originalVariantsOnly(MACRO_RECIPES),
+  ...WEB_RECIPES,
 ];
 
-export const ALL_RECIPES: Recipe[] = [...RECIPES, ...MACRO_RECIPES];
+export const ALL_RECIPES: Recipe[] = [...RECIPES, ...MACRO_RECIPES, ...WEB_RECIPES];
 
 export const RECIPE_MAP = new Map<string, Recipe>(
   ALL_RECIPES.map((r) => [r.id, r]),

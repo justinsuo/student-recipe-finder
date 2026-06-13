@@ -284,19 +284,22 @@ export default function AiChefScreen() {
               const fromDb = o.id.startsWith("local");
               return (
                 <Press key={o.id} onPress={() => setSelectedId(o.id)} scaleTo={0.97}
-                  style={{ width: 150, padding: 12, borderRadius: radius.lg, borderWidth: 2, borderColor: o.id === selectedId ? accent[OPTION_TONE[o.optionLabel] ?? "ai-chef"].main : colors.border, backgroundColor: o.id === selectedId ? accent[OPTION_TONE[o.optionLabel] ?? "ai-chef"].tint : colors.surface, gap: 6 }}>
-                  <Row gap={5}>
+                  style={{ width: 172, padding: 13, borderRadius: radius.lg, borderWidth: 2, borderColor: o.id === selectedId ? accent[OPTION_TONE[o.optionLabel] ?? "ai-chef"].main : colors.border, backgroundColor: o.id === selectedId ? accent[OPTION_TONE[o.optionLabel] ?? "ai-chef"].tint : colors.surface, gap: 8 }}>
+                  <Row justify="space-between" align="center">
                     <Badge label={o.optionLabel.replace("-", " ")} tone={OPTION_TONE[o.optionLabel] ?? "ai-chef"} />
-                    <Badge label={fromDb ? "⚡ instant" : "✨ AI"} tone={fromDb ? "cheap" : "ai-chef"} />
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+                      <Feather name={fromDb ? "zap" : "feather"} size={12} color={fromDb ? accent.cheap.shadow : accent["ai-chef"].shadow} />
+                      <Txt style={{ fontSize: 10.5, fontWeight: "700", color: fromDb ? accent.cheap.shadow : accent["ai-chef"].shadow }}>{fromDb ? "instant" : "AI"}</Txt>
+                    </View>
                   </Row>
-                  <Txt variant="subheading" numberOfLines={2}>{o.recipe.name}</Txt>
-                  <Txt variant="caption" muted numberOfLines={2}>{o.shortReason}</Txt>
+                  <Txt variant="subheading" numberOfLines={2} style={{ minHeight: 44 }}>{o.recipe.name}</Txt>
+                  <Txt variant="caption" muted numberOfLines={2} style={{ minHeight: 32 }}>{o.shortReason}</Txt>
                   <Row gap={6}><Txt variant="caption" weight="700" color={colors.basilShadow}>${o.recipe.estimatedCostPerServing.toFixed(2)}</Txt><Txt variant="caption" muted>· {o.recipe.totalTimeMinutes}m</Txt></Row>
                 </Press>
               );
             })}
             {aiLoading ? (
-              <View style={{ width: 150, padding: 12, borderRadius: radius.lg, borderWidth: 2, borderStyle: "dashed", borderColor: accent["ai-chef"].main, backgroundColor: accent["ai-chef"].tint, alignItems: "center", justifyContent: "center", gap: 8 }}>
+              <View style={{ width: 172, padding: 13, borderRadius: radius.lg, borderWidth: 2, borderStyle: "dashed", borderColor: accent["ai-chef"].main, backgroundColor: accent["ai-chef"].tint, alignItems: "center", justifyContent: "center", gap: 8 }}>
                 <ActivityIndicator color={accent["ai-chef"].main} />
                 <Txt variant="caption" color={accent["ai-chef"].shadow} weight="700" center>Writing AI originals…</Txt>
               </View>
