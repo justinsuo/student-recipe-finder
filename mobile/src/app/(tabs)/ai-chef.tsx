@@ -62,7 +62,6 @@ export default function AiChefScreen() {
   }
 
   async function generate() {
-    if (!aiAvailable()) { toast("Add your Worker URL in Settings to use AI Chef", "error"); return; }
     setLoading(true);
     setResults(null);
     try {
@@ -138,15 +137,7 @@ export default function AiChefScreen() {
     }
   }
 
-  if (!aiAvailable()) {
-    return (
-      <Screen>
-        <Txt variant="title" style={{ marginBottom: space.md }}>AI Chef</Txt>
-        <EmptyState emoji="🤖" title="AI Chef is offline" subtitle="Add your Cloudflare Worker URL in Settings to generate custom recipes from your pantry. The OpenAI key stays on the server — never on your phone."
-          action={<Button title="Open Settings" icon="settings" accentKey="ai-chef" variant="accent" onPress={() => router.push("/settings")} />} />
-      </Screen>
-    );
-  }
+  const mode = aiMode();
 
   return (
     <Screen>
@@ -155,8 +146,25 @@ export default function AiChefScreen() {
           <Txt variant="label">AI CHEF</Txt>
           <Txt variant="title">Cook something custom</Txt>
         </View>
-        <Badge label={aiMode() === "worker" ? "Secure" : "Haiku"} tone="ai-chef" icon="shield" />
+        <Badge
+          label={mode === "worker" ? "Secure AI" : mode === "haiku" ? "Fast AI" : "On-device"}
+          tone="ai-chef"
+          icon={mode === "local" ? "cpu" : "shield"}
+        />
       </Row>
+
+      {mode === "local" ? (
+        <Press onPress={() => router.push("/settings")}>
+          <Card soft style={{ marginBottom: space.md }}>
+            <Row gap={10}>
+              <Feather name="zap" size={18} color={accent["ai-chef"].shadow} />
+              <Txt variant="caption" muted style={{ flex: 1 }}>
+                Building recipes on-device from your pantry + Waivy's 229-recipe catalog with real cost & macros. Add a Worker URL in <Txt weight="700" color={accent["ai-chef"].shadow}>Settings</Txt> for AI-generated originals.
+              </Txt>
+            </Row>
+          </Card>
+        </Press>
+      ) : null}
 
       <Card style={{ gap: 12, marginBottom: space.md }}>
         <Press onPress={() => { setUsePantryItems((v) => !v); tap(); }}>

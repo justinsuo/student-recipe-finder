@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { View } from "react-native";
+import { View, ScrollView } from "react-native";
 import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { Screen } from "~/components/Screen";
@@ -32,9 +32,10 @@ export default function HomeScreen() {
   const { grocery } = useGrocery();
   const today = useToday();
 
+  const allViews = allSeedViews();
   const cheapest = useMemo(() => {
-    return [...allSeedViews()].sort((a, b) => a.costPerServing - b.costPerServing).slice(0, 6);
-  }, []);
+    return [...allViews].sort((a, b) => a.costPerServing - b.costPerServing).slice(0, 10);
+  }, [allViews]);
 
   const pantryGroups = useMemo(() => {
     if (pantry.length === 0) return null;
@@ -71,8 +72,35 @@ export default function HomeScreen() {
       </Row>
 
       {/* Today's pick */}
-      <SectionHeading title="Today's cheapest pick" action="See all" onAction={() => router.push("/cheap")} />
-      {cheapest[0] ? <RecipeCard view={cheapest[0]} /> : null}
+      <SectionHeading title="Today's cheapest picks" action="See all" onAction={() => router.push("/cheap")} />
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ gap: 12, paddingRight: space.lg }}
+        style={{ marginHorizontal: -space.lg, paddingHorizontal: space.lg, marginBottom: space.md }}
+      >
+        {cheapest.map((v) => (
+          <RecipeCard key={v.id} view={v} width={250} />
+        ))}
+      </ScrollView>
+
+      {/* Browse the whole catalog */}
+      <Press onPress={() => router.push("/recipes")}>
+        <Card>
+          <Row justify="space-between">
+            <Row gap={10}>
+              <View style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: accent.explore.tint, alignItems: "center", justifyContent: "center" }}>
+                <Feather name="book-open" size={18} color={accent.explore.shadow} />
+              </View>
+              <View>
+                <Txt variant="subheading">Browse all recipes</Txt>
+                <Txt variant="caption" muted>{allViews.length} student-friendly recipes — search & filter</Txt>
+              </View>
+            </Row>
+            <Feather name="chevron-right" size={20} color={colors.textFaint} />
+          </Row>
+        </Card>
+      </Press>
 
       {/* Nourish + Pantry status row */}
       <Row gap={space.md} align="stretch" style={{ marginTop: space.xl }}>

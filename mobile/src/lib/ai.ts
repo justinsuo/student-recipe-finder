@@ -32,15 +32,33 @@ import { makeCustomRecipeId, fallbackImageMeta, saveCustomRecipe } from "@/lib/c
 import type { AIGeneratedRecipe } from "@/lib/customRecipeTypes";
 import type { NutritionEstimate } from "@/lib/types";
 import { saveRecipeImageB64, saveRecipeImageFromUrl } from "./imageStore";
+import { generateOptionsLocal, refineLocal, type LocalChefInput } from "./localChef";
 
-export function aiAvailable(): boolean {
+/** A backend AI (worker or browser Haiku) is configured. */
+export function aiBackendAvailable(): boolean {
   return isWorkerConfigured() || isAiEnabled();
 }
 
-export function aiMode(): "worker" | "haiku" | "offline" {
+/** AI Chef always works — locally if no backend is configured. */
+export function aiAvailable(): boolean {
+  return true;
+}
+
+export function aiMode(): "worker" | "haiku" | "local" {
   if (isWorkerConfigured()) return "worker";
   if (isAiEnabled()) return "haiku";
-  return "offline";
+  return "local";
+}
+
+function toLocalInput(input: ChefInput): LocalChefInput {
+  return {
+    pantryIds: input.selectedPantryIngredientIds ?? [],
+    budgetPerServing: input.budgetPerServing,
+    servings: input.servings,
+    equipment: input.equipment,
+    dietTags: input.dietTags,
+    notes: [input.cravingText, input.aiNotes].filter(Boolean).join(". "),
+  };
 }
 
 export interface ChefInput {
@@ -88,7 +106,8 @@ export async function generateOptions(input: ChefInput): Promise<GeneratedRecipe
     const set = await generateRecipeQuickOptions(hInput);
     return repairOptionNutrition(set);
   }
-  throw new Error("AI is offline");
+  // No backend → on-device generation from the pantry + catalog (always works).
+  return generateOptionsLocal(toLocalInput(input));
 }
 
 /** Refine a recipe ("make it cheaper", "higher protein", …). */
@@ -104,16 +123,20 @@ export async function refine(base: GeneratedRecipe, userRequest: string, input: 
     });
     return { ...out, estimatedNutrition: recomputeNutrition(out) };
   }
-  const out = await generateRecipeQuick({
-    pantryIngredients: input.pantryIngredients,
-    cravings: input.cravingText,
-    budgetPerServing: input.budgetPerServing,
-    servings: input.servings,
-    equipment: input.equipment,
-    dietTags: input.dietTags,
-    refinement: userRequest,
-  } as HaikuRecipeInput);
-  return { ...out, estimatedNutrition: recomputeNutrition(out) };
+  if (isAiEnabled()) {
+    const out = await generateRecipeQuick({
+      pantryIngredients: input.pantryIngredients,
+      cravings: input.cravingText,
+      budgetPerServing: input.budgetPerServing,
+      servings: input.servings,
+      equipment: input.equipment,
+      dietTags: input.dietTags,
+      refinement: userRequest,
+    } as HaikuRecipeInput);
+    return { ...out, estimatedNutrition: recomputeNutrition(out) };
+  }
+  // No backend → local refinement from the catalog.
+  return refineLocal(base, userRequest, toLocalInput(input));
 }
 
 // ── nutrition recompute (never 0 macros) ─────────────────────────────────────
